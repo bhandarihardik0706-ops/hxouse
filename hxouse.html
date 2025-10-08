@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to HXOUSE Coffee Co.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F7F7F7;
+            --text-primary: #121212;
+            --text-secondary: #555555;
+            --brand-primary: #121212;
+            --brand-accent: #D4AF37; /* A subtle gold for highlights */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #E5E7EB; /* A neutral background for the 'device' */
+            color: var(--text-primary);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .app-container { background-color: var(--bg-primary); }
+        .brand-text { color: var(--brand-primary); }
+        .brand-bg { 
+            background-color: var(--brand-primary);
+            color: white;
+        }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .toast { animation: toast-in 0.5s ease, toast-out 0.5s ease 2.5s forwards; }
+        @keyframes toast-in { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes toast-out { from { opacity: 1; } to { opacity: 0; display: none; } }
+        .category-tabs::-webkit-scrollbar { display: none; }
+        .category-tabs { -ms-overflow-style: none; scrollbar-width: none; }
+        .modal-overlay { animation: fadeIn 0.3s ease; }
+        .modal-content { animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .game-cell { aspect-ratio: 1/1; transition: background-color 0.2s ease; }
+    </style>
+</head>
+<body class="bg-gray-200">
+
+    <!-- Main Application Container -->
+    <div id="app" class="app-container max-w-lg mx-auto min-h-screen shadow-2xl flex flex-col">
+        <main class="flex-grow pb-20">
+             <!-- Admin Section -->
+            <div id="admin-panel" class="hidden h-screen flex flex-col"></div>
+
+            <!-- Main Interface -->
+            <div id="main-interface" class="h-full">
+                <header id="page-header" class="sticky top-0 bg-white z-20 p-4 flex justify-between items-center border-b border-gray-200"></header>
+                <div id="page-content"></div>
+            </div>
+        </main>
+        
+        <!-- Bottom Navigation Bar -->
+        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-white border-t border-gray-200 flex justify-around items-center h-16 z-30">
+            <button onclick="app.navigateTo('home')" class="nav-item p-2 text-secondary" data-page="home">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                <span class="text-xs font-semibold">Home</span>
+            </button>
+             <button onclick="app.navigateTo('order')" class="nav-item p-2 text-secondary" data-page="order">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                <span class="text-xs font-semibold">Order</span>
+            </button>
+            <button onclick="app.navigateTo('cart')" class="nav-item relative p-2 text-secondary" data-page="cart">
+                 <svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                 <span id="cart-tab-label" class="text-xs font-semibold">Cart</span>
+                 <span id="cart-count" class="absolute top-0 right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+            </button>
+            <button onclick="app.navigateTo('play')" class="nav-item p-2 text-secondary" data-page="play">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span class="text-xs font-semibold">Play</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modal-container"></div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-20 right-4 brand-bg text-white py-3 px-5 rounded-lg shadow-xl z-50">
+        <p id="toast-message"></p>
+    </div>
+    
+    <!-- Page Templates -->
+    <template id="page-template-home">
+        <div class="space-y-6">
+            <!-- Video Header -->
+            <div class="relative h-64 overflow-hidden">
+                <video src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
+                <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
+                    <h1 class="text-4xl font-extrabold">Welcome to HXOUSE</h1>
+                    <p class="text-lg tracking-widest mt-1">COFFEE CO.</p>
+                </div>
+            </div>
+
+            <div class="p-4 space-y-6">
+                <div id="active-order-tracker" class="hidden"></div>
+                <!-- Attention Grabber Promo -->
+                <div onclick="app.showInstagramPromo()" class="cursor-pointer group relative bg-gray-800 rounded-lg p-6 text-white overflow-hidden shadow-lg">
+                     <div class="relative">
+                        <h2 class="text-2xl font-bold">Follow, Post & Get 5% Off!</h2>
+                        <p class="mt-1 opacity-80">Follow us on Instagram, post a story, and show it at the counter.</p>
+                        <button class="font-semibold mt-2 text-sm bg-white/20 px-3 py-1 rounded-full group-hover:bg-white/30 transition">How it works &rarr;</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="app.callWaiter()" class="bg-secondary rounded-lg p-4 text-center">
+                        <span class="text-3xl">🛎️</span>
+                        <p class="font-semibold mt-2 text-primary">Call Waiter</p>
+                    </button>
+                     <button onclick="app.showFeedbackModal()" class="bg-secondary rounded-lg p-4 text-center">
+                        <span class="text-3xl">📝</span>
+                        <p class="font-semibold mt-2 text-primary">Leave Feedback</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="page-template-order">
+        <div>
+             <div class="sticky top-[72px] bg-white z-10 py-2 px-4 border-b border-gray-200">
+                 <div id="category-tabs" class="category-tabs flex space-x-4 overflow-x-auto"></div>
+             </div>
+             <div id="menu-items-container" class="p-4 space-y-8"></div>
+        </div>
+    </template>
+    
+    <template id="page-template-cart">
+         <div class="px-4">
+            <div id="cart-content"></div>
+            <div id="order-tracking-content" class="hidden"></div>
+        </div>
+    </template>
+    
+    <template id="page-template-play">
+         <div class="p-4 space-y-4">
+            <div class="bg-secondary p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-primary mb-2">Spin to Win!</h3>
+                <p class="text-secondary mb-4">Try your luck for a discount on your next visit.</p>
+                <button onclick="spinTheWheel.start()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition">Spin the Wheel</button>
+            </div>
+            <div class="bg-secondary p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-primary mb-2">Tic-Tac-Toe</h3>
+                <p class="text-secondary mb-4">Classic 2-player game for your table.</p>
+                <button onclick="ticTacToe.start()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition">Play Tic-Tac-Toe</button>
+            </div>
+             <div class="bg-secondary p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-primary mb-2">Rock Paper Scissors</h3>
+                <p class="text-secondary mb-4">Challenge our AI to a quick game.</p>
+                <button onclick="rockPaperScissors.start()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition">Play vs. AI</button>
+            </div>
+        </div>
+    </template>
+    
+    <!-- All Modals will be populated by JS -->
+    <template id="modal-template-spin-the-wheel"></template>
+    <template id="modal-template-tic-tac-toe"></template>
+    <template id="modal-template-rock-paper-scissors"></template>
+    <template id="modal-template-instagram"></template>
+    <template id="modal-template-feedback"></template>
+    <template id="modal-template-admin-login"></template>
+    <template id="modal-template-post-order"></template>
+
+<script>
+// --- DATA ---
+const menuData = [ { category: "Hot Coffee", items: [ { name: "Espresso", price: 90 }, { name: "Americano", price: 95 }, { name: "Macchiato", price: 120 }, { name: "Cappuccino", price: 150 }, { name: "Cafe Latte", price: 165 }, { name: "Flat White", price: 140 }, { name: "Cafe Mocha", price: 180 }, { name: "Hazelnut Cappuccino", price: 180 }, { name: "Nutella Cappuccino", price: 200 }, { name: "Lotus Biscoff Cappuccino", price: 220 }, ] }, { category: "Cold Coffee", items: [ { name: "Classic Frappe", price: 150 }, { name: "Mocha Frappe", price: 175 }, { name: "Caramel Frappe", price: 180 }, { name: "Chocolate Frappe", price: 190 }, { name: "Nutella Frappe", price: 220 }, { name: "Hazlenut Frappe", price: 210 }, { name: "Oreo Frappe", price: 220 }, ] }, { category: "Iced Coffee", items: [ { name: "Classic Iced Coffee", price: 140 }, { name: "Iced Latte", price: 150 }, { name: "Iced Americano", price: 150 }, { name: "Iced Vanilla", price: 170 }, { name: "Iced Mocha", price: 170 }, { name: "Iced Carmel", price: 170 }, { name: "Ginger Ale Espresso", price: 190 }, ] }, { category: "Shakes", items: [ { name: "Choclate Shake", price: 150 }, { name: "Strawberry Shake", price: 180 }, { name: "Butterscotch Shake", price: 180 }, { name: "Oreo Shake", price: 190 }, { name: "Kitkat Shake", price: 190 }, { name: "Lotus Biscoff Shake", price: 220 }, { name: "Nutella Shake", price: 240 }, ] }, { category: "Mocktails", items: [ { name: "Classic Lemonade", price: 140 }, { name: "Virgin Mojito", price: 150 }, { name: "Black Currant", price: 150 }, { name: "Starwberry Mojito", price: 170 }, { name: "Green Apple Mojito", price: 170 }, { name: "Watermelon Mojito", price: 170 }, ] }, { category: "Asian", items: [ { name: "Honey Chilli Potato", price: 240 }, { name: "Spring Roll", price: 220 }, { name: "Hakka Noodles", price: 180 }, { name: "Veg Manchurian", price: 190 }, { name: "Fried Rice", price: 190 }, { name: "Chillie Paneer", price: 280 }, ] }, { category: "Pasta & Pizza", items: [ { name: "The Spicy Arrabiata", price: 280 }, { name: "Alfredo", price: 300 }, { name: "Spaghetti Aglio E Olio", price: 320 }, { name: "Margherita Pizza", price: 260 }, { name: "Garden Fresh Pizza", price: 340 }, { name: "Tandoori Paneer Pizza", price: 380 }, ] }, { category: "Bites & Fries", items: [ { name: "Cheese Onion Rings", price: 230 }, { name: "Classic French Fries", price: 129 }, { name: "Peri - Peri Fries", price: 139 }, { name: "Paneer Tikka Sandwich", price: 290 }, { name: "Peri Peri Cottage Cheese Wrap", price: 280 }, { name: "Nachos Fries", price: 179 }, { name: "Loaded Nachos Fries", price: 199 }, ] } ];
+
+// --- SOUND ENGINE ---
+const sound = {
+    audioContext: null,
+    init() { try { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { console.error("Web Audio API is not supported in this browser"); } },
+    play(type, freq = 600) { if (!this.audioContext) return; let o = this.audioContext.createOscillator(), g = this.audioContext.createGain(); o.connect(g); g.connect(this.audioContext.destination); g.gain.setValueAtTime(0, this.audioContext.currentTime); switch(type) { case 'click': o.type = 'sine'; o.frequency.setValueAtTime(freq, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1); break; case 'add_to_cart': o.type = 'triangle'; o.frequency.setValueAtTime(440, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.4, this.audioContext.currentTime + 0.02); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2); break; case 'success': o.type = 'sine'; o.frequency.setValueAtTime(523.25, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.05); o.frequency.setValueAtTime(659.25, this.audioContext.currentTime + 0.1); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.3); break; case 'win': o.type = 'sine'; o.frequency.setValueAtTime(587.33, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.4, this.audioContext.currentTime + 0.05); o.frequency.setValueAtTime(880, this.audioContext.currentTime + 0.15); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.3); break; case 'draw': o.type = 'sawtooth'; o.frequency.setValueAtTime(220, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.01); o.frequency.setValueAtTime(180, this.audioContext.currentTime + 0.1); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2); break;} o.start(this.audioContext.currentTime); o.stop(this.audioContext.currentTime + 1); }
+};
+
+// --- CORE APP LOGIC ---
+const app = {
+    state: { currentPage: 'home', cart: [], activeOrder: null, tableNumber: 1 },
+    adminClickCount: 0, adminTimeout: null, orderStatusInterval: null,
+    init() {
+        this.loadState();
+        this.showMainInterface();
+        document.body.addEventListener('click', () => sound.init(), { once: true });
+        window.addEventListener('storage', (e) => { if (e.key === 'hxouseAllOrders') this.checkOrderStatus(); });
+    },
+    showMainInterface() { this.navigateTo('home'); },
+    navigateTo(page) {
+        sound.play('click');
+        this.state.currentPage = page;
+        
+        const header = document.getElementById('page-header');
+        const content = document.getElementById('page-content');
+        header.innerHTML = ''; content.innerHTML = '';
+
+        const pageTitle = page.charAt(0).toUpperCase() + page.slice(1);
+        
+        header.innerHTML = `
+            <div class="flex items-center space-x-2">
+                ${page !== 'home' ? `<button onclick="app.navigateTo('home')" class="p-2 -ml-2 rounded-full hover:bg-secondary"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg></button>` : `<div class="w-8"></div>`}
+                <h1 class="text-3xl font-bold brand-text" onclick="app.adminAccess(event)">${page === 'home' ? 'HXOUSE' : pageTitle}</h1>
+            </div>
+            <p class="text-secondary font-semibold">Table #${this.state.tableNumber}</p>`;
+
+        const template = document.getElementById(`page-template-${page}`);
+        if(template) content.appendChild(template.content.cloneNode(true));
+
+        this.updateActiveNav(page);
+        this.renderPageContent(page);
+    },
+    renderPageContent(page) {
+        if(page === 'order') this.renderMenu();
+        if(page === 'cart') this.renderCartPage();
+        if(page === 'home') this.renderHomePage();
+        
+        clearInterval(this.orderStatusInterval);
+        if (this.state.activeOrder) this.orderStatusInterval = setInterval(() => this.checkOrderStatus(), 3000);
+    },
+    updateActiveNav(page) {
+        const cartTabLabel = document.getElementById('cart-tab-label');
+        const cartIcon = document.getElementById('cart-icon-svg');
+        if (this.state.activeOrder) {
+            cartTabLabel.textContent = 'Track';
+            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`;
+        } else {
+            cartTabLabel.textContent = 'Cart';
+            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`;
+        }
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.toggle('brand-text', item.dataset.page === page);
+            item.classList.toggle('text-secondary', item.dataset.page !== page);
+        });
+        this.refreshCartDependentUI();
+    },
+    saveState() { localStorage.setItem('hxouseUserSession', JSON.stringify(this.state)); },
+    loadState() {
+        const s = JSON.parse(localStorage.getItem('hxouseUserSession')); 
+        if (s) this.state = {...this.state, ...s, tableNumber: 1};
+    },
+    showModal(templateId) {
+        const template = document.getElementById(templateId);
+        if (template && template.innerHTML) {
+            const modalContainer = document.getElementById('modal-container');
+            modalContainer.innerHTML = '';
+            const modalWrapper = document.createElement('div');
+            modalWrapper.innerHTML = template.innerHTML;
+            modalContainer.appendChild(modalWrapper);
+        } else console.error(`Modal template "${templateId}" is missing or empty.`);
+    },
+    closeModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.parentElement.remove(); },
+    adminAccess(event) {
+        event.stopPropagation(); this.adminClickCount++;
+        clearTimeout(this.adminTimeout);
+        this.adminTimeout = setTimeout(() => { this.adminClickCount = 0; }, 1500);
+        if (this.adminClickCount === 5) { this.adminClickCount = 0; admin.showLogin(); }
+    },
+    showFeedbackModal() { this.showModal('modal-template-feedback'); },
+    submitFeedback() {
+        this.closeModal('feedback-modal');
+        this.showToast("Thank you for your feedback!");
+    },
+    checkOrderStatus() {
+        const allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
+        if (!this.state.activeOrder) return;
+        const myOrder = allOrders.find(o => o.id === this.state.activeOrder.id);
+        
+        if (myOrder && myOrder.status !== this.state.activeOrder.status) {
+            this.state.activeOrder = myOrder; this.saveState();
+            this.showToast(`Your order is now: ${myOrder.status}`);
+            this.renderPageContent(this.state.currentPage);
+        }
+        if (myOrder && myOrder.status === 'Delivered') {
+            this.state.activeOrder = null; this.saveState();
+            if(!sessionStorage.getItem('promoShown')) {
+                this.showInstagramPromo(true);
+                sessionStorage.setItem('promoShown', 'true');
+            }
+            clearInterval(this.orderStatusInterval);
+            this.renderPageContent(this.state.currentPage);
+            this.updateActiveNav(this.state.currentPage);
+        }
+    },
+    callWaiter() { this.showToast("A waiter is on their way!"); },
+    showToast(message) {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        toastMessage.textContent = message;
+        toast.classList.remove('hidden'); toast.classList.add('toast');
+        setTimeout(() => { toast.classList.remove('toast'); toast.classList.add('hidden'); }, 3000);
+    },
+    getFeedbackModalHTML: () => `<div id="feedback-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-primary mb-4">Leave Feedback</h2><textarea class="w-full p-2 border rounded-md bg-secondary" rows="4" placeholder="How was your experience?"></textarea><div class="flex justify-end space-x-2 mt-4"><button onclick="app.closeModal('feedback-modal')" class="bg-gray-200 text-primary font-semibold py-2 px-4 rounded-lg">Cancel</button><button onclick="app.submitFeedback()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg">Submit</button></div></div></div>`,
+    getInstagramModalHTML(isDelivered = false) {
+        const storyIdeas = {
+            "For Foodies": ["Good food, good mood.", "This latte art is a masterpiece!", "Found my new favorite dish."],
+            "For Remote Workers": ["My office for the day. #WorkFromCafe", "Powered by coffee and Wi-Fi.", "Best place for a productive afternoon."],
+            "For Friends": ["Good times and coffee.", "Making memories at @hxouse.coffee.", "Squad goals."],
+            "For Couples": ["Coffee dates are the best dates.", "Our happy place.", "You, me, and a cup of coffee."]
+        };
+        let ideasHtml = Object.keys(storyIdeas).map(category => `<div><h4 class="font-semibold text-primary mt-3 mb-1">${category}</h4><div class="flex flex-wrap gap-2">${storyIdeas[category].map(tag => `<span class="bg-gray-200 text-secondary text-sm px-2 py-1 rounded-full">"${tag}"</span>`).join('')}</div></div>`).join('');
+        
+        const title = isDelivered ? "Your Order's Here!" : "How to Get 5% Off";
+        const subtitle = isDelivered 
+            ? `Enjoy your meal! While you do, post a story, tag <strong class="brand-text">@hxouse.coffee</strong>, and show it at the counter for an instant 5% discount!`
+            : `Follow these simple steps to claim your discount.`;
+
+        const steps = `
+            <div class="space-y-3 text-left my-4">
+                <div class="flex items-center"><div class="w-6 h-6 rounded-full brand-bg text-white flex items-center justify-center font-bold text-sm mr-3">1</div><span><strong>Follow</strong> us @hxouse.coffee</span></div>
+                <div class="flex items-center"><div class="w-6 h-6 rounded-full brand-bg text-white flex items-center justify-center font-bold text-sm mr-3">2</div><span><strong>Post a Story</strong> of your order & tag us</span></div>
+                <div class="flex items-center"><div class="w-6 h-6 rounded-full brand-bg text-white flex items-center justify-center font-bold text-sm mr-3">3</div><span><strong>Show at Counter</strong> when you pay</span></div>
+            </div>`;
+
+        return `<div id="ig-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-primary mb-2">${title}</h2><p class="text-secondary text-sm">${subtitle}</p>${steps}<div class="bg-secondary text-left p-3 rounded-lg max-h-40 overflow-y-auto"><h3 class="font-bold text-primary mb-2">Need an idea?</h3>${ideasHtml}</div><button onclick="app.closeModal('ig-modal')" class="w-full mt-4 bg-gray-200 text-primary font-semibold py-3 px-6 rounded-lg">Got It</button></div></div>`;
+    },
+    showInstagramPromo(isDelivered = false) { this.showModal('modal-template-instagram', isDelivered); },
+    getPostOrderModalHTML: () => `<div id="post-order-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><h2 class="text-xl font-bold text-primary mb-2">Order Received!</h2><p class="text-gray-600 mb-4">While your order is being prepared, feel free to play some games!</p><div class="flex space-x-2 mt-4"><button onclick="app.closeModal('post-order-modal')" class="w-full bg-gray-200 text-primary font-semibold py-2 px-6 rounded-lg">Dismiss</button><button onclick="app.closeModal('post-order-modal'); app.navigateTo('play');" class="w-full brand-bg text-white font-semibold py-2 px-6 rounded-lg">Play Games</button></div></div></div>`
+};
+
+// --- Cart, Order, Menu Methods ---
+Object.assign(app, {
+    renderHomePage() {
+        const tracker = document.getElementById('active-order-tracker'); if (!tracker) return;
+        if(this.state.activeOrder) {
+            tracker.classList.remove('hidden');
+            tracker.innerHTML = `<div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center"><h2 class="font-bold text-blue-800">Your order is ${this.state.activeOrder.status}!</h2><button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600">View Details</button></div>`;
+        } else tracker.classList.add('hidden');
+    },
+    renderMenu() {
+        const tabsContainer = document.getElementById('category-tabs');
+        const container = document.getElementById('menu-items-container');
+        if(!tabsContainer || !container) return;
+        tabsContainer.innerHTML = menuData.map(c => `<button onclick="app.scrollToCategory('${c.category.replace(/\s+/g, '-')}')" class="flex-shrink-0 font-semibold text-secondary py-2 px-4 rounded-full hover:bg-gray-100">${c.category}</button>`).join('');
+        container.innerHTML = menuData.map(category => {
+            const categoryId = category.category.replace(/\s+/g, '-');
+            const itemsHtml = category.items.map(item => {
+                const itemInCart = this.state.cart.find(ci => ci.name === item.name);
+                const quantity = itemInCart ? itemInCart.quantity : 0;
+                return `
+                    <div class="bg-secondary rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-semibold text-primary">${item.name}</h3>
+                            <p class="text-secondary font-bold">₹${item.price}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                             ${quantity > 0 ? `
+                                <button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', -1, true)" class="w-8 h-8 bg-gray-300 rounded-full font-bold text-xl flex items-center justify-center">-</button>
+                                <span class="font-bold w-5 text-center text-lg">${quantity}</span>
+                                <button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', 1, true)" class="w-8 h-8 brand-bg text-white rounded-full font-bold text-xl flex items-center justify-center">+</button>
+                            ` : `
+                                <button onclick="app.addToCart({name: '${item.name.replace(/'/g, "\\'")}', price: ${item.price}})" class="w-10 h-10 brand-bg text-white rounded-full flex items-center justify-center transform hover:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                                </button>
+                            `}
+                        </div>
+                    </div>`;
+            }).join('');
+            return `<div id="${categoryId}"><h2 class="text-2xl font-bold text-primary mb-4">${category.category}</h2><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${itemsHtml}</div></div>`;
+        }).join('');
+    },
+    scrollToCategory(categoryId) {
+        sound.play('click');
+        const el = document.getElementById(categoryId);
+        if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+    renderCartPage() {
+        const cartContent = document.getElementById('cart-content');
+        const trackingContent = document.getElementById('order-tracking-content');
+        if (!cartContent || !trackingContent) return;
+        if (this.state.activeOrder) {
+            cartContent.classList.add('hidden');
+            trackingContent.classList.remove('hidden');
+            this.renderOrderTracking();
+        } else {
+            cartContent.classList.remove('hidden');
+            trackingContent.classList.add('hidden');
+            this.renderCart();
+        }
+    },
+    renderCart() {
+        const container = document.getElementById('cart-content');
+        if(!container) return;
+        if (this.state.cart.length === 0) {
+            container.innerHTML = `<div class="text-center py-24"><svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><p class="text-secondary mt-4">Your cart is empty.</p><button onclick="app.navigateTo('order')" class="mt-4 text-sm font-semibold brand-text">Browse Menu</button></div>`;
+        } else {
+            let total = 0;
+            let itemsHtml = this.state.cart.map(item => {
+                total += item.price * item.quantity;
+                return `<div class="flex items-center justify-between p-2 rounded-lg"><div><h3 class="font-semibold text-primary">${item.name}</h3><p class="text-secondary text-sm">₹${item.price}</p></div><div class="flex items-center space-x-3"><button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', -1)" class="w-8 h-8 bg-secondary rounded-full font-bold text-xl flex items-center justify-center">-</button><span class="font-bold w-5 text-center text-lg">${item.quantity}</span><button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', 1)" class="w-8 h-8 brand-bg text-white rounded-full font-bold text-xl flex items-center justify-center">+</button></div></div>`;
+            }).join('');
+            container.innerHTML = `<div class="space-y-4 mt-6">${itemsHtml}</div><div class="mt-8 border-t border-gray-200 pt-4"><div class="flex justify-between items-center text-lg font-semibold text-primary"><span>Total</span><span>₹${total}</span></div><textarea id="order-notes" class="w-full mt-4 p-2 border rounded-md bg-secondary" placeholder="Add any special requests..."></textarea><button onclick="app.placeOrder()" class="mt-6 w-full brand-bg text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:opacity-90 transition-all">Place Order</button></div>`;
+        }
+    },
+    renderOrderTracking() {
+        const container = document.getElementById('order-tracking-content');
+        if(!container || !this.state.activeOrder) return;
+        const statuses = ['Order Received', 'In the Kitchen', 'On its Way', 'Delivered'];
+        const currentStatusIndex = statuses.indexOf(this.state.activeOrder.status);
+        const itemsHtml = this.state.activeOrder.items.map(item => `<div class="flex justify-between text-secondary"><span>${item.name} (x${item.quantity})</span><span>₹${item.price * item.quantity}</span></div>`).join('');
+        container.innerHTML = `<div class="mt-6 text-center"><h2 class="text-2xl font-bold text-primary">Tracking Your Order</h2><p class="text-secondary">Order ID: ${this.state.activeOrder.id}</p><div class="my-8 space-y-4">${statuses.map((status, index) => `<div class="flex items-center"><div class="w-8 h-8 rounded-full flex items-center justify-center ${index <= currentStatusIndex ? 'brand-bg text-white' : 'bg-secondary text-primary'}">${index < currentStatusIndex ? '✓' : index + 1}</div><p class="ml-4 font-semibold ${index <= currentStatusIndex ? 'text-primary' : 'text-secondary'}">${status}</p></div>`).join('')}</div><div class="bg-secondary p-4 rounded-lg text-left"><h3 class="font-bold text-primary mb-2">Order Summary</h3>${itemsHtml}</div></div>`;
+    },
+    addToCart(item) {
+        sound.play('add_to_cart');
+        const existingItem = this.state.cart.find(ci => ci.name === item.name);
+        if (existingItem) { existingItem.quantity++; } else { this.state.cart.push({ ...item, quantity: 1 }); }
+        this.refreshCartDependentUI(true);
+        this.showToast(`${item.name} added`);
+    },
+    updateQuantity(itemName, change, fromMenu = false) {
+        sound.play('click');
+        const item = this.state.cart.find(ci => ci.name === itemName);
+        if (item) { item.quantity += change; if (item.quantity <= 0) { this.state.cart = this.state.cart.filter(ci => ci.name !== itemName); } }
+        this.refreshCartDependentUI(fromMenu);
+    },
+    refreshCartDependentUI(fromMenu = false) {
+        const totalItems = this.state.cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartCountEl = document.getElementById('cart-count');
+        if (cartCountEl) {
+            if (totalItems > 0 && !this.state.activeOrder) { 
+                cartCountEl.textContent = totalItems; 
+                cartCountEl.classList.remove('hidden'); 
+            } else { 
+                cartCountEl.classList.add('hidden'); 
+            }
+        }
+        if (this.state.currentPage === 'cart') this.renderCartPage();
+        else if (this.state.currentPage === 'order' && fromMenu) this.renderMenu();
+        this.saveState();
+    },
+    placeOrder() {
+        if (this.state.cart.length === 0) return;
+        sound.play('success');
+        const orderId = `T${this.state.tableNumber}-${Date.now().toString().slice(-4)}`;
+        this.state.activeOrder = { id: orderId, items: [...this.state.cart], notes: document.getElementById('order-notes')?.value || '', status: 'Order Received', table: this.state.tableNumber, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+        
+        let allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
+        allOrders.push(this.state.activeOrder);
+        localStorage.setItem('hxouseAllOrders', JSON.stringify(allOrders));
+        
+        this.state.cart = []; this.saveState();
+        sessionStorage.removeItem('promoShown'); // Reset promo shown flag for new order
+        this.navigateTo('cart'); this.showToast('Order placed successfully!');
+        this.showModal('modal-template-post-order');
+    }
+});
+
+// --- Admin Panel ---
+const admin = {
+    isLoggedIn: false,
+    showLogin() { app.showModal('modal-template-admin-login'); },
+    login() {
+        const password = document.getElementById('admin-password').value;
+        if (password === 'admin123') {
+            this.isLoggedIn = true;
+            app.closeModal('admin-login-modal');
+            this.renderPanel();
+        } else {
+            app.showToast("Incorrect Password");
+        }
+    },
+    logout() {
+        this.isLoggedIn = false;
+        document.getElementById('admin-panel').classList.add('hidden');
+        document.getElementById('main-interface').classList.remove('hidden');
+    },
+    renderPanel() {
+        document.getElementById('main-interface').classList.add('hidden');
+        const panel = document.getElementById('admin-panel');
+        panel.classList.remove('hidden');
+
+        const allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
+        const activeOrders = allOrders.filter(o => o.status !== 'Delivered').sort((a,b) => b.id.slice(-4) - a.id.slice(-4));
+
+        panel.innerHTML = `
+            <header class="p-4 flex justify-between items-center bg-secondary">
+                <h1 class="text-2xl font-bold brand-text">Admin Panel</h1>
+                <button onclick="admin.logout()" class="font-semibold text-sm">Logout</button>
+            </header>
+            <div class="flex-grow p-4 space-y-4 overflow-y-auto">
+                ${activeOrders.length === 0 ? '<p class="text-center text-secondary">No active orders.</p>' : 
+                activeOrders.map(order => `
+                    <div class="bg-secondary rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="font-bold text-primary">Order #${order.id}</h2>
+                            <span class="text-xs text-secondary">${order.timestamp}</span>
+                        </div>
+                        <div class="my-2">
+                            ${order.items.map(i => `<p class="text-sm text-secondary">${i.name} x ${i.quantity}</p>`).join('')}
+                            ${order.notes ? `<p class="text-sm italic text-primary mt-1">Notes: ${order.notes}</p>` : ''}
+                        </div>
+                        <div class="flex space-x-2 mt-2">
+                            <select onchange="admin.updateOrderStatus('${order.id}', this.value)" class="w-full p-2 rounded-md bg-white border-2">
+                                <option ${order.status === 'Order Received' ? 'selected' : ''}>Order Received</option>
+                                <option ${order.status === 'In the Kitchen' ? 'selected' : ''}>In the Kitchen</option>
+                                <option ${order.status === 'On its Way' ? 'selected' : ''}>On its Way</option>
+                                <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            </select>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+    },
+    updateOrderStatus(orderId, newStatus) {
+        let allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
+        const orderIndex = allOrders.findIndex(o => o.id === orderId);
+        if (orderIndex > -1) {
+            allOrders[orderIndex].status = newStatus;
+            localStorage.setItem('hxouseAllOrders', JSON.stringify(allOrders));
+            this.renderPanel();
+        }
+    },
+    getLoginModalHTML: () => `<div id="admin-login-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-primary mb-4">Admin Access</h2><input type="password" id="admin-password" class="w-full p-2 border rounded-md" placeholder="Enter password"><div class="flex justify-end space-x-2 mt-4"><button onclick="app.closeModal('admin-login-modal')" class="bg-gray-200 text-primary font-semibold py-2 px-4 rounded-lg">Cancel</button><button onclick="admin.login()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg">Login</button></div></div></div>`
+};
+
+// --- GAMES ---
+const spinTheWheel = {
+    state: { wheel: null, spinBtn: null, prize: null, rotation: 0, rotationSpeed: 0, friction: 0.995, isSpinning: false },
+    segments: [ {fillStyle: '#eae56f', text: '5% Off'}, {fillStyle: '#89f26e', text: 'Try Again'}, {fillStyle: '#7de6ef', text: 'Free Cookie'}, {fillStyle: '#e7706f', text: '10% Off'}, {fillStyle: '#eae56f', text: 'Try Again'}, {fillStyle: '#89f26e', text: 'Free Drink'} ],
+    start() { app.showModal('modal-template-spin-the-wheel'); this.init(); },
+    init() {
+        this.state.wheel = document.getElementById('spin-wheel-canvas');
+        this.state.spinBtn = document.getElementById('spin-btn');
+        if(!this.state.wheel || !this.state.spinBtn) return;
+        this.drawWheel();
+        this.state.spinBtn.onclick = () => this.spin();
+    },
+    drawWheel() {
+        const ctx = this.state.wheel.getContext('2d');
+        const arcSize = (2 * Math.PI) / this.segments.length;
+        const centerX = this.state.wheel.width / 2;
+        const centerY = this.state.wheel.height / 2;
+        const radius = Math.min(centerX, centerY) * 0.9;
+        ctx.clearRect(0, 0, this.state.wheel.width, this.state.wheel.height);
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(this.state.rotation);
+        this.segments.forEach((seg, i) => {
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.arc(0, 0, radius, i * arcSize, (i + 1) * arcSize);
+            ctx.closePath();
+            ctx.fillStyle = seg.fillStyle;
+            ctx.fill();
+            ctx.save();
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.rotate((i + 0.5) * arcSize);
+            ctx.fillText(seg.text, radius * 0.6, 0);
+            ctx.restore();
+        });
+        ctx.restore();
+    },
+    spin() {
+        if (this.state.isSpinning) return;
+        this.state.isSpinning = true;
+        this.state.rotationSpeed = Math.random() * 0.4 + 0.4; // Initial power
+        this.state.spinBtn.disabled = true;
+        this.animate();
+    },
+    animate() {
+        this.state.rotation += this.state.rotationSpeed;
+        this.state.rotationSpeed *= this.state.friction;
+        this.drawWheel();
+        if (this.state.rotationSpeed > 0.001) {
+            requestAnimationFrame(() => this.animate());
+        } else {
+            this.state.rotationSpeed = 0;
+            this.state.isSpinning = false;
+            this.state.spinBtn.disabled = false;
+            const finalAngle = this.state.rotation % (2 * Math.PI);
+            const segmentIndex = Math.floor(this.segments.length - finalAngle / (2 * Math.PI) * this.segments.length) % this.segments.length;
+            const prize = this.segments[segmentIndex].text;
+            document.getElementById('spin-result').textContent = `You won: ${prize}!`;
+            sound.play('win');
+        }
+    },
+    getModalHTML: () => `<div id="spin-wheel-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><div class="relative inline-block"><canvas id="spin-wheel-canvas" width="280" height="280"></canvas><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full" style="clip-path: polygon(50% 100%, 0 0, 100% 0); width: 30px; height: 40px; background: #333;"></div></div><h3 id="spin-result" class="text-xl font-bold mt-4 h-8"></h3><button id="spin-btn" class="w-full mt-4 brand-bg font-semibold py-3 px-6 rounded-lg">SPIN</button><button onclick="app.closeModal('spin-wheel-modal')" class="w-full mt-2 bg-gray-200 text-primary font-semibold py-2 px-6 rounded-lg">Close</button></div></div>`
+};
+const ticTacToe = {
+    state: { board: [], currentPlayer: 'X', gameOver: false },
+    start() { app.showModal('modal-template-tic-tac-toe'); this.init(); },
+    init() {
+        this.state.board = Array(9).fill(null);
+        this.state.currentPlayer = 'X';
+        this.state.gameOver = false;
+        this.render();
+    },
+    render() {
+        const boardEl = document.getElementById('ttt-board');
+        const statusEl = document.getElementById('ttt-status');
+        if(!boardEl || !statusEl) return;
+        boardEl.innerHTML = '';
+        this.state.board.forEach((cell, index) => {
+            const cellEl = document.createElement('div');
+            cellEl.className = 'game-cell flex items-center justify-center text-5xl font-extrabold bg-white rounded-md cursor-pointer hover:bg-gray-50';
+            cellEl.textContent = cell || '';
+            if (!cell && !this.state.gameOver) { cellEl.onclick = () => this.makeMove(index); }
+            if (cell === 'X') cellEl.style.color = '#ef4444';
+            if (cell === 'O') cellEl.style.color = '#3b82f6';
+            boardEl.appendChild(cellEl);
+        });
+        statusEl.textContent = this.state.gameOver ? this.state.gameOver : `Player ${this.state.currentPlayer}'s turn`;
+    },
+    makeMove(index) {
+        if (this.state.board[index] || this.state.gameOver) return;
+        sound.play('click');
+        this.state.board[index] = this.state.currentPlayer;
+        if (this.checkWin()) {
+            this.state.gameOver = `Player ${this.state.currentPlayer} wins!`;
+            sound.play('win');
+        } else if (this.state.board.every(c => c)) {
+            this.state.gameOver = "It's a draw!";
+            sound.play('draw');
+        } else {
+            this.state.currentPlayer = this.state.currentPlayer === 'X' ? 'O' : 'X';
+        }
+        this.render();
+    },
+    checkWin() {
+        const lines = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
+        return lines.some(line => {
+            const [a, b, c] = line;
+            return this.state.board[a] && this.state.board[a] === this.state.board[b] && this.state.board[a] === this.state.board[c];
+        });
+    },
+    getModalHTML: () => `<div id="ttt-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-primary">Tic-Tac-Toe</h2><button onclick="app.closeModal('ttt-modal')" class="text-2xl font-bold">&times;</button></div><div id="ttt-game"><h3 id="ttt-status" class="text-center text-xl font-semibold mb-4 h-8"></h3><div id="ttt-board" class="grid grid-cols-3 gap-2 max-w-xs mx-auto p-2 bg-secondary rounded-lg"></div><button onclick="ticTacToe.init()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">New Game</button></div></div></div>`
+};
+const rockPaperScissors = {
+    choices: ['rock', 'paper', 'scissors'],
+    emojis: { rock: '✊', paper: '✋', scissors: '✌️' },
+    start() { app.showModal('modal-template-rock-paper-scissors'); this.reset(); },
+    reset() {
+        const playerEl = document.getElementById('rps-player');
+        const aiEl = document.getElementById('rps-ai');
+        const resultEl = document.getElementById('rps-result');
+        const buttonsEl = document.getElementById('rps-buttons');
+        if (playerEl) playerEl.textContent = '?';
+        if (aiEl) aiEl.textContent = '?';
+        if (resultEl) resultEl.textContent = 'Make your move!';
+        if (buttonsEl) buttonsEl.style.pointerEvents = 'auto';
+    },
+    play(playerChoice) {
+        sound.play('click');
+        const buttonsEl = document.getElementById('rps-buttons');
+        if(buttonsEl) buttonsEl.style.pointerEvents = 'none';
+        
+        const aiChoice = this.choices[Math.floor(Math.random() * 3)];
+        
+        const playerEl = document.getElementById('rps-player');
+        const aiEl = document.getElementById('rps-ai');
+        const resultEl = document.getElementById('rps-result');
+
+        if(playerEl) playerEl.textContent = this.emojis[playerChoice];
+        if(aiEl) aiEl.textContent = this.emojis[aiChoice];
+        
+        let result = '';
+        if (playerChoice === aiChoice) {
+            result = "It's a Tie!";
+            sound.play('draw');
+        } else if ((playerChoice === 'rock' && aiChoice === 'scissors') || (playerChoice === 'paper' && aiChoice === 'rock') || (playerChoice === 'scissors' && aiChoice === 'paper')) {
+            result = 'You Win!';
+            sound.play('win');
+        } else {
+            result = 'AI Wins!';
+        }
+        if(resultEl) resultEl.textContent = result;
+        setTimeout(() => this.reset(), 1500);
+    },
+    getModalHTML: () => `<div id="rps-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-primary">vs. AI</h2><button onclick="app.closeModal('rps-modal')" class="text-2xl font-bold">&times;</button></div><div id="rps-result" class="text-2xl font-bold mb-8 h-8"></div><div class="flex justify-center space-x-4 mb-8"><div class="text-center"><p class="font-bold">You</p><div id="rps-player" class="text-6xl p-4">?</div></div><div class="text-center"><p class="font-bold">AI</p><div id="rps-ai" class="text-6xl p-4">?</div></div></div><p class="mb-4 font-medium">Choose your move:</p><div id="rps-buttons" class="flex justify-center space-x-4"><button onclick="rockPaperScissors.play('rock')" class="text-4xl p-4 bg-secondary rounded-full hover:opacity-80 transition transform hover:scale-110">✊</button><button onclick="rockPaperScissors.play('paper')" class="text-4xl p-4 bg-secondary rounded-full hover:opacity-80 transition transform hover:scale-110">✋</button><button onclick="rockPaperScissors.play('scissors')" class="text-4xl p-4 bg-secondary rounded-full hover:opacity-80 transition transform hover:scale-110">✌️</button></div></div></div>`
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // A special handler to pass the isDelivered flag to the instagram modal template
+    const originalShowModal = app.showModal.bind(app);
+    app.showModal = function(templateId, ...args) {
+        if (templateId === 'modal-template-instagram') {
+            const isDelivered = args[0] || false;
+            const template = document.getElementById(templateId);
+            if (template) {
+                template.innerHTML = app.getInstagramModalHTML(isDelivered);
+            }
+        }
+        originalShowModal(templateId);
+    };
+
+    const modalTemplates = {
+        'modal-template-admin-login': admin.getLoginModalHTML(),
+        'modal-template-feedback': app.getFeedbackModalHTML(),
+        'modal-template-instagram': app.getInstagramModalHTML(), // Initial render
+        'modal-template-spin-the-wheel': spinTheWheel.getModalHTML(),
+        'modal-template-tic-tac-toe': ticTacToe.getModalHTML(),
+        'modal-template-rock-paper-scissors': rockPaperScissors.getModalHTML(),
+        'modal-template-post-order': app.getPostOrderModalHTML()
+    };
+
+    for (const id in modalTemplates) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = modalTemplates[id];
+    }
+    app.init();
+});
+</script>
+</body>
+</html>
+
