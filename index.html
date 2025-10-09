@@ -7,8 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Reference to the Supabase JS library -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* --- THEMES & STYLES --- */
@@ -23,44 +22,75 @@
         [data-theme="dark"] { --bg-primary: var(--bg-primary-dark); --bg-secondary: var(--bg-secondary-dark); --text-primary: var(--text-primary-dark); --text-secondary: var(--text-secondary-dark); --border-color: var(--border-dark); --brand-primary: var(--brand-primary-dark); }
         [data-theme="sunset"] { --bg-primary: var(--bg-primary-sunset); --bg-secondary: var(--bg-secondary-sunset); --text-primary: var(--text-primary-sunset); --text-secondary: var(--text-secondary-sunset); --border-color: var(--border-sunset); --brand-primary: var(--brand-primary-sunset); }
         [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
+        
         html, body { height: 100%; overflow: hidden; }
-        body { font-family: 'Inter', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; }
-        .app-container { background-color: var(--bg-primary); transition: background-color 0.3s ease; height: var(--app-height); }
-        .text-primary { color: var(--text-primary); }
-        .text-secondary { color: var(--text-secondary); }
-        .bg-primary { background-color: var(--bg-primary); }
-        .bg-secondary { background-color: var(--bg-secondary); }
-        .border-custom { border-color: var(--border-color); }
-        .brand-text { color: var(--brand-primary); }
+        body { font-family: 'Poppins', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
+        .app-container { background-color: var(--bg-primary); transition: background-color 0.5s ease; height: var(--app-height); }
+        .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
+        .bg-primary { background-color: var(--bg-primary); } .bg-secondary { background-color: var(--bg-secondary); }
+        .border-custom { border-color: var(--border-color); } .brand-text { color: var(--brand-primary); }
         .brand-bg { background-color: var(--brand-primary); color: var(--bg-primary); }
         .brand-border { border-color: var(--brand-primary); }
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-out { animation: fadeOut 0.5s ease-in-out forwards; } @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        
         .toast { animation: toast-in 0.5s ease, toast-out 0.5s ease 2.5s forwards; }
         @keyframes toast-in { from { bottom: -100px; opacity: 0; } to { bottom: 80px; opacity: 1; } }
         @keyframes toast-out { from { opacity: 1; } to { opacity: 0; display: none; } }
+        
         .modal-overlay { animation: fadeIn 0.3s ease; }
         .modal-content { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
         #splash-screen img { animation: pulse 2s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        
         .horizontal-scroll::-webkit-scrollbar { display: none; }
         .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
         .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
         .tracker-line { position: absolute; top: 18px; left: 10%; width: 80%; height: 4px; background-color: var(--border-color); }
         .tracker-progress { position: absolute; top: 18px; left: 10%; height: 4px; background-color: var(--brand-primary); transition: width 0.5s ease-in-out; }
-        .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 60px; position: relative; }
-        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-secondary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 60px; position: relative; z-index: 1; }
+        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
         .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
         .tracker-label { margin-top: 8px; font-size: 10px; font-weight: 600; transition: color 0.3s ease; }
         .tracker-step.active .tracker-label { color: var(--brand-primary); }
+
+        .instagram-card {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .classy-x {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body data-theme="light">
 
+    <!-- Theme Selection Screen: First thing the user sees -->
+    <div id="theme-selection-screen" class="fixed inset-0 bg-black flex items-center justify-center z-[101]">
+        <div class="text-center text-white p-8">
+            <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-32 h-32 object-contain mx-auto mb-6 rounded-full">
+            <h1 class="text-3xl font-bold mb-2">Welcome to H<span class="classy-x">X</span>OUSE</h1>
+            <p class="text-gray-400 mb-8">First, choose a theme for your experience.</p>
+            <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                <button onclick="app.setThemeAndProceed('light')" class="bg-gray-200 text-black p-4 rounded-xl text-center"><span class="text-3xl">☀️</span><p class="font-semibold mt-1">Light</p></button>
+                <button onclick="app.setThemeAndProceed('dark')" class="bg-gray-800 text-white p-4 rounded-xl text-center"><span class="text-3xl">🌙</span><p class="font-semibold mt-1">Dark</p></button>
+                <button onclick="app.setThemeAndProceed('sunset')" class="bg-indigo-900 text-orange-300 p-4 rounded-xl text-center"><span class="text-3xl">🌆</span><p class="font-semibold mt-1">Sunset</p></button>
+                <button onclick="app.setThemeAndProceed('matcha')" class="bg-green-100 text-green-900 p-4 rounded-xl text-center"><span class="text-3xl">🍵</span><p class="font-semibold mt-1">Matcha</p></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Splash Screen: Shown during initial auth and data load -->
-    <div id="splash-screen" class="fixed inset-0 bg-black flex items-center justify-center z-[100]">
-        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain">
+    <div id="splash-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-[100] hidden">
+        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full">
     </div>
 
     <!-- Main Application Container -->
@@ -87,39 +117,34 @@
 //  SECTION 1: SETUP & CONFIGURATION
 // =================================================================================
 
-/**
- * Sets the height of the app to match the browser's inner window height.
- * This fixes issues with 100vh on mobile browsers where the URL bar can interfere.
- */
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => document.querySelectorAll(selector);
+
 function setAppHeight() {
   document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
 }
 window.addEventListener('resize', setAppHeight);
 setAppHeight();
 
-/**
- * Supabase client configuration.
- * This is the bridge between our app and the database.
- */
 const SUPABASE_URL = 'https://jkrslxtnhtvrdllyjvxo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprcnNseHRuaHR2cmRsbHlqdnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5ODQxNDgsImV4cCI6MjA3NTU2MDE0OH0.J8VzFmQeU_0sRd8MDO6YJMiJA9Cs0KVpwN-NVzyY5nk';
 const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/**
- * Static data for features that don't need a database table.
- */
 const STATIC_DATA = {
     captionIdeas: {
-        student: [ "Fueling my study session with @hxousecoffee ☕️📚 #StudentLife" ],
-        office: [ "My real co-worker: this cup from @hxousecoffee 💼 #WorkFuel" ],
-        couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffee" ],
-        friends: [ "Good times and great coffee with the best crew! @hxousecoffee #Friends" ]
-    }
+        student: [ "Fueling my study session with @hxousecoffeeco ☕️📚 #StudentLife", "Caffeine and concentration, courtesy of @hxousecoffeeco." ],
+        office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ],
+        couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffeeco", "Love is in the air, and it smells like coffee from @hxousecoffeeco." ],
+        friends: [ "Good times and great coffee with the best crew! @hxousecoffeeco #Friends", "A perfect blend of friendship and coffee at @hxousecoffeeco!" ]
+    },
+    coffeeTrivia: [
+        { q: "Where was coffee first discovered?", a: "Ethiopia" },
+        { q: "What does 'espresso' mean in Italian?", a: "Expressed or Forced Out" },
+        { q: "What is the most expensive coffee in the world?", a: "Kopi Luwak" },
+        { q: "Which country is the largest producer of coffee?", a: "Brazil" }
+    ]
 };
 
-/**
- * Sound effects module for UI feedback.
- */
 const sound = {
     audioContext: null,
     init() {
@@ -132,8 +157,8 @@ const sound = {
         const o = this.audioContext.createOscillator(), g = this.audioContext.createGain();
         o.connect(g); g.connect(this.audioContext.destination); g.gain.setValueAtTime(0, this.audioContext.currentTime);
         const sounds = {
-            click: { type: 'sine', freq: 600, gain: 0.3, len: 0.1 },
-            add_to_cart: { type: 'triangle', freq: 440, gain: 0.4, len: 0.2 },
+            click: { type: 'sine', freq: 600, gain: 0.2, len: 0.1 },
+            add_to_cart: { type: 'triangle', freq: 440, gain: 0.3, len: 0.2 },
             success: { type: 'sine', freq: 523.25, gain: 0.3, len: 0.3, secondFreq: 659.25 },
             win: { type: 'sine', freq: 587.33, gain: 0.4, len: 0.3, secondFreq: 880 },
             draw: { type: 'sawtooth', freq: 220, gain: 0.2, len: 0.2, secondFreq: 180 },
@@ -147,14 +172,10 @@ const sound = {
     }
 };
 
-
 // =================================================================================
 //  SECTION 2: CORE APPLICATION LOGIC
 // =================================================================================
 const app = {
-    /**
-     * The main state object. All dynamic data that the UI depends on is stored here.
-     */
     state: {
         currentPage: 'home',
         cart: [],
@@ -165,20 +186,37 @@ const app = {
         theme: 'light',
         menuData: [],
         orderSubscription: null,
-        currentMenuFilter: null, // To remember the active menu filter for re-rendering
+        currentMenuCategory: null, 
     },
     
-    /**
-     * Main application entry point.
-     * 1. Set theme and check URL for a table number from a QR code.
-     * 2. Authenticate the user (get session or create an anonymous one).
-     * 3. Fetch essential data (profile, menu).
-     * 4. Once data is ready, hide splash screen and show the app.
-     * 5. Route the user to the correct starting modal (onboarding vs. table entry).
-     */
     async init() {
-        this.state.theme = localStorage.getItem('hxouse-theme') || 'light';
+        // PERF: Immediately check for saved theme to show UI faster
+        const savedTheme = localStorage.getItem('hxouse-theme');
+        if (savedTheme) {
+            this.setThemeAndProceed(savedTheme, true);
+        }
+        document.body.addEventListener('click', () => sound.init(), { once: true });
+    },
+
+    setThemeAndProceed(theme, isAlreadySet = false) {
+        this.state.theme = theme;
+        localStorage.setItem('hxouse-theme', theme);
         this.applyTheme();
+
+        const themeScreen = $('#theme-selection-screen');
+        if (!isAlreadySet) {
+            themeScreen.classList.add('fade-out');
+            setTimeout(() => themeScreen.style.display = 'none', 500);
+        } else {
+            themeScreen.style.display = 'none';
+        }
+        
+        // PERF: Don't wait for fade-out to start the app logic
+        this.startAppFlow();
+    },
+
+    async startAppFlow() {
+        $('#splash-screen').classList.remove('hidden');
         this.getTableNumberFromURL();
         
         try {
@@ -192,9 +230,9 @@ const app = {
             
             await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData() ]);
 
-            document.getElementById('splash-screen').style.display = 'none';
-            document.getElementById('app').classList.remove('hidden');
-            document.getElementById('app').classList.add('flex');
+            $('#splash-screen').style.display = 'none';
+            $('#app').classList.remove('hidden');
+            $('#app').classList.add('flex');
 
             if (!this.state.customerProfile) {
                 this.showOnboardingModal();
@@ -206,166 +244,715 @@ const app = {
 
         } catch (error) {
             console.error("CRITICAL: Initialization failed.", error);
-            document.getElementById('splash-screen').innerHTML = `<div class="text-white text-center p-4">Could not load the app. Please check your connection and try again.</div>`;
+            $('#splash-screen').innerHTML = `<div class="text-primary text-center p-4">Could not load the app. Please check your connection and try again.</div>`;
         }
-
-        document.body.addEventListener('click', () => sound.init(), { once: true });
     },
 
     // --- DATA & SESSION MANAGEMENT ---
-
-    /** Parses the window's URL for a 'table' query parameter from a QR code. */
     getTableNumberFromURL() {
         const params = new URLSearchParams(window.location.search);
         const tableNum = params.get('table');
-        if (tableNum && !isNaN(parseInt(tableNum))) {
-            this.state.tableNumber = parseInt(tableNum);
-        }
+        if (tableNum && !isNaN(parseInt(tableNum))) this.state.tableNumber = parseInt(tableNum);
     },
 
-    /** Fetches the logged-in user's profile from the 'customers' table. */
-    async fetchCustomerProfile() { if (!this.state.user) return; try { const { data, error } = await supabase.from('customers').select('*').eq('id', this.state.user.id).single(); if (error && error.code !== 'PGRST116') throw error; if (data) this.state.customerProfile = data; } catch (error) { console.error('Error fetching profile:', error); this.showToast('Could not fetch your profile.'); } },
+    async fetchCustomerProfile() { 
+        if (!this.state.user) return;
+        try {
+            const { data, error } = await supabase.from('customers').select('*').eq('id', this.state.user.id).single();
+            if (error && error.code !== 'PGRST116') throw error;
+            if (data) this.state.customerProfile = data;
+        } catch (error) { console.error('Error fetching profile:', error); ui.showToast('Could not fetch your profile.'); }
+    },
 
-    /** Fetches the entire menu structure from the database. */
-    async fetchMenuData() { try { const { data, error } = await supabase.from('menu_categories').select(`name, products (id, name, description, price, image_url, is_available)`).order('display_order'); if (error) throw error; this.state.menuData = data.map(c => ({ category: c.name, items: c.products })); } catch (error) { console.error('Error fetching menu:', error); this.showToast('Could not load the menu.'); } },
+    async fetchMenuData() {
+        try {
+            const { data, error } = await supabase.from('menu_categories').select(`name, products (id, name, description, price, image_url, is_available)`).order('display_order');
+            if (error) throw error;
+            this.state.menuData = data.map(c => ({ category: c.name, items: c.products }));
+        } catch (error) { console.error('Error fetching menu:', error); ui.showToast('Could not load the menu.'); }
+    },
     
-    /** Displays the onboarding modal, adapting based on whether a QR code was scanned. */
     showOnboardingModal(){
         const tableInputHTML = !this.state.tableNumber 
             ? `<input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>`
             : '';
-        const modalHTML =`<div id="onboarding-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold text-primary mb-2">Welcome to HXOUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p><div class="space-y-4"><input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Name" required>${tableInputHTML}<input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Mobile Number (Optional)"></div><button onclick="app.completeOnboarding()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Let's Go</button></div></div>`;
-        this.showModal(modalHTML);
+        ui.showModal('onboarding-modal', `
+            <h2 class="text-2xl font-bold text-primary mb-2">Welcome to HXOUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p>
+            <div class="space-y-4">
+                <input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Name" required>
+                ${tableInputHTML}
+                <input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Mobile Number (Optional)">
+            </div>
+            <button onclick="app.completeOnboarding()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Let's Go</button>
+        `);
     },
     
-    /** Handles new user submission, creating a profile and starting the session. */
     async completeOnboarding(){
-        const name = document.getElementById('user-name-input').value.trim();
+        const name = $('#user-name-input').value.trim();
         let tableNumber = this.state.tableNumber;
         if (!tableNumber) {
-            const tableInput = document.getElementById('table-number-input');
-            if (!tableInput || !tableInput.value) return this.showToast("Please enter your table number.");
+            const tableInput = $('#table-number-input');
+            if (!tableInput || !tableInput.value) return ui.showToast("Please enter your table number.");
             tableNumber = parseInt(tableInput.value);
         }
-        if (!name) return this.showToast("Please enter your name.");
+        if (!name) return ui.showToast("Please enter your name.");
         
-        // Note: The database column is `whatsapp_number`. We are collecting it as "Mobile Number".
         const { data, error } = await supabase.from('customers').insert({ 
             id: this.state.user.id, name, 
-            whatsapp_number: document.getElementById('mobile-number-input').value.trim() 
+            whatsapp_number: $('#mobile-number-input').value.trim() 
         }).select().single();
-        if (error) return this.showToast('Could not save profile. Please try again.');
+        if (error) return ui.showToast('Could not save profile. Please try again.');
         
         this.state.customerProfile = data;
         this.state.tableNumber = tableNumber;
-        this.closeModal('onboarding-modal');
+        ui.closeModal('onboarding-modal');
         this.startSession();
     },
     
-    /** Displays a welcome-back modal for a returning user to enter their table number manually. */
-    showTableNumberModal() { const m = `<div id="table-number-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold text-primary mb-2">Welcome back, ${this.state.customerProfile.name}!</h2><p class="text-secondary mb-6">Please enter your table number for today's visit.</p><div class="space-y-4"><input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required></div><button onclick="app.completeTableNumberEntry()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Continue</button></div></div>`; this.showModal(m); },
+    showTableNumberModal() {
+        ui.showModal('table-number-modal', `
+            <h2 class="text-2xl font-bold text-primary mb-2">Welcome back, ${this.state.customerProfile.name}!</h2>
+            <p class="text-secondary mb-6">Please enter your table number for today's visit.</p>
+            <input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>
+            <button onclick="app.completeTableNumberEntry()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Continue</button>
+        `);
+    },
 
-    /** Handles submission of the table number form for a returning user. */
-    completeTableNumberEntry() { const tableNumber = document.getElementById('table-number-input').value; if (!tableNumber) return this.showToast("Please enter your table number."); this.state.tableNumber = parseInt(tableNumber); this.closeModal('table-number-modal'); this.startSession(); },
+    completeTableNumberEntry() {
+        const tableNumber = $('#table-number-input').value;
+        if (!tableNumber) return ui.showToast("Please enter your table number.");
+        this.state.tableNumber = parseInt(tableNumber);
+        ui.closeModal('table-number-modal');
+        this.startSession();
+    },
 
-    /** Final step after onboarding. Checks for active orders and shows the main UI. */
-    async startSession() { await this.fetchActiveOrder(); this.showMainInterface(); },
+    async startSession() {
+        await this.fetchActiveOrder();
+        this.showMainInterface();
+    },
     
-    /** Makes the main application interface (header, content, nav) visible. */
-    showMainInterface(){ document.getElementById('main-interface').classList.remove('hidden'); document.getElementById('bottom-nav').classList.remove('hidden'); this.renderBottomNav(); this.navigateTo('home'); },
+    showMainInterface(){
+        $('#main-interface').classList.remove('hidden');
+        $('#bottom-nav').classList.remove('hidden');
+        ui.renderBottomNav();
+        this.navigateTo('home');
+    },
 
     // --- UI RENDERING & NAVIGATION ---
-    navigateTo(page){ if (!this.state.customerProfile) return; sound.play('click'); this.state.currentPage=page; const h=document.getElementById('page-header'), c=document.getElementById('page-content'); h.innerHTML='', c.innerHTML='', c.className='fade-in'; const p={home:{title:'HXOUSE',back:!1},order:{title:'Menu',back:!0},cart:{title:this.state.activeOrder?'Track Order':'My Cart',back:!0},play:{title:'Entertainment',back:!0},more:{title:'More Options',back:!0}}; const g=p[page]; h.innerHTML=`<div class="flex items-center space-x-2">${g.back?`<button onclick="app.navigateTo('home')" class="p-2 -ml-2 rounded-full hover:bg-secondary"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>`:''}<h1 class="text-3xl font-bold brand-text">${g.title}</h1></div><div class="text-right"><p class="font-semibold text-primary">${this.state.customerProfile.name}</p><p class="text-xs text-secondary">Table #${this.state.tableNumber || 'N/A'}</p></div>`; this.renderPageContent(page); this.updateActiveNav(page); },
-    renderPageContent(page){ const r = { home: this.renderHomePage, order: this.renderMenu, cart: this.renderCartPage, play: this.renderPlayPage, more: this.renderMorePage }; r[page]?.call(this); },
-    renderBottomNav(){const i={home:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`,order:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,cart:`<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`,play:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,more:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`};const p=['home','order','cart','play','more'];document.getElementById('bottom-nav').innerHTML=p.map(p=>`<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${i[p]}<span id="${p}-tab-label" class="text-xs font-semibold capitalize">${p}</span></button>`).join('')},
-    updateActiveNav(page){const cL=document.getElementById('cart-tab-label'),cI=document.getElementById('cart-icon-svg');this.state.activeOrder?(cL.textContent='Track',cI.innerHTML=`<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`):(cL.textContent='Cart',cI.innerHTML=`<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`);document.querySelectorAll('.nav-item').forEach(i=>{const a=i.dataset.page===page;i.classList.toggle('brand-text',a);i.classList.toggle('text-secondary',!a);i.style.transform=a?'scale(1.1)':'scale(1)'});this.refreshCartDependentUI()},
-    applyTheme(){document.body.dataset.theme=this.state.theme},
-    toggleTheme(t){this.state.theme=t;localStorage.setItem('hxouse-theme',t);this.applyTheme();this.renderMorePage()},
-    showModal(c){document.getElementById('modal-container').innerHTML=c},
-    closeModal(id){document.getElementById(id)?.remove()},
-    showToast(m){const t=document.getElementById('toast'),p=document.getElementById('toast-message');p.textContent=m;t.classList.remove('hidden');t.classList.add('toast');setTimeout(()=>{t.classList.remove('toast');t.classList.add('hidden')},3e3)},
-    renderHomePage(){const c=document.getElementById('page-content');let a=this.state.activeOrder?`<div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center"><h2 class="font-bold text-primary">Your order is ${this.state.activeOrder.status}!</h2><p class="text-secondary text-sm">Order ID: #${this.state.activeOrder.id.slice(0,6)}</p><button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button></div>`:'';c.innerHTML=`<div class="space-y-6"><div class="relative h-64 overflow-hidden rounded-b-2xl"><video src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4"><h1 class="text-4xl font-black tracking-tighter">HXOUSE</h1><p class="text-lg tracking-widest mt-1 font-light">COFFEE CO.</p></div></div><div class="p-4 space-y-6">${a}<div onclick="app.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm"><h2 class="text-2xl font-bold text-primary">Follow, Post & Get 5% Off!</h2><p class="mt-1 text-secondary">Follow, post a story, and show it at the counter.</p><button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">How it works &rarr;</button></div><div class="grid grid-cols-2 gap-4"><button onclick="app.showStaffRequestModal()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎️</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button><button onclick="app.showFeedbackModal()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">📝</span><p class="font-semibold mt-2 text-primary">Leave Feedback</p></button></div></div></div>`},
-    renderPlayPage(){const c=document.getElementById('page-content');c.innerHTML=`<div class="p-4 space-y-4">${Object.values(GAMES).map(g=>`<div class="bg-secondary p-6 rounded-xl"><h3 class="text-xl font-bold text-primary mb-2">${g.title}</h3><p class="text-secondary mb-4">${g.description}</p><button onclick="GAMES['${g.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg">Play</button></div>`).join("")}</div>`},
-    renderMorePage(){const c=document.getElementById('page-content');const o=[{i:"🎨",t:"Change Theme",a:"app.showThemeModal()"},{i:"📶",t:"View Wi-Fi Details",a:"app.showWifiModal()"},{i:"📜",t:"Order History",a:"app.showOrderHistoryModal()"},{i:"💸",t:"Bill Splitter",a:"app.showBillSplitterModal()"}];c.innerHTML=`<div class="p-4 space-y-3">${o.map(i=>`<button onclick="${i.a}" class="w-full flex items-center justify-between bg-secondary p-4 rounded-xl text-left"><div class="flex items-center"><span class="text-2xl mr-4">${i.i}</span><span class="font-semibold text-primary">${i.t}</span></div><span class="text-secondary">&rarr;</span></button>`).join("")}</div>`},
+    navigateTo(page){
+        if (!this.state.customerProfile) return;
+        sound.play('click');
+        this.state.currentPage = page;
+        ui.renderHeader(page);
+        ui.renderPageContent(page);
+        ui.updateActiveNav(page);
+    },
+
+    applyTheme(){ document.body.dataset.theme = this.state.theme; },
+    toggleTheme(t){ this.state.theme = t; localStorage.setItem('hxouse-theme', t); this.applyTheme(); this.navigateTo('more'); },
+
+    // --- CART & ORDER LOGIC ---
+    addOrUpdateCartFromModal(itemId) {
+        const quantity = parseInt($('#modal-quantity-select').value);
+        const cartItem = this.state.cart.find(i => i.id === itemId);
+
+        if (cartItem) {
+            cartItem.quantity = quantity;
+        } else {
+            const item = this.state.menuData.flatMap(c => c.items).find(i => i.id === itemId);
+            if (!item) return;
+            this.state.cart.push({ cartId: Date.now(), ...item, quantity: quantity });
+        }
+
+        ui.showToast('Cart updated!');
+        sound.play('add_to_cart');
+        ui.closeModal('item-detail-modal');
+        this.refreshPage();
+    },
     
-    // --- MENU & CART LOGIC ---
-    renderMenu() { const c=document.getElementById('page-content'); if(this.state.menuData.length===0){c.innerHTML=`<div class="p-4 text-center text-secondary">Loading menu...</div>`;return} const f=this.state.menuData[0].category; this.state.currentMenuFilter={type:'category',value:f}; c.innerHTML=`<div class="p-4"><div class="relative"><input type="text" id="menu-search" class="w-full p-3 pl-10 border-custom rounded-lg bg-secondary text-primary" placeholder="Search..."><span class="absolute left-3 top-3.5 text-secondary">🔍</span></div></div><div class="horizontal-scroll sticky top-0 bg-primary/80 backdrop-blur-sm z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">${this.state.menuData.map((c,i)=>`<button class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${i===0?'brand-text border-b-2 border-current':'text-secondary'}" data-category="${c.category}" onclick="app.filterMenuByCategory('${c.category}',this)">${c.category}</button>`).join('')}</div><div id="menu-items" class="p-4 grid grid-cols-1 gap-3"></div>`; document.getElementById('menu-search').addEventListener('input',(e)=>this.filterMenuBySearch(e.target.value)); this.filterMenuByCategory(f); },
-    filterMenuByCategory(c,t){if(t){document.querySelectorAll('.category-tab').forEach(t=>{t.classList.remove('brand-text','border-b-2','border-current');t.classList.add('text-secondary')});t.classList.add('brand-text','border-b-2','border-current');document.getElementById('menu-search').value=''}this.state.currentMenuFilter={type:'category',value:c};const d=this.state.menuData.find(d=>d.category===c);this.renderMenuItems(d?d.items.filter(i=>i.is_available):[])},
-    filterMenuBySearch(s){document.querySelectorAll('.category-tab').forEach(b=>b.classList.remove('brand-text','border-b-2','border-current'));this.state.currentMenuFilter={type:'search',value:s};const i=this.state.menuData.flatMap(c=>c.items).filter(i=>i.name.toLowerCase().includes(s.toLowerCase())&&i.is_available);this.renderMenuItems(i)},
-    rerenderMenu(){if(this.state.currentPage!=='order')return;const f=this.state.currentMenuFilter;if(!f)return;if(f.type==='category'){const t=document.querySelector(`.category-tab[data-category="${f.value}"]`);this.filterMenuByCategory(f.value,t)}else{this.filterMenuBySearch(f.value)}},
-    renderMenuItems(items){const container=document.getElementById('menu-items');container.innerHTML=!items||items.length===0?`<p class="text-secondary text-center">No items found.</p>`:items.map(item=>{const cartItem=this.state.cart.find(ci=>ci.id===item.id);const buttonHTML=cartItem?`<div class="flex items-center space-x-3"><button onclick="event.stopPropagation(); app.updateCartItemQuantity(${cartItem.cartId},-1)" class="brand-bg rounded-full w-8 h-8 font-bold">-</button><span class="font-bold text-primary w-4 text-center">${cartItem.quantity}</span><button onclick="event.stopPropagation(); app.updateCartItemQuantity(${cartItem.cartId},1)" class="brand-bg rounded-full w-8 h-8 font-bold">+</button></div>`:`<button onclick="event.stopPropagation();app.addToCartById(${item.id})" class="brand-bg rounded-full w-10 h-10 text-2xl font-light">+</button>`;return`<div onclick="app.showItemDetailModal(${item.id})" class="bg-secondary p-4 rounded-xl flex justify-between items-center cursor-pointer"><div class="flex items-center space-x-4"><div class="text-4xl flex-shrink-0 w-12 h-12 flex items-center justify-center bg-primary rounded-lg">${item.image_url||'🍴'}</div><div><h3 class="font-bold text-primary">${item.name}</h3><p class="font-semibold text-secondary">₹${item.price}</p></div></div>${buttonHTML}</div>`}).join('')},
-    showItemDetailModal(itemId){const item=this.state.menuData.flatMap(c=>c.items).find(i=>i.id===itemId);if(!item)return;this.showModal(`<div id="item-detail-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><div class="flex justify-between items-start"><div><h2 class="text-2xl font-bold text-primary">${item.name}</h2><p class="text-xl font-semibold text-secondary">₹${item.price}</p></div><div class="text-5xl">${item.image_url||'🍴'}</div></div><p class="text-secondary mt-2">${item.description||'A delicious choice.'}</p><div class="mt-6"><button onclick="app.addToCartById(${item.id})" class="w-full brand-bg font-semibold py-3 rounded-lg">Add to Cart</button></div></div></div>`)},
-    addToCartById(itemId){const cartItem=this.state.cart.find(i=>i.id===itemId);if(cartItem){cartItem.quantity++}else{const item=this.state.menuData.flatMap(c=>c.items).find(i=>i.id===itemId);if(!item)return;this.state.cart.push({cartId:Date.now(),...item,quantity:1,finalPrice:item.price});this.showToast(`${item.name} added to cart!`)}sound.play('add_to_cart');this.refreshPage()},
-    updateCartItemQuantity(cartId,change){const item=this.state.cart.find(i=>i.cartId===cartId);if(item){item.quantity+=change;if(item.quantity<=0)this.state.cart=this.state.cart.filter(i=>i.cartId!==cartId)}this.refreshPage()},
-    calculateCartTotal(){return this.state.cart.reduce((t,i)=>t+(i.finalPrice*i.quantity),0)},
-    refreshCartDependentUI(){const el=document.getElementById('cart-count');const total=this.state.cart.reduce((s,i)=>s+i.quantity,0);if(total>0&&!this.state.activeOrder){el.textContent=total;el.classList.remove('hidden')}else{el.classList.add('hidden')}},
-    refreshPage(){this.refreshCartDependentUI();this.renderPageContent(this.state.currentPage)},
-    renderCartPage(){const c=document.getElementById('page-content');if(this.state.activeOrder)this.renderOrderTracking(c);else if(this.state.cart.length>0)this.renderCart(c);else c.innerHTML=`<div class="text-center p-10"><h2 class="text-2xl font-bold text-primary">Your cart is empty</h2><p class="text-secondary mt-2">Add items from the menu to get started.</p><button onclick="app.navigateTo('order')" class="mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">View Menu</button></div>`},
-    renderCart(c){const t=this.calculateCartTotal();c.innerHTML=`<div class="p-4 space-y-3">${this.state.cart.map(i=>`<div class="bg-secondary p-3 rounded-xl"><div class="flex justify-between items-start"><p class="font-bold text-primary">${i.name}</p><p class="font-semibold text-primary">₹${i.finalPrice*i.quantity}</p></div><div class="flex justify-between items-center mt-2"><button onclick="app.updateCartItemQuantity(${i.cartId}, -Infinity)" class="text-red-500 font-semibold text-xs">Remove</button><div class="flex items-center space-x-3"><button onclick="app.updateCartItemQuantity(${i.cartId},-1)" class="bg-primary border-custom rounded-full w-6 h-6">-</button><span class="font-bold text-primary w-4 text-center">${i.quantity}</span><button onclick="app.updateCartItemQuantity(${i.cartId},1)" class="bg-primary border-custom rounded-full w-6 h-6">+</button></div></div></div>`).join('')}</div><div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div><div class="p-4 bg-primary border-t-custom"><div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${t}</span></div><button onclick="app.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button></div>`},
-    showPaymentModal(){const m=`<div id="payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2><div class="space-y-3"><button onclick="app.placeOrder('Pay at Counter')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button><button onclick="app.placeOrder('UPI / QR Code')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button></div><button onclick="app.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button></div></div>`;this.showModal(m)},
-    async placeOrder(paymentMethod){if(this.state.cart.length===0||!this.state.tableNumber)return this.showToast("Cart is empty or table number is missing.");this.closeModal('payment-modal');console.log("Placing order for table:",this.state.tableNumber);const{data:tableData,error:tableError}=await supabase.from('tables').select('id').eq('table_number',this.state.tableNumber).single();if(tableError||!tableData){console.error("Table lookup error:",tableError);return this.showToast(`Table #${this.state.tableNumber} is not a valid table.`)}console.log("Found table ID:",tableData.id);const{data:orderData,error:orderError}=await supabase.from('orders').insert({customer_id:this.state.user.id,table_id:tableData.id,total_amount:this.calculateCartTotal(),payment_method:paymentMethod,special_instructions:document.getElementById('special-instructions')?.value||''}).select().single();if(orderError){console.error("Order insert error:",orderError);return this.showToast(`Could not place order: ${orderError.message}`)}console.log("Order created:",orderData);const orderItems=this.state.cart.map(i=>({order_id:orderData.id,product_id:i.id,quantity:i.quantity,price_at_time_of_order:i.price}));const{error:itemsError}=await supabase.from('order_items').insert(orderItems);if(itemsError){console.error("Order items insert error:",itemsError);return this.showToast(`Could not save order items: ${itemsError.message}`)}console.log("Order placed successfully!");await this.fetchActiveOrder();this.state.cart=[];this.refreshPage();sound.play('success');this.showPlayGamesPrompt()},
-    async fetchActiveOrder(){if(!this.state.user)return;const{data,error}=await supabase.from('orders').select(`*, order_items(*, products(name))`).eq('customer_id',this.state.user.id).in('status',['received','accepted','preparing','ready']).order('created_at',{ascending:false}).limit(1).single();if(error&&error.code!=='PGRST116')console.error('Fetch active order error:',error);this.state.activeOrder=data||null;if(this.state.activeOrder){this.listenToOrderUpdates(this.state.activeOrder.id)}},
-    listenToOrderUpdates(orderId){if(this.state.orderSubscription)supabase.removeChannel(this.state.orderSubscription);this.state.orderSubscription=supabase.channel(`public:orders:id=eq.${orderId}`).on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders',filter:`id=eq.${orderId}`},p=>{if(!this.state.activeOrder)return;const u=p.new;if(u.status!==this.state.activeOrder.status){this.showToast(`Your order is now: ${u.status}`);this.state.activeOrder.status=u.status;if(['delivered','cancelled'].includes(u.status)){this.state.activeOrder=null;supabase.removeChannel(this.state.orderSubscription);this.state.orderSubscription=null;this.showToast('Order completed!')}this.refreshPage()}}).subscribe()},
-    renderOrderTracking(container){const o=this.state.activeOrder;if(!o){container.innerHTML='';return}const s=['received','accepted','preparing','ready','delivered'];const c=s.indexOf(o.status);const w=c*25;const i={received:'📝',accepted:'👍',preparing:'🧑‍🍳',ready:'🛎️',delivered:'😊'};const h=o.order_items?.length>0?o.order_items.map(t=>`<div class="flex justify-between text-sm py-1"><span class="text-primary">${t.products.name} x${t.quantity}</span></div>`).join(''):'<p class="text-sm text-secondary">Loading item details...</p>';container.innerHTML=`<div class="p-6"><h2 class="text-2xl font-bold text-center capitalize">Your Order is ${o.status}</h2><p class="text-secondary text-center mb-10">Order ID: #${o.id.slice(0,6)}</p><div class="tracker-container my-12"><div class="tracker-line"></div><div class="tracker-progress" style="width: ${w}%"></div>${s.map((t,d)=>`<div class="tracker-step ${d<=c?'active':''}"><div class="tracker-icon-container">${i[t]}</div><span class="tracker-label capitalize">${t}</span></div>`).join('')}</div><div class="bg-secondary p-4 rounded-xl mt-4"><h3 class="font-bold text-primary mb-2">Order Summary</h3>${h}<div class="flex justify-between font-bold mt-2 pt-2 border-t border-custom"><span>Total</span><span>₹${o.total_amount}</span></div></div></div>`},
-    showPlayGamesPrompt(){const m=`<div id="play-prompt-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl shadow-xl p-6 w-full max-w-sm text-center"><span class="text-4xl">🎮</span><h2 class="text-2xl font-bold mt-4">Order Received!</h2><p class="text-secondary my-2">While you wait, why not play a game?</p><button onclick="app.closeModal('play-prompt-modal'); app.navigateTo('play');" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Play Games</button><button onclick="app.closeModal('play-prompt-modal'); app.navigateTo('cart');" class="w-full mt-2 bg-secondary py-3 rounded-lg">Track Order</button></div></div>`;this.showModal(m)},
-    showInstagramPromo(){const c=Object.entries(STATIC_DATA.captionIdeas).map(([k,v])=>({n:k,i:{student:'🎓',office:'💼',couple:'❤️',friends:'🎉'}[k]}));const m=`<div id="insta-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold">Post & Get 5% Off!</h2><p class="text-secondary mt-1 mb-6">Choose your vibe for caption ideas!</p><div class="grid grid-cols-2 gap-4">${c.map(i=>`<button onclick="app.showCaptionIdeas('${i.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${i.i}</span><p class="font-semibold mt-2 capitalize">${i.n}</p></button>`).join('')}</div><button onclick="app.closeModal('insta-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button></div></div>`;this.showModal(m)},
-    showCaptionIdeas(category){this.closeModal('insta-modal');const i=STATIC_DATA.captionIdeas[category];const m=`<div id="caption-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold">Caption Ideas</h2><p class="text-secondary mt-1 mb-4">Tap to copy. Tag us <span class="font-bold brand-text">@hxousecoffee</span>!</p><div class="space-y-2 max-h-48 overflow-y-auto">${i.map(s=>`<div onclick="app.copyCaption('${s.replace(/'/g,"\\'")}')" class="bg-secondary p-3 rounded-lg text-sm font-medium cursor-pointer flex justify-between"><span>${s}</span><span class="text-xs font-bold">COPY</span></div>`).join('')}</div><a href="https://www.instagram.com" target="_blank" class="block w-full text-center mt-6 brand-bg font-semibold py-3 rounded-lg">Open Instagram</a><button onclick="app.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
-    copyCaption(t){navigator.clipboard.writeText(t).then(()=>this.showToast('Copied!'),()=>this.showToast('Copy failed.'))},
-    showStaffRequestModal(){const m=`<div id="staff-req-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold mb-4">Request Service</h2><div class="grid grid-cols-2 gap-4"><button onclick="app.showToast('Waiter is on the way!');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">🙋‍♂️</span><p class="font-semibold mt-1">Waiter</p></button><button onclick="app.showToast('Water is on the way.');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">💧</span><p class="font-semibold mt-1">Water</p></button><button onclick="app.showToast('Your bill is being prepared.');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">💳</span><p class="font-semibold mt-1">The Bill</p></button><button onclick="app.showToast('Staff will be over to clean.');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">🧹</span><p class="font-semibold mt-1">Cleaning</p></button></div><button onclick="app.closeModal('staff-req-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button></div></div>`;this.showModal(m)},
-    async showFeedbackModal(){const{data}=await supabase.from('orders').select('id').eq('customer_id',this.state.user.id).eq('status','delivered').order('created_at',{ascending:false}).limit(1).single();if(!data)return this.showToast("You can leave feedback after an order is complete.");this.showModal(`<div id="feedback-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold text-primary mb-4">Leave Feedback</h2><p class="text-sm text-secondary mb-2">For order #${data.id.slice(0,6)}</p><textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="4" placeholder="How was your experience?"></textarea><div class="flex space-x-2 mt-4"><button onclick="app.closeModal('feedback-modal')" class="w-1/2 bg-secondary font-semibold py-3 rounded-lg">Cancel</button><button onclick="app.submitFeedback('${data.id}')" class="w-1/2 brand-bg font-semibold py-3 rounded-lg">Submit</button></div></div></div>`)},
-    async submitFeedback(orderId){const content=document.getElementById('feedback-text').value.trim();if(!content)return this.showToast("Please enter your feedback.");const{error}=await supabase.from('feedback').insert({order_id:orderId,customer_id:this.state.user.id,content:content});if(error)return this.showToast(`Could not submit feedback: ${error.message}`);this.closeModal('feedback-modal');this.showToast("Thank you for your feedback!")},
-    showThemeModal(){const t=[{n:'light',i:'☀️'},{n:'dark',i:'🌙'},{n:'sunset',i:'🌆'},{n:'matcha',i:'🍵'}];const m=`<div id="theme-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold mb-4">Choose Theme</h2><div class="grid grid-cols-2 gap-4">${t.map(i=>`<button onclick="app.toggleTheme('${i.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${i.i}</span><p class="font-semibold mt-1 capitalize">${i.n}</p></button>`).join('')}</div><button onclick="app.closeModal('theme-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
-    showWifiModal(){const m=`<div id="wifi-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2><p class="text-secondary mb-4">Connect and enjoy!</p><div class="bg-secondary p-4 rounded-lg"><p class="text-xs">Network Name</p><p class="font-bold text-lg">HXOUSE_GUEST</p><hr class="border-custom my-3"><p class="text-xs">Password</p><p class="font-bold text-lg">coffeehouse</p></div><button onclick="app.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
-    async showOrderHistoryModal(){const{data}=await supabase.from('orders').select(`*, order_items (products(name), quantity)`).eq('customer_id',this.state.user.id).order('created_at',{ascending:false});const h=data?.length>0?data.map(o=>`<div class="bg-secondary p-3 rounded-lg"><div class="flex justify-between"><div><p class="font-bold">Order #${o.id.slice(0,6)}</p><p class="text-xs text-secondary">${new Date(o.created_at).toLocaleString()}</p></div><p class="font-semibold">₹${o.total_amount}</p></div><div class="text-sm text-secondary mt-2">${o.order_items.map(i=>`${i.products.name} (x${i.quantity})`).join(', ')}</div></div>`).join(''):'<p class="text-secondary text-center">No past orders found.</p>';this.showModal(`<div id="history-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-md"><h2 class="text-xl font-bold text-center mb-4">Order History</h2><div class="space-y-3 max-h-80 overflow-y-auto">${h}</div><button onclick="app.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`)},
-    showBillSplitterModal(){const m=`<div id="splitter-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-center mb-4">Bill Splitter</h2><div class="space-y-4"><input type="number" id="bill-total" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Total Bill"><input type="number" id="bill-people" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Number of People"></div><button onclick="app.calculateSplit()" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Calculate</button><div id="split-result" class="mt-4 text-center h-8 font-bold text-xl"></div><button onclick="app.closeModal('splitter-modal')" class="w-full mt-4 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
-    calculateSplit(){const t=parseFloat(document.getElementById('bill-total').value),e=parseInt(document.getElementById('bill-people').value),r=document.getElementById('split-result');r.textContent=t>0&&e>0?`Each person pays ₹${(t/e).toFixed(2)}`:"Invalid input"},
+    calculateCartTotal(){ return this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0); },
+    
+    refreshPage(){
+        ui.refreshCartDependentUI();
+        ui.renderPageContent(this.state.currentPage);
+    },
+    
+    async placeOrder(paymentMethod){
+        if (this.state.cart.length === 0 || !this.state.tableNumber) return ui.showToast("Cart is empty or table number is missing.");
+        ui.closeModal('payment-modal');
+
+        const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
+        if (tableError || !tableData) return ui.showToast(`Table #${this.state.tableNumber} is not a valid table.`);
+        
+        const { data: orderData, error: orderError } = await supabase.from('orders').insert({
+            customer_id: this.state.user.id,
+            table_id: tableData.id,
+            total_amount: this.calculateCartTotal(),
+            payment_method: paymentMethod,
+            special_instructions: $('#special-instructions')?.value || ''
+        }).select().single();
+        if (orderError) return ui.showToast(`Could not place order: ${orderError.message}`);
+        
+        const orderItems = this.state.cart.map(i => ({
+            order_id: orderData.id,
+            product_id: i.id,
+            quantity: i.quantity,
+            price_at_time_of_order: i.price
+        }));
+        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+        if (itemsError) return ui.showToast(`Could not save order items: ${itemsError.message}`);
+
+        await this.fetchActiveOrder();
+        this.state.cart = [];
+        this.refreshPage();
+        sound.play('success');
+        this.navigateTo('cart'); // Go to tracking page
+        ui.showModal('play-prompt-modal', `
+            <div class="text-center"><span class="text-4xl">🎮</span>
+                <h2 class="text-2xl font-bold mt-4">Order Received!</h2>
+                <p class="text-secondary my-2">While you wait, why not play a game?</p>
+                <button onclick="ui.closeModal('play-prompt-modal'); app.navigateTo('play');" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Play Games</button>
+                <button onclick="ui.closeModal('play-prompt-modal');" class="w-full mt-2 bg-secondary py-3 rounded-lg">No, Thanks</button>
+            </div>
+        `);
+    },
+    
+    async fetchActiveOrder(){
+        if (!this.state.user) return;
+        const { data, error } = await supabase.from('orders').select(`*, order_items(*, products(name))`).eq('customer_id', this.state.user.id).in('status', ['received', 'accepted', 'preparing', 'ready']).order('created_at', { ascending: false }).limit(1).single();
+        if (error && error.code !== 'PGRST116') console.error('Fetch active order error:', error);
+        
+        this.state.activeOrder = data || null;
+        if (this.state.activeOrder) {
+            this.listenToOrderUpdates(this.state.activeOrder.id);
+        }
+    },
+    
+    listenToOrderUpdates(orderId){
+        if (this.state.orderSubscription) supabase.removeChannel(this.state.orderSubscription);
+        this.state.orderSubscription = supabase.channel(`public:orders:id=eq.${orderId}`)
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` }, payload => {
+                if (!this.state.activeOrder) return;
+                const updatedOrder = payload.new;
+                
+                if (updatedOrder.status !== this.state.activeOrder.status) {
+                    ui.showToast(`Your order is now: ${updatedOrder.status}`);
+                    this.state.activeOrder.status = updatedOrder.status;
+                }
+
+                if (['delivered', 'cancelled'].includes(updatedOrder.status)) {
+                    supabase.removeChannel(this.state.orderSubscription);
+                    this.state.orderSubscription = null;
+                    if (updatedOrder.status === 'delivered') {
+                        ui.showModal('review-modal', `
+                            <div class="text-center"><span class="text-4xl">⭐</span>
+                            <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2>
+                            <p class="text-secondary my-2">How was your experience with order #${orderId.slice(0,6)}?</p>
+                            <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="3" placeholder="Tell us more..."></textarea>
+                            <button onclick="app.submitFeedback('${orderId}')" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Submit Feedback</button>
+                            <button onclick="ui.closeModal('review-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Maybe Later</button>
+                            </div>
+                        `);
+                    } else {
+                        ui.showToast('Your order has been cancelled.');
+                    }
+                    this.state.activeOrder = null;
+                }
+                this.refreshPage();
+            }).subscribe();
+    },
+
+    async submitFeedback(orderId){
+        const content = $('#feedback-text').value.trim();
+        if (!content) return ui.showToast("Please enter your feedback.");
+        const { error } = await supabase.from('feedback').insert({ order_id: orderId, customer_id: this.state.user.id, content: content });
+        if (error) return ui.showToast(`Could not submit feedback: ${error.message}`);
+        ui.closeModal('review-modal');
+        ui.showToast("Thank you for your feedback!");
+    },
+    
+    async sendStaffCall(requestType) {
+        if (!this.state.tableNumber) return ui.showToast('Table number not set.');
+        const { data: tableData } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
+        if (!tableData) return ui.showToast('Invalid table number.');
+
+        const { error } = await supabase.from('staff_calls').insert({
+            table_id: tableData.id,
+            customer_id: this.state.user.id,
+            request_type: requestType
+        });
+
+        if (error) {
+            ui.showToast(`Error: ${error.message}`);
+        } else {
+            ui.showToast(`${requestType.charAt(0).toUpperCase() + requestType.slice(1)} is on the way!`);
+        }
+        ui.closeModal('staff-req-modal');
+    },
+
+    copyCaption(text) {
+        navigator.clipboard.writeText(text).then(() => ui.showToast('Copied!'), () => ui.showToast('Copy failed.'));
+    }
 };
 
 // =================================================================================
-//  SECTION 3: GAMES & INTERACTIVE MODULES
+// SECTION 3: UI COMPONENTS & RENDERERS
+// =================================================================================
+const ui = {
+    showModal(id, content) {
+        const modalHTML = `<div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg">${content}</div></div>`;
+        $('#modal-container').insertAdjacentHTML('beforeend', modalHTML);
+    },
+    closeModal(id) { $(`#${id}`)?.remove(); },
+    showToast(message) {
+        const toast = $('#toast'), p = $('#toast-message');
+        p.textContent = message;
+        toast.classList.remove('hidden');
+        toast.classList.add('toast');
+        setTimeout(() => { toast.classList.remove('toast'); toast.classList.add('hidden'); }, 3000);
+    },
+    
+    renderHeader(page) {
+        const header = $('#page-header');
+        const pageConfigs = {
+            home: { title: 'H<span class="classy-x">X</span>OUSE', back: false },
+            order: { title: 'Menu', back: false },
+            cart: { title: app.state.activeOrder ? 'Track Order' : 'My Cart', back: false },
+            play: { title: 'Entertainment', back: true },
+            more: { title: 'More Options', back: true },
+        };
+        const config = pageConfigs[page];
+        header.innerHTML = `
+            <div class="flex items-center space-x-2">
+                ${config.back ? `<button onclick="app.navigateTo('home')" class="p-2 -ml-2 rounded-full hover:bg-secondary"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>` : ''}
+                <h1 class="text-3xl font-bold brand-text">${config.title}</h1>
+            </div>
+            <div class="text-right">
+                <p class="font-semibold text-primary">${app.state.customerProfile.name}</p>
+                <p class="text-xs text-secondary">Table #${app.state.tableNumber || 'N/A'}</p>
+            </div>`;
+    },
+    
+    renderPageContent(page) {
+        const content = $('#page-content');
+        content.innerHTML = '';
+        content.className = 'fade-in';
+        const renderers = {
+            home: this.renderHomePage,
+            order: this.renderMenuPage,
+            cart: this.renderCartPage,
+            play: this.renderPlayPage,
+            more: this.renderMorePage,
+        };
+        renderers[page]?.call(this);
+    },
+    
+    renderBottomNav(){
+        const icons = { home: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`, order: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`, cart: `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`, play: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`, more: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>` };
+        const pages = ['home', 'order', 'cart', 'play', 'more'];
+        $('#bottom-nav').innerHTML = pages.map(p => `<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${icons[p]}<span id="${p}-tab-label" class="text-xs font-semibold capitalize">${p}</span></button>`).join('');
+    },
+    
+    updateActiveNav(page) {
+        const cartLabel = $('#cart-tab-label'), cartIcon = $('#cart-icon-svg');
+        if (app.state.activeOrder) {
+            cartLabel.textContent = 'Track';
+            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`;
+        } else {
+            cartLabel.textContent = 'Cart';
+            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`;
+        }
+        $$('.nav-item').forEach(item => {
+            const isActive = item.dataset.page === page;
+            item.classList.toggle('brand-text', isActive);
+            item.classList.toggle('text-secondary', !isActive);
+            item.style.transform = isActive ? 'scale(1.1)' : 'scale(1)';
+        });
+        this.refreshCartDependentUI();
+    },
+
+    refreshCartDependentUI() {
+        const el = $('#cart-count');
+        const total = app.state.cart.reduce((s, i) => s + i.quantity, 0);
+        if (total > 0 && !app.state.activeOrder) {
+            el.textContent = total;
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    },
+
+    // --- PAGE RENDERERS ---
+    renderHomePage(){
+        const activeOrderHTML = app.state.activeOrder ? `
+            <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center">
+                <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2>
+                <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p>
+                <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
+            </div>` : '';
+            
+        $('#page-content').innerHTML = `
+            <div class="space-y-6">
+                <div class="relative h-64 overflow-hidden rounded-b-2xl">
+                    <video src="https://jkrslxtnhtvrdllyjvxo.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
+                    <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
+                        <h1 class="text-4xl font-bold">H<span class="classy-x">X</span>OUSE</h1>
+                        <p class="text-lg mt-1 font-light">COFFEE CO.</p>
+                    </div>
+                </div>
+                <div class="p-4 space-y-6">
+                    ${activeOrderHTML}
+                    <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
+                        <h2 class="text-2xl font-bold text-primary">Follow & Get <span class="instagram-card">5% Off!</span></h2>
+                        <p class="mt-1 text-secondary">Follow, post a story, and show it at the counter.</p>
+                        <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">How it works &rarr;</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="ui.showStaffRequestModal()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎️</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button>
+                        <button onclick="app.navigateTo('play')" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🎮</span><p class="font-semibold mt-2 text-primary">Games</p></button>
+                    </div>
+                </div>
+            </div>`;
+    },
+    
+    renderMenuPage() {
+        const content = $('#page-content');
+        if (app.state.menuData.length === 0) {
+            content.innerHTML = `<div class="p-4 text-center text-secondary">Loading menu...</div>`; return;
+        }
+
+        if (!app.state.currentMenuCategory) {
+            app.state.currentMenuCategory = app.state.menuData[0].category;
+        }
+
+        content.innerHTML = `
+            <div class="horizontal-scroll sticky top-24 bg-primary/80 backdrop-blur-sm z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
+                ${app.state.menuData.map(c => `<button 
+                    class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${app.state.currentMenuCategory === c.category ? 'brand-text border-b-2 border-current' : 'text-secondary'}" 
+                    data-category="${c.category}" 
+                    onclick="ui.filterMenuByCategory('${c.category}', this)">
+                    ${c.category}
+                </button>`).join('')}
+            </div>
+            <div id="menu-items" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3"></div>`;
+
+        this.filterMenuByCategory(app.state.currentMenuCategory);
+    },
+
+    filterMenuByCategory(category, tabElement) {
+        app.state.currentMenuCategory = category; 
+
+        if (tabElement) {
+            $$('.category-tab').forEach(tab => {
+                tab.classList.remove('brand-text', 'border-b-2', 'border-current');
+                tab.classList.add('text-secondary');
+            });
+            tabElement.classList.add('brand-text', 'border-b-2', 'border-current');
+        }
+        const data = app.state.menuData.find(d => d.category === category);
+        this.renderMenuItems(data ? data.items.filter(i => i.is_available) : []);
+    },
+
+    renderMenuItems(items) {
+        const container = $('#menu-items');
+        container.innerHTML = !items || items.length === 0 ? `<p class="text-secondary text-center">No items found.</p>` :
+            items.map(item => {
+                const cartItem = app.state.cart.find(ci => ci.id === item.id);
+                const quantityBadge = cartItem ? `<div class="absolute -top-2 -right-2 brand-bg text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold shadow-lg">${cartItem.quantity}</div>` : '';
+                
+                return `<div class="bg-secondary p-4 rounded-xl flex justify-between items-center cursor-pointer relative" onclick="ui.showItemDetailModal(${item.id})">
+                            ${quantityBadge}
+                            <div class="flex items-center space-x-4 flex-grow">
+                                <div class="text-4xl flex-shrink-0 w-12 h-12 flex items-center justify-center bg-primary rounded-lg">${item.image_url || '🍴'}</div>
+                                <div>
+                                    <h3 class="font-bold text-primary">${item.name}</h3>
+                                    <p class="font-semibold text-secondary">₹${item.price}</p>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0">
+                               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                        </div>`;
+            }).join('');
+    },
+    
+    renderCartPage() {
+        const content = $('#page-content');
+        if (app.state.activeOrder) this.renderOrderTracking(content);
+        else if (app.state.cart.length > 0) this.renderCart(content);
+        else content.innerHTML = `<div class="text-center p-10"><h2 class="text-2xl font-bold text-primary">Your cart is empty</h2><p class="text-secondary mt-2">Add items from the menu to get started.</p><button onclick="app.navigateTo('order')" class="mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">View Menu</button></div>`;
+    },
+
+    renderCart(container){
+        const total = app.calculateCartTotal();
+        container.innerHTML = `
+            <div class="p-4 space-y-3">${app.state.cart.map(i => `
+                <div class="bg-secondary p-3 rounded-xl">
+                    <div class="flex justify-between items-start">
+                        <p class="font-bold text-primary">${i.name}</p>
+                        <p class="font-semibold text-primary">₹${(i.price * i.quantity).toFixed(2)}</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <button onclick="app.state.cart = app.state.cart.filter(ci => ci.cartId !== ${i.cartId}); app.refreshPage();" class="text-red-500 font-semibold text-xs">Remove</button>
+                        <p class="text-sm text-secondary">Quantity: ${i.quantity}</p>
+                    </div>
+                </div>`).join('')}
+            </div>
+            <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div>
+            <div class="p-4 bg-primary border-t-custom sticky bottom-20">
+                <div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${total.toFixed(2)}</span></div>
+                <button onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
+            </div>`;
+    },
+
+    renderOrderTracking(container) {
+        const order = app.state.activeOrder;
+        if (!order) { container.innerHTML = ''; return; }
+        const statuses = ['received', 'accepted', 'preparing', 'ready', 'delivered'];
+        const currentIndex = statuses.indexOf(order.status);
+        const width = currentIndex * 25;
+        const icons = { received: '📝', accepted: '👍', preparing: '🧑‍🍳', ready: '🛎️', delivered: '😊' };
+        
+        const itemsHTML = order.order_items?.length > 0 ? order.order_items.map(item => `
+            <div class="flex justify-between text-sm py-1"><span class="text-primary">${item.products.name} x${item.quantity}</span></div>`).join('') : '<p class="text-sm text-secondary">Loading item details...</p>';
+        
+        container.innerHTML = `
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-center capitalize">Your Order is ${order.status}</h2>
+                <p class="text-secondary text-center mb-10">Order ID: #${order.id.slice(0,6)}</p>
+                <div class="tracker-container my-12">
+                    <div class="tracker-line"></div>
+                    <div class="tracker-progress" style="width: ${width}%"></div>
+                    ${statuses.map((status, index) => `
+                        <div class="tracker-step ${index <= currentIndex ? 'active' : ''}">
+                            <div class="tracker-icon-container">${icons[status]}</div>
+                            <span class="tracker-label capitalize">${status}</span>
+                        </div>`).join('')}
+                </div>
+                <div class="bg-secondary p-4 rounded-xl mt-4">
+                    <h3 class="font-bold text-primary mb-2">Order Summary</h3>
+                    ${itemsHTML}
+                    <div class="flex justify-between font-bold mt-2 pt-2 border-t border-custom"><span>Total</span><span>₹${order.total_amount}</span></div>
+                </div>
+            </div>`;
+    },
+    
+    renderPlayPage(){
+        $('#page-content').innerHTML = `
+            <div class="p-4 space-y-4">
+                ${Object.values(GAMES).map(game => `
+                    <div class="bg-secondary p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-primary mb-2">${game.title}</h3>
+                        <p class="text-secondary mb-4">${game.description}</p>
+                        <button onclick="GAMES['${game.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg">Play</button>
+                    </div>`).join("")}
+            </div>`;
+    },
+    
+    renderMorePage(){
+        const options = [
+            { icon: "🎨", text: "Change Theme", action: "ui.showThemeModal()" },
+            { icon: "📶", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
+            { icon: "📜", text: "Order History", action: "ui.showOrderHistoryModal()" },
+        ];
+        $('#page-content').innerHTML = `
+            <div class="p-4 space-y-3">${options.map(opt => `
+                <button onclick="${opt.action}" class="w-full flex items-center justify-between bg-secondary p-4 rounded-xl text-left">
+                    <div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>
+                    <span class="text-secondary">&rarr;</span>
+                </button>`).join("")}
+            </div>`;
+    },
+
+    // --- MODAL RENDERERS ---
+    showPaymentModal(){
+        ui.showModal('payment-modal', `
+            <h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2>
+            <div class="space-y-3">
+                <button onclick="app.placeOrder('Pay at Counter')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
+                <button onclick="app.placeOrder('UPI / QR Code')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button>
+            </div>
+            <button onclick="ui.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+        `);
+    },
+    
+    showItemDetailModal(itemId){
+        const item = app.state.menuData.flatMap(c => c.items).find(i => i.id === itemId); if (!item) return;
+        
+        const cartItem = app.state.cart.find(ci => ci.id === itemId);
+        const currentQuantity = cartItem ? cartItem.quantity : 1;
+
+        let optionsHTML = '';
+        for (let i = 1; i <= 10; i++) {
+            optionsHTML += `<option value="${i}" ${i === currentQuantity ? 'selected' : ''}>${i}</option>`;
+        }
+
+        ui.showModal('item-detail-modal', `
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary">${item.name}</h2>
+                    <p class="text-xl font-semibold text-secondary">₹${item.price}</p>
+                </div>
+                <div class="text-5xl">${item.image_url || '🍴'}</div>
+            </div>
+            <p class="text-secondary mt-2">${item.description || 'A delicious choice.'}</p>
+            <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-lg">
+                <label for="modal-quantity-select" class="font-semibold text-primary">Quantity:</label>
+                <select id="modal-quantity-select" class="bg-primary border border-custom text-primary font-semibold rounded-lg p-2">
+                    ${optionsHTML}
+                </select>
+            </div>
+            <div class="mt-6 grid grid-cols-2 gap-4">
+                <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button>
+                <button onclick="app.addOrUpdateCartFromModal(${item.id})" class="w-full brand-bg font-semibold py-3 rounded-lg">
+                    ${cartItem ? 'Update Quantity' : 'Add to Cart'}
+                </button>
+            </div>`);
+    },
+
+    showInstagramPromo(){
+        const vibes = Object.entries(STATIC_DATA.captionIdeas).map(([key, _]) => ({
+            name: key, icon: { student: '🎓', office: '💼', couple: '❤️', friends: '🎉' }[key]
+        }));
+        ui.showModal('insta-modal', `
+            <h2 class="text-2xl font-bold">Post & Get 5% Off!</h2>
+            <p class="text-secondary mt-1 mb-6">Choose your vibe for caption ideas!</p>
+            <div class="grid grid-cols-2 gap-4">${vibes.map(v => `
+                <button onclick="ui.showCaptionIdeas('${v.name}')" class="bg-secondary p-4 rounded-xl text-center">
+                    <span class="text-3xl">${v.icon}</span><p class="font-semibold mt-2 capitalize">${v.name}</p>
+                </button>`).join('')}
+            </div>
+            <button onclick="ui.closeModal('insta-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+        `);
+    },
+
+    showCaptionIdeas(category){
+        ui.closeModal('insta-modal');
+        const captions = STATIC_DATA.captionIdeas[category];
+        ui.showModal('caption-modal', `
+            <h2 class="text-2xl font-bold">Caption Ideas</h2>
+            <p class="text-secondary mt-1 mb-4">Tap to copy. Tag us <span class="font-bold brand-text">@hxousecoffeeco</span>!</p>
+            <div class="space-y-2 max-h-48 overflow-y-auto">${captions.map(c => `
+                <div onclick="app.copyCaption('${c.replace(/'/g, "\\'")}')" class="bg-secondary p-3 rounded-lg text-sm font-medium cursor-pointer flex justify-between items-center">
+                    <span>${c}</span><span class="text-xs font-bold brand-text">COPY</span>
+                </div>`).join('')}
+            </div>
+            <a href="instagram://story-camera" class="block w-full text-center mt-6 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white font-semibold py-3 rounded-lg">Open Instagram Story</a>
+            <div class="mt-4 text-center">
+                 <button id="reveal-code-btn" onclick="ui.revealDiscount()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">I've Posted, Get My Code!</button>
+            </div>
+            <div id="discount-code-container" class="hidden mt-4 bg-secondary p-4 rounded-lg text-center">
+                <p class="text-secondary text-sm">Here is your 5% discount code!</p>
+                <div class="flex items-center justify-center space-x-2 my-2">
+                    <p id="discount-code" class="text-2xl font-bold brand-text tracking-widest">HXOUSE5</p>
+                    <button onclick="app.copyCaption('HXOUSE5')" class="bg-primary p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    </button>
+                </div>
+                <p class="text-xs text-secondary">Show this code at the counter.</p>
+            </div>
+            <button onclick="ui.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+        `);
+    },
+
+    revealDiscount() {
+        $('#reveal-code-btn').style.display = 'none';
+        $('#discount-code-container').classList.remove('hidden');
+    },
+    
+    showStaffRequestModal(){
+        const requests = [
+            { type: 'waiter', icon: '🙋‍♂️', text: 'Waiter' },
+            { type: 'water', icon: '💧', text: 'Water' },
+            { type: 'bill', icon: '💳', text: 'The Bill' },
+            { type: 'cleaning', icon: '🧹', text: 'Cleaning' },
+        ];
+        ui.showModal('staff-req-modal', `
+            <h2 class="text-xl font-bold mb-4">Request Service</h2>
+            <div class="grid grid-cols-2 gap-4">${requests.map(r => `
+                <button onclick="app.sendStaffCall('${r.type}')" class="bg-secondary p-4 rounded-xl text-center">
+                    <span class="text-2xl">${r.icon}</span><p class="font-semibold mt-1">${r.text}</p>
+                </button>`).join('')}
+            </div>
+            <button onclick="ui.closeModal('staff-req-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+        `);
+    },
+
+    showThemeModal() {
+        const themes = [ { n: 'light', i: '☀️' }, { n: 'dark', i: '🌙' }, { n: 'sunset', i: '🌆' }, { n: 'matcha', i: '🍵' }];
+        ui.showModal('theme-modal', `
+            <h2 class="text-xl font-bold mb-4">Choose Theme</h2>
+            <div class="grid grid-cols-2 gap-4">${themes.map(t => `<button onclick="app.toggleTheme('${t.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${t.i}</span><p class="font-semibold mt-1 capitalize">${t.n}</p></button>`).join('')}</div>
+            <button onclick="ui.closeModal('theme-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+        `);
+    },
+    
+    showWifiModal() {
+        ui.showModal('wifi-modal', `
+            <div class="text-center">
+                <h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2>
+                <p class="text-secondary mb-4">Connect and enjoy!</p>
+                <div class="bg-secondary p-4 rounded-lg">
+                    <p class="text-xs">Network Name</p><p class="font-bold text-lg">HXOUSE_GUEST</p>
+                    <hr class="border-custom my-3">
+                    <p class="text-xs">Password</p><p class="font-bold text-lg">coffeehouse</p>
+                </div>
+                <button onclick="ui.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+            </div>
+        `);
+    },
+    
+    async showOrderHistoryModal() {
+        const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity)`).eq('customer_id', app.state.user.id).order('created_at', { ascending: false });
+        const historyHTML = data?.length > 0 ? data.map(o => `
+            <div class="bg-secondary p-3 rounded-lg">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="font-bold">Order #${o.id.slice(0, 6)}</p>
+                        <p class="text-xs text-secondary">${new Date(o.created_at).toLocaleString()}</p>
+                    </div>
+                    <p class="font-semibold">₹${o.total_amount}</p>
+                </div>
+                <div class="text-sm text-secondary mt-2">${o.order_items.map(i => `${i.products.name} (x${i.quantity})`).join(', ')}</div>
+            </div>`).join('') : '<p class="text-secondary text-center">No past orders found.</p>';
+        
+        ui.showModal('history-modal', `
+            <h2 class="text-xl font-bold text-center mb-4">Order History</h2>
+            <div class="space-y-3 max-h-80 overflow-y-auto">${historyHTML}</div>
+            <button onclick="ui.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+        `);
+    }
+};
+
+// =================================================================================
+//  SECTION 4: GAMES & INTERACTIVE MODULES
 // =================================================================================
 const GAMES = {
     ticTacToe: {
         id: 'ticTacToe', title: 'Tic-Tac-Toe', description: 'Classic 2-player game for your table.',
         board: Array(9).fill(null), currentPlayer:"X", winner:null,
-        start(){this.reset();app.showModal(`<div id="ttt-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Tic-Tac-Toe</h2><p id="ttt-status" class="font-semibold text-secondary mb-4">Player X's turn</p><div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">${this.board.map((_,i)=>`<div class="aspect-square bg-secondary flex items-center justify-center text-4xl font-bold rounded-lg" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}</div><button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button><button onclick="app.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button></div></div>`)},
+        start(){this.reset(); ui.showModal('ttt-modal', `<h2 class="text-2xl font-bold mb-2 text-center">Tic-Tac-Toe</h2><p id="ttt-status" class="font-semibold text-secondary mb-4 text-center">Player X's turn</p><div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">${this.board.map((_,i)=>`<div class="aspect-square bg-secondary flex items-center justify-center text-4xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}</div><button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button><button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>`)},
         play(i){if(this.board[i]||this.winner)return;this.board[i]=this.currentPlayer;this.checkWinner();this.currentPlayer=this.currentPlayer==="X"?"O":"X";this.updateUI()},
         checkWinner(){const l=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(let e of l){const[a,b,c]=e;if(this.board[a]&&this.board[a]===this.board[b]&&this.board[a]===this.board[c]){this.winner=this.board[a];sound.play("win");return}}if(this.board.every(c=>c)){this.winner="Draw";sound.play("draw")}},
-        updateUI(){document.querySelectorAll("#ttt-board>div").forEach((c,i)=>{c.textContent=this.board[i];c.style.color=this.board[i]==="X"?"#3b82f6":"#ef4444"});document.getElementById("ttt-status").textContent=this.winner?this.winner==="Draw"?"It's a Draw!":`Player ${this.winner} wins!`: `Player ${this.currentPlayer}'s turn`},
+        updateUI(){$$("#ttt-board > div").forEach((c,i)=>{c.textContent=this.board[i];c.style.color=this.board[i]==="X"?"#3b82f6":"#ef4444"});$("#ttt-status").textContent=this.winner?this.winner==="Draw"?"It's a Draw!":`Player ${this.winner} wins!`: `Player ${this.currentPlayer}'s turn`},
         reset(){this.board.fill(null);this.currentPlayer="X";this.winner=null}
-    },
-    rockPaperScissors: {
-        id: 'rockPaperScissors', title: 'Rock Paper Scissors', description: 'Challenge our AI to a quick game.',
-        choices: ['✊', '✋', '✌️'],
-        start() {
-            app.showModal(`<div id="rps-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Rock Paper Scissors</h2><div class="flex justify-around items-center my-6"><div class="text-center"><p class="font-bold">You</p><p id="rps-player" class="text-6xl mt-2">?</p></div><p class="text-4xl font-bold">vs</p><div class="text-center"><p class="font-bold">AI</p><p id="rps-ai" class="text-6xl mt-2">?</p></div></div><p id="rps-result" class="font-bold text-lg h-8"></p><div class="flex justify-around mt-4">${this.choices.map((c, i) => `<button onclick="GAMES.rockPaperScissors.play(${i})" class="text-4xl p-4 bg-secondary rounded-full hover:scale-110">${c}</button>`).join("")}</div><button onclick="app.closeModal('rps-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`);
-        },
-        play(playerChoice) {
-            const aiChoice = Math.floor(Math.random() * 3);
-            document.getElementById('rps-player').textContent = this.choices[playerChoice];
-            document.getElementById('rps-ai').textContent = this.choices[aiChoice];
-            const resultEl = document.getElementById('rps-result');
-            if (playerChoice === aiChoice) { resultEl.textContent = "It's a Draw!"; sound.play('draw'); } 
-            else if ((playerChoice === 0 && aiChoice === 2) || (playerChoice === 1 && aiChoice === 0) || (playerChoice === 2 && aiChoice === 1)) { resultEl.textContent = 'You Win!'; sound.play('win'); } 
-            else { resultEl.textContent = 'AI Wins!'; sound.play('draw'); }
-        }
     },
     coffeeTrivia: {
         id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your coffee knowledge!',
         start() {
             const item = STATIC_DATA.coffeeTrivia[Math.floor(Math.random() * STATIC_DATA.coffeeTrivia.length)];
-            app.showModal(`<div id="trivia-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-xl font-bold mb-2">Coffee Trivia</h2><p class="text-secondary mb-6">${item.q}</p><div class="bg-secondary p-4 rounded-lg"><p id="trivia-answer" class="font-bold text-lg opacity-0 transition-opacity">${item.a}</p></div><button onclick="document.getElementById('trivia-answer').style.opacity=1" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Show Answer</button><button onclick="app.closeModal('trivia-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button></div></div>`);
+            ui.showModal('trivia-modal', `<div class="text-center"><h2 class="text-xl font-bold mb-2">Coffee Trivia</h2><p class="text-secondary mb-6">${item.q}</p><div class="bg-secondary p-4 rounded-lg"><p id="trivia-answer" class="font-bold text-lg opacity-0 transition-opacity duration-500">${item.a}</p></div><button onclick="$('#trivia-answer').style.opacity=1" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Show Answer</button><div class="flex space-x-2 mt-2"><button onclick="GAMES.coffeeTrivia.start()" class="w-full bg-secondary py-3 rounded-lg">Next Question</button><button onclick="ui.closeModal('trivia-modal')" class="w-full bg-secondary py-3 rounded-lg">Close</button></div></div>`);
         }
     },
     coffeeArt: {
         id: 'coffeeArt', title: 'Coffee Art Studio', description: 'Unleash your inner barista and create some latte art.',
         canvas: null, ctx: null, painting: false,
         start() {
-            app.showModal(`<div id="art-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-64 h-64 mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair"><canvas id="coffee-art-canvas" class="absolute inset-0" width="256" height="256"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="app.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div></div>`);
+            ui.showModal('art-modal', `<div class="text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-64 h-64 mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair"><canvas id="coffee-art-canvas" class="absolute inset-0" width="256" height="256"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div>`);
             this.initCanvas();
         },
         initCanvas() {
-            this.canvas = document.getElementById("coffee-art-canvas"); this.ctx = this.canvas.getContext("2d");
+            this.canvas = $("#coffee-art-canvas"); this.ctx = this.canvas.getContext("2d");
             this.ctx.strokeStyle = "#ffffff"; this.ctx.lineWidth = 5; this.ctx.lineCap = "round";
             this.canvas.addEventListener("pointerdown", this.startPosition.bind(this));
             this.canvas.addEventListener("pointerup", this.finishedPosition.bind(this));
@@ -384,21 +971,12 @@ const GAMES = {
     },
 };
 
-
 // =================================================================================
-//  SECTION 4: APP INITIALIZATION
+//  SECTION 5: APP INITIALIZATION
 // =================================================================================
+document.addEventListener('DOMContentLoaded', () => app.init());
 
-/**
- * The final step: wait for the HTML document to be fully loaded, then
- * call the main `app.init()` function to start the application.
- */
-document.addEventListener('DOMContentLoaded', () => {
-    app.init();
-});
 </script>
 </body>
 </html>
-" in the document "Hxouse Customer App".
-I am looking for you to make the following changes: bro quantity not visible when i order something in menu page quantity should be visiblle also games  are not showing add my previous games for interaction and remove spin to win but add other games also ask for name and mobile number(optional) also track order not uilding up rn yk order is not placing
 
