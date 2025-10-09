@@ -2,713 +2,403 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Welcome to HXOUSE Coffee Co.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Reference to the Supabase JS library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* --- THEMES & STYLES --- */
         :root {
-            --bg-primary: #FFFFFF;
-            --bg-secondary: #F7F7F7;
-            --text-primary: #121212;
-            --text-secondary: #555555;
-            --brand-primary: #121212;
-            --brand-accent: #D4AF37; /* A subtle gold for highlights */
+            --bg-primary-light: #FFFFFF; --bg-secondary-light: #F3F4F6; --text-primary-light: #111827; --text-secondary-light: #6B7280; --border-light: #E5E7EB; --brand-primary-light: #111827;
+            --bg-primary-dark: #111111; --bg-secondary-dark: #1F2023; --text-primary-dark: #F9FAFB; --text-secondary-dark: #9CA3AF; --border-dark: #374151; --brand-primary-dark: #FFFFFF;
+            --bg-primary-sunset: #1E1E2E; --bg-secondary-sunset: #2D2D44; --text-primary-sunset: #F6F6F6; --text-secondary-sunset: #A8A8C3; --border-sunset: #4A4A6A; --brand-primary-sunset: #FFA756;
+            --bg-primary-matcha: #F0FFF4; --bg-secondary-matcha: #DCF2E3; --text-primary-matcha: #2F4858; --text-secondary-matcha: #5C7A89; --border-matcha: #B8D8C0; --brand-primary-matcha: #3A8154;
+            --app-height: 100vh;
         }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #E5E7EB; /* A neutral background for the 'device' */
-            color: var(--text-primary);
-            -webkit-tap-highlight-color: transparent;
-        }
-        .app-container { background-color: var(--bg-primary); }
-        .brand-text { color: var(--brand-primary); }
-        .brand-bg { 
-            background-color: var(--brand-primary);
-            color: white;
-        }
+        [data-theme="light"] { --bg-primary: var(--bg-primary-light); --bg-secondary: var(--bg-secondary-light); --text-primary: var(--text-primary-light); --text-secondary: var(--text-secondary-light); --border-color: var(--border-light); --brand-primary: var(--brand-primary-light); }
+        [data-theme="dark"] { --bg-primary: var(--bg-primary-dark); --bg-secondary: var(--bg-secondary-dark); --text-primary: var(--text-primary-dark); --text-secondary: var(--text-secondary-dark); --border-color: var(--border-dark); --brand-primary: var(--brand-primary-dark); }
+        [data-theme="sunset"] { --bg-primary: var(--bg-primary-sunset); --bg-secondary: var(--bg-secondary-sunset); --text-primary: var(--text-primary-sunset); --text-secondary: var(--text-secondary-sunset); --border-color: var(--border-sunset); --brand-primary: var(--brand-primary-sunset); }
+        [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; }
+        .app-container { background-color: var(--bg-primary); transition: background-color 0.3s ease; height: var(--app-height); }
         .text-primary { color: var(--text-primary); }
         .text-secondary { color: var(--text-secondary); }
+        .bg-primary { background-color: var(--bg-primary); }
         .bg-secondary { background-color: var(--bg-secondary); }
+        .border-custom { border-color: var(--border-color); }
+        .brand-text { color: var(--brand-primary); }
+        .brand-bg { background-color: var(--brand-primary); color: var(--bg-primary); }
+        .brand-border { border-color: var(--brand-primary); }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .toast { animation: toast-in 0.5s ease, toast-out 0.5s ease 2.5s forwards; }
-        @keyframes toast-in { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes toast-in { from { bottom: -100px; opacity: 0; } to { bottom: 80px; opacity: 1; } }
         @keyframes toast-out { from { opacity: 1; } to { opacity: 0; display: none; } }
-        .category-tabs::-webkit-scrollbar { display: none; }
-        .category-tabs { -ms-overflow-style: none; scrollbar-width: none; }
         .modal-overlay { animation: fadeIn 0.3s ease; }
-        .modal-content { animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .game-cell { aspect-ratio: 1/1; transition: background-color 0.2s ease; }
+        .modal-content { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        #splash-screen img { animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
+        .tracker-line { position: absolute; top: 18px; left: 10%; width: 80%; height: 4px; background-color: var(--border-color); }
+        .tracker-progress { position: absolute; top: 18px; left: 10%; height: 4px; background-color: var(--brand-primary); transition: width 0.5s ease-in-out; }
+        .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 60px; position: relative; }
+        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-secondary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
+        .tracker-label { margin-top: 8px; font-size: 10px; font-weight: 600; transition: color 0.3s ease; }
+        .tracker-step.active .tracker-label { color: var(--brand-primary); }
     </style>
 </head>
-<body class="bg-gray-200">
+<body data-theme="light">
 
-    <!-- Main Application Container -->
-    <div id="app" class="app-container max-w-lg mx-auto min-h-screen shadow-2xl flex flex-col">
-        <main class="flex-grow pb-20">
-             <!-- Admin Section -->
-            <div id="admin-panel" class="hidden h-screen flex flex-col"></div>
-
-            <!-- Main Interface -->
-            <div id="main-interface" class="h-full">
-                <header id="page-header" class="sticky top-0 bg-white z-20 p-4 flex justify-between items-center border-b border-gray-200"></header>
-                <div id="page-content"></div>
-            </div>
-        </main>
-        
-        <!-- Bottom Navigation Bar -->
-        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-white border-t border-gray-200 flex justify-around items-center h-16 z-30">
-            <button onclick="app.navigateTo('home')" class="nav-item p-2 text-secondary" data-page="home">
-                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                <span class="text-xs font-semibold">Home</span>
-            </button>
-             <button onclick="app.navigateTo('order')" class="nav-item p-2 text-secondary" data-page="order">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                <span class="text-xs font-semibold">Order</span>
-            </button>
-            <button onclick="app.navigateTo('cart')" class="nav-item relative p-2 text-secondary" data-page="cart">
-                 <svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                 <span id="cart-tab-label" class="text-xs font-semibold">Cart</span>
-                 <span id="cart-count" class="absolute top-0 right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
-            </button>
-            <button onclick="app.navigateTo('play')" class="nav-item p-2 text-secondary" data-page="play">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span class="text-xs font-semibold">Play</span>
-            </button>
-        </nav>
+    <!-- Splash Screen: Shown during initial auth and data load -->
+    <div id="splash-screen" class="fixed inset-0 bg-black flex items-center justify-center z-[100]">
+        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain">
     </div>
 
-    <!-- Modals Container -->
+    <!-- Main Application Container -->
+    <div id="app" class="app-container max-w-lg mx-auto shadow-2xl flex flex-col hidden">
+        <main class="flex-grow overflow-y-auto">
+            <div id="main-interface" class="hidden">
+                <header id="page-header" class="sticky top-0 bg-primary/80 backdrop-blur-sm z-20 h-24 px-4 flex justify-between items-center border-b border-custom"></header>
+                <div id="page-content"></div>
+            </div>
+            <!-- Spacer to ensure content scrolls above the bottom nav bar -->
+            <div class="h-28 flex-shrink-0"></div>
+        </main>
+        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary/80 backdrop-blur-sm border-t border-custom flex justify-around items-center h-20 z-30 hidden"></nav>
+    </div>
+
+    <!-- Global Containers for Modals & Toasts -->
     <div id="modal-container"></div>
-    
-    <!-- Toast Notification -->
-    <div id="toast" class="hidden fixed bottom-20 right-4 brand-bg text-white py-3 px-5 rounded-lg shadow-xl z-50">
+    <div id="toast" class="hidden fixed right-4 brand-bg py-3 px-5 rounded-lg shadow-xl z-50">
         <p id="toast-message"></p>
     </div>
     
-    <!-- Page Templates -->
-    <template id="page-template-home">
-        <div class="space-y-6">
-            <!-- Video Header -->
-            <div class="relative h-64 overflow-hidden">
-                <video src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
-                <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
-                    <h1 class="text-4xl font-extrabold">Welcome to HXOUSE</h1>
-                    <p class="text-lg tracking-widest mt-1">COFFEE CO.</p>
-                </div>
-            </div>
-
-            <div class="p-4 space-y-6">
-                <div id="active-order-tracker" class="hidden"></div>
-                <!-- Attention Grabber Promo -->
-                <div onclick="app.showInstagramPromo()" class="cursor-pointer group relative bg-gray-800 rounded-lg p-6 text-white overflow-hidden shadow-lg">
-                     <div class="relative">
-                        <h2 class="text-2xl font-bold">Follow, Post & Get 5% Off!</h2>
-                        <p class="mt-1 opacity-80">Follow us on Instagram, post a story, and show it at the counter.</p>
-                        <button class="font-semibold mt-2 text-sm bg-white/20 px-3 py-1 rounded-full group-hover:bg-white/30 transition">How it works &rarr;</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="app.callWaiter()" class="bg-secondary rounded-lg p-4 text-center">
-                        <span class="text-3xl">🛎️</span>
-                        <p class="font-semibold mt-2 text-primary">Call Waiter</p>
-                    </button>
-                     <button onclick="app.showFeedbackModal()" class="bg-secondary rounded-lg p-4 text-center">
-                        <span class="text-3xl">📝</span>
-                        <p class="font-semibold mt-2 text-primary">Leave Feedback</p>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </template>
-    
-    <template id="page-template-order">
-        <div>
-             <div class="sticky top-[72px] bg-white z-10 py-2 px-4 border-b border-gray-200">
-                 <div id="category-tabs" class="category-tabs flex space-x-4 overflow-x-auto"></div>
-             </div>
-             <div id="menu-items-container" class="p-4 space-y-8"></div>
-        </div>
-    </template>
-    
-    <template id="page-template-cart">
-         <div class="px-4">
-            <div id="cart-content"></div>
-            <div id="order-tracking-content" class="hidden"></div>
-        </div>
-    </template>
-    
-    <template id="page-template-play">
-         <div class="p-4 space-y-4">
-            <div class="bg-secondary p-6 rounded-lg">
-                <h3 class="text-xl font-bold text-primary mb-2">Spin to Win!</h3>
-                <p class="text-secondary mb-4">Try your luck for a discount on your next visit.</p>
-                <button onclick="spinTheWheel.start()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition">Spin the Wheel</button>
-            </div>
-            <div class="bg-secondary p-6 rounded-lg">
-                <h3 class="text-xl font-bold text-primary mb-2">Tic-Tac-Toe</h3>
-                <p class="text-secondary mb-4">Classic 2-player game for your table.</p>
-                <button onclick="ticTacToe.start()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition">Play Tic-Tac-Toe</button>
-            </div>
-             <div class="bg-secondary p-6 rounded-lg">
-                <h3 class="text-xl font-bold text-primary mb-2">Rock Paper Scissors</h3>
-                <p class="text-secondary mb-4">Challenge our AI to a quick game.</p>
-                <button onclick="rockPaperScissors.start()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition">Play vs. AI</button>
-            </div>
-        </div>
-    </template>
-    
-    <!-- All Modals will be populated by JS -->
-    <template id="modal-template-spin-the-wheel"></template>
-    <template id="modal-template-tic-tac-toe"></template>
-    <template id="modal-template-rock-paper-scissors"></template>
-    <template id="modal-template-instagram"></template>
-    <template id="modal-template-feedback"></template>
-    <template id="modal-template-admin-login"></template>
-    <template id="modal-template-post-order"></template>
-
 <script>
-// --- DATA ---
-const menuData = [ { category: "Hot Coffee", items: [ { name: "Espresso", price: 90 }, { name: "Americano", price: 95 }, { name: "Macchiato", price: 120 }, { name: "Cappuccino", price: 150 }, { name: "Cafe Latte", price: 165 }, { name: "Flat White", price: 140 }, { name: "Cafe Mocha", price: 180 }, { name: "Hazelnut Cappuccino", price: 180 }, { name: "Nutella Cappuccino", price: 200 }, { name: "Lotus Biscoff Cappuccino", price: 220 }, ] }, { category: "Cold Coffee", items: [ { name: "Classic Frappe", price: 150 }, { name: "Mocha Frappe", price: 175 }, { name: "Caramel Frappe", price: 180 }, { name: "Chocolate Frappe", price: 190 }, { name: "Nutella Frappe", price: 220 }, { name: "Hazlenut Frappe", price: 210 }, { name: "Oreo Frappe", price: 220 }, ] }, { category: "Iced Coffee", items: [ { name: "Classic Iced Coffee", price: 140 }, { name: "Iced Latte", price: 150 }, { name: "Iced Americano", price: 150 }, { name: "Iced Vanilla", price: 170 }, { name: "Iced Mocha", price: 170 }, { name: "Iced Carmel", price: 170 }, { name: "Ginger Ale Espresso", price: 190 }, ] }, { category: "Shakes", items: [ { name: "Choclate Shake", price: 150 }, { name: "Strawberry Shake", price: 180 }, { name: "Butterscotch Shake", price: 180 }, { name: "Oreo Shake", price: 190 }, { name: "Kitkat Shake", price: 190 }, { name: "Lotus Biscoff Shake", price: 220 }, { name: "Nutella Shake", price: 240 }, ] }, { category: "Mocktails", items: [ { name: "Classic Lemonade", price: 140 }, { name: "Virgin Mojito", price: 150 }, { name: "Black Currant", price: 150 }, { name: "Starwberry Mojito", price: 170 }, { name: "Green Apple Mojito", price: 170 }, { name: "Watermelon Mojito", price: 170 }, ] }, { category: "Asian", items: [ { name: "Honey Chilli Potato", price: 240 }, { name: "Spring Roll", price: 220 }, { name: "Hakka Noodles", price: 180 }, { name: "Veg Manchurian", price: 190 }, { name: "Fried Rice", price: 190 }, { name: "Chillie Paneer", price: 280 }, ] }, { category: "Pasta & Pizza", items: [ { name: "The Spicy Arrabiata", price: 280 }, { name: "Alfredo", price: 300 }, { name: "Spaghetti Aglio E Olio", price: 320 }, { name: "Margherita Pizza", price: 260 }, { name: "Garden Fresh Pizza", price: 340 }, { name: "Tandoori Paneer Pizza", price: 380 }, ] }, { category: "Bites & Fries", items: [ { name: "Cheese Onion Rings", price: 230 }, { name: "Classic French Fries", price: 129 }, { name: "Peri - Peri Fries", price: 139 }, { name: "Paneer Tikka Sandwich", price: 290 }, { name: "Peri Peri Cottage Cheese Wrap", price: 280 }, { name: "Nachos Fries", price: 179 }, { name: "Loaded Nachos Fries", price: 199 }, ] } ];
+// =================================================================================
+//  SECTION 1: SETUP & CONFIGURATION
+// =================================================================================
 
-// --- SOUND ENGINE ---
+/**
+ * Sets the height of the app to match the browser's inner window height.
+ * This fixes issues with 100vh on mobile browsers where the URL bar can interfere.
+ */
+function setAppHeight() {
+  document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+}
+window.addEventListener('resize', setAppHeight);
+setAppHeight();
+
+/**
+ * Supabase client configuration.
+ * This is the bridge between our app and the database.
+ */
+const SUPABASE_URL = 'https://jkrslxtnhtvrdllyjvxo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprcnNseHRuaHR2cmRsbHlqdnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5ODQxNDgsImV4cCI6MjA3NTU2MDE0OH0.J8VzFmQeU_0sRd8MDO6YJMiJA9Cs0KVpwN-NVzyY5nk';
+const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/**
+ * Static data for features that don't need a database table.
+ */
+const STATIC_DATA = {
+    captionIdeas: {
+        student: [ "Fueling my study session with @hxousecoffee ☕️📚 #StudentLife" ],
+        office: [ "My real co-worker: this cup from @hxousecoffee 💼 #WorkFuel" ],
+        couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffee" ],
+        friends: [ "Good times and great coffee with the best crew! @hxousecoffee #Friends" ]
+    }
+};
+
+/**
+ * Sound effects module for UI feedback.
+ */
 const sound = {
     audioContext: null,
-    init() { try { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { console.error("Web Audio API is not supported in this browser"); } },
-    play(type, freq = 600) { if (!this.audioContext) return; let o = this.audioContext.createOscillator(), g = this.audioContext.createGain(); o.connect(g); g.connect(this.audioContext.destination); g.gain.setValueAtTime(0, this.audioContext.currentTime); switch(type) { case 'click': o.type = 'sine'; o.frequency.setValueAtTime(freq, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1); break; case 'add_to_cart': o.type = 'triangle'; o.frequency.setValueAtTime(440, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.4, this.audioContext.currentTime + 0.02); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2); break; case 'success': o.type = 'sine'; o.frequency.setValueAtTime(523.25, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.05); o.frequency.setValueAtTime(659.25, this.audioContext.currentTime + 0.1); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.3); break; case 'win': o.type = 'sine'; o.frequency.setValueAtTime(587.33, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.4, this.audioContext.currentTime + 0.05); o.frequency.setValueAtTime(880, this.audioContext.currentTime + 0.15); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.3); break; case 'draw': o.type = 'sawtooth'; o.frequency.setValueAtTime(220, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.01); o.frequency.setValueAtTime(180, this.audioContext.currentTime + 0.1); g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2); break;} o.start(this.audioContext.currentTime); o.stop(this.audioContext.currentTime + 1); }
-};
-
-// --- CORE APP LOGIC ---
-const app = {
-    state: { currentPage: 'home', cart: [], activeOrder: null, tableNumber: 1 },
-    adminClickCount: 0, adminTimeout: null, orderStatusInterval: null,
     init() {
-        this.loadState();
-        this.showMainInterface();
-        document.body.addEventListener('click', () => sound.init(), { once: true });
-        window.addEventListener('storage', (e) => { if (e.key === 'hxouseAllOrders') this.checkOrderStatus(); });
+        if (this.audioContext) return;
+        try { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); } 
+        catch (e) { console.error("Web Audio API is not supported in this browser."); }
     },
-    showMainInterface() { this.navigateTo('home'); },
-    navigateTo(page) {
-        sound.play('click');
-        this.state.currentPage = page;
-        
-        const header = document.getElementById('page-header');
-        const content = document.getElementById('page-content');
-        header.innerHTML = ''; content.innerHTML = '';
-
-        const pageTitle = page.charAt(0).toUpperCase() + page.slice(1);
-        
-        header.innerHTML = `
-            <div class="flex items-center space-x-2">
-                ${page !== 'home' ? `<button onclick="app.navigateTo('home')" class="p-2 -ml-2 rounded-full hover:bg-secondary"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg></button>` : `<div class="w-8"></div>`}
-                <h1 class="text-3xl font-bold brand-text" onclick="app.adminAccess(event)">${page === 'home' ? 'HXOUSE' : pageTitle}</h1>
-            </div>
-            <p class="text-secondary font-semibold">Table #${this.state.tableNumber}</p>`;
-
-        const template = document.getElementById(`page-template-${page}`);
-        if(template) content.appendChild(template.content.cloneNode(true));
-
-        this.updateActiveNav(page);
-        this.renderPageContent(page);
-    },
-    renderPageContent(page) {
-        if(page === 'order') this.renderMenu();
-        if(page === 'cart') this.renderCartPage();
-        if(page === 'home') this.renderHomePage();
-        
-        clearInterval(this.orderStatusInterval);
-        if (this.state.activeOrder) this.orderStatusInterval = setInterval(() => this.checkOrderStatus(), 3000);
-    },
-    updateActiveNav(page) {
-        const cartTabLabel = document.getElementById('cart-tab-label');
-        const cartIcon = document.getElementById('cart-icon-svg');
-        if (this.state.activeOrder) {
-            cartTabLabel.textContent = 'Track';
-            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`;
-        } else {
-            cartTabLabel.textContent = 'Cart';
-            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`;
-        }
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('brand-text', item.dataset.page === page);
-            item.classList.toggle('text-secondary', item.dataset.page !== page);
-        });
-        this.refreshCartDependentUI();
-    },
-    saveState() { localStorage.setItem('hxouseUserSession', JSON.stringify(this.state)); },
-    loadState() {
-        const s = JSON.parse(localStorage.getItem('hxouseUserSession')); 
-        if (s) this.state = {...this.state, ...s, tableNumber: 1};
-    },
-    showModal(templateId) {
-        const template = document.getElementById(templateId);
-        if (template && template.innerHTML) {
-            const modalContainer = document.getElementById('modal-container');
-            modalContainer.innerHTML = '';
-            const modalWrapper = document.createElement('div');
-            modalWrapper.innerHTML = template.innerHTML;
-            modalContainer.appendChild(modalWrapper);
-        } else console.error(`Modal template "${templateId}" is missing or empty.`);
-    },
-    closeModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.parentElement.remove(); },
-    adminAccess(event) {
-        event.stopPropagation(); this.adminClickCount++;
-        clearTimeout(this.adminTimeout);
-        this.adminTimeout = setTimeout(() => { this.adminClickCount = 0; }, 1500);
-        if (this.adminClickCount === 5) { this.adminClickCount = 0; admin.showLogin(); }
-    },
-    showFeedbackModal() { this.showModal('modal-template-feedback'); },
-    submitFeedback() {
-        this.closeModal('feedback-modal');
-        this.showToast("Thank you for your feedback!");
-    },
-    checkOrderStatus() {
-        const allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
-        if (!this.state.activeOrder) return;
-        const myOrder = allOrders.find(o => o.id === this.state.activeOrder.id);
-        
-        if (myOrder && myOrder.status !== this.state.activeOrder.status) {
-            this.state.activeOrder = myOrder; this.saveState();
-            this.showToast(`Your order is now: ${myOrder.status}`);
-            this.renderPageContent(this.state.currentPage);
-        }
-        if (myOrder && myOrder.status === 'Delivered') {
-            this.state.activeOrder = null; this.saveState();
-            if(!sessionStorage.getItem('promoShown')) {
-                this.showInstagramPromo(true);
-                sessionStorage.setItem('promoShown', 'true');
-            }
-            clearInterval(this.orderStatusInterval);
-            this.renderPageContent(this.state.currentPage);
-            this.updateActiveNav(this.state.currentPage);
-        }
-    },
-    callWaiter() { this.showToast("A waiter is on their way!"); },
-    showToast(message) {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toast-message');
-        toastMessage.textContent = message;
-        toast.classList.remove('hidden'); toast.classList.add('toast');
-        setTimeout(() => { toast.classList.remove('toast'); toast.classList.add('hidden'); }, 3000);
-    },
-    getFeedbackModalHTML: () => `<div id="feedback-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-primary mb-4">Leave Feedback</h2><textarea class="w-full p-2 border rounded-md bg-secondary" rows="4" placeholder="How was your experience?"></textarea><div class="flex justify-end space-x-2 mt-4"><button onclick="app.closeModal('feedback-modal')" class="bg-gray-200 text-primary font-semibold py-2 px-4 rounded-lg">Cancel</button><button onclick="app.submitFeedback()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg">Submit</button></div></div></div>`,
-    getInstagramModalHTML(isDelivered = false) {
-        const storyIdeas = {
-            "For Foodies": ["Good food, good mood.", "This latte art is a masterpiece!", "Found my new favorite dish."],
-            "For Remote Workers": ["My office for the day. #WorkFromCafe", "Powered by coffee and Wi-Fi.", "Best place for a productive afternoon."],
-            "For Friends": ["Good times and coffee.", "Making memories at @hxouse.coffee.", "Squad goals."],
-            "For Couples": ["Coffee dates are the best dates.", "Our happy place.", "You, me, and a cup of coffee."]
+    play(type) {
+        if (!this.audioContext) return;
+        const o = this.audioContext.createOscillator(), g = this.audioContext.createGain();
+        o.connect(g); g.connect(this.audioContext.destination); g.gain.setValueAtTime(0, this.audioContext.currentTime);
+        const sounds = {
+            click: { type: 'sine', freq: 600, gain: 0.3, len: 0.1 },
+            add_to_cart: { type: 'triangle', freq: 440, gain: 0.4, len: 0.2 },
+            success: { type: 'sine', freq: 523.25, gain: 0.3, len: 0.3, secondFreq: 659.25 },
+            win: { type: 'sine', freq: 587.33, gain: 0.4, len: 0.3, secondFreq: 880 },
+            draw: { type: 'sawtooth', freq: 220, gain: 0.2, len: 0.2, secondFreq: 180 },
         };
-        let ideasHtml = Object.keys(storyIdeas).map(category => `<div><h4 class="font-semibold text-primary mt-3 mb-1">${category}</h4><div class="flex flex-wrap gap-2">${storyIdeas[category].map(tag => `<span class="bg-gray-200 text-secondary text-sm px-2 py-1 rounded-full">"${tag}"</span>`).join('')}</div></div>`).join('');
-        
-        const title = isDelivered ? "Your Order's Here!" : "How to Get 5% Off";
-        const subtitle = isDelivered 
-            ? `Enjoy your meal! While you do, post a story, tag <strong class="brand-text">@hxouse.coffee</strong>, and show it at the counter for an instant 5% discount!`
-            : `Follow these simple steps to claim your discount.`;
-
-        const steps = `
-            <div class="space-y-3 text-left my-4">
-                <div class="flex items-center"><div class="w-6 h-6 rounded-full brand-bg text-white flex items-center justify-center font-bold text-sm mr-3">1</div><span><strong>Follow</strong> us @hxouse.coffee</span></div>
-                <div class="flex items-center"><div class="w-6 h-6 rounded-full brand-bg text-white flex items-center justify-center font-bold text-sm mr-3">2</div><span><strong>Post a Story</strong> of your order & tag us</span></div>
-                <div class="flex items-center"><div class="w-6 h-6 rounded-full brand-bg text-white flex items-center justify-center font-bold text-sm mr-3">3</div><span><strong>Show at Counter</strong> when you pay</span></div>
-            </div>`;
-
-        return `<div id="ig-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-primary mb-2">${title}</h2><p class="text-secondary text-sm">${subtitle}</p>${steps}<div class="bg-secondary text-left p-3 rounded-lg max-h-40 overflow-y-auto"><h3 class="font-bold text-primary mb-2">Need an idea?</h3>${ideasHtml}</div><button onclick="app.closeModal('ig-modal')" class="w-full mt-4 bg-gray-200 text-primary font-semibold py-3 px-6 rounded-lg">Got It</button></div></div>`;
-    },
-    showInstagramPromo(isDelivered = false) { this.showModal('modal-template-instagram', isDelivered); },
-    getPostOrderModalHTML: () => `<div id="post-order-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><h2 class="text-xl font-bold text-primary mb-2">Order Received!</h2><p class="text-gray-600 mb-4">While your order is being prepared, feel free to play some games!</p><div class="flex space-x-2 mt-4"><button onclick="app.closeModal('post-order-modal')" class="w-full bg-gray-200 text-primary font-semibold py-2 px-6 rounded-lg">Dismiss</button><button onclick="app.closeModal('post-order-modal'); app.navigateTo('play');" class="w-full brand-bg text-white font-semibold py-2 px-6 rounded-lg">Play Games</button></div></div></div>`
-};
-
-// --- Cart, Order, Menu Methods ---
-Object.assign(app, {
-    renderHomePage() {
-        const tracker = document.getElementById('active-order-tracker'); if (!tracker) return;
-        if(this.state.activeOrder) {
-            tracker.classList.remove('hidden');
-            tracker.innerHTML = `<div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center"><h2 class="font-bold text-blue-800">Your order is ${this.state.activeOrder.status}!</h2><button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600">View Details</button></div>`;
-        } else tracker.classList.add('hidden');
-    },
-    renderMenu() {
-        const tabsContainer = document.getElementById('category-tabs');
-        const container = document.getElementById('menu-items-container');
-        if(!tabsContainer || !container) return;
-        tabsContainer.innerHTML = menuData.map(c => `<button onclick="app.scrollToCategory('${c.category.replace(/\s+/g, '-')}')" class="flex-shrink-0 font-semibold text-secondary py-2 px-4 rounded-full hover:bg-gray-100">${c.category}</button>`).join('');
-        container.innerHTML = menuData.map(category => {
-            const categoryId = category.category.replace(/\s+/g, '-');
-            const itemsHtml = category.items.map(item => {
-                const itemInCart = this.state.cart.find(ci => ci.name === item.name);
-                const quantity = itemInCart ? itemInCart.quantity : 0;
-                return `
-                    <div class="bg-secondary rounded-lg p-4 flex justify-between items-center">
-                        <div>
-                            <h3 class="font-semibold text-primary">${item.name}</h3>
-                            <p class="text-secondary font-bold">₹${item.price}</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                             ${quantity > 0 ? `
-                                <button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', -1, true)" class="w-8 h-8 bg-gray-300 rounded-full font-bold text-xl flex items-center justify-center">-</button>
-                                <span class="font-bold w-5 text-center text-lg">${quantity}</span>
-                                <button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', 1, true)" class="w-8 h-8 brand-bg text-white rounded-full font-bold text-xl flex items-center justify-center">+</button>
-                            ` : `
-                                <button onclick="app.addToCart({name: '${item.name.replace(/'/g, "\\'")}', price: ${item.price}})" class="w-10 h-10 brand-bg text-white rounded-full flex items-center justify-center transform hover:scale-110 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                                </button>
-                            `}
-                        </div>
-                    </div>`;
-            }).join('');
-            return `<div id="${categoryId}"><h2 class="text-2xl font-bold text-primary mb-4">${category.category}</h2><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${itemsHtml}</div></div>`;
-        }).join('');
-    },
-    scrollToCategory(categoryId) {
-        sound.play('click');
-        const el = document.getElementById(categoryId);
-        if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    },
-    renderCartPage() {
-        const cartContent = document.getElementById('cart-content');
-        const trackingContent = document.getElementById('order-tracking-content');
-        if (!cartContent || !trackingContent) return;
-        if (this.state.activeOrder) {
-            cartContent.classList.add('hidden');
-            trackingContent.classList.remove('hidden');
-            this.renderOrderTracking();
-        } else {
-            cartContent.classList.remove('hidden');
-            trackingContent.classList.add('hidden');
-            this.renderCart();
-        }
-    },
-    renderCart() {
-        const container = document.getElementById('cart-content');
-        if(!container) return;
-        if (this.state.cart.length === 0) {
-            container.innerHTML = `<div class="text-center py-24"><svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><p class="text-secondary mt-4">Your cart is empty.</p><button onclick="app.navigateTo('order')" class="mt-4 text-sm font-semibold brand-text">Browse Menu</button></div>`;
-        } else {
-            let total = 0;
-            let itemsHtml = this.state.cart.map(item => {
-                total += item.price * item.quantity;
-                return `<div class="flex items-center justify-between p-2 rounded-lg"><div><h3 class="font-semibold text-primary">${item.name}</h3><p class="text-secondary text-sm">₹${item.price}</p></div><div class="flex items-center space-x-3"><button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', -1)" class="w-8 h-8 bg-secondary rounded-full font-bold text-xl flex items-center justify-center">-</button><span class="font-bold w-5 text-center text-lg">${item.quantity}</span><button onclick="app.updateQuantity('${item.name.replace(/'/g, "\\'")}', 1)" class="w-8 h-8 brand-bg text-white rounded-full font-bold text-xl flex items-center justify-center">+</button></div></div>`;
-            }).join('');
-            container.innerHTML = `<div class="space-y-4 mt-6">${itemsHtml}</div><div class="mt-8 border-t border-gray-200 pt-4"><div class="flex justify-between items-center text-lg font-semibold text-primary"><span>Total</span><span>₹${total}</span></div><textarea id="order-notes" class="w-full mt-4 p-2 border rounded-md bg-secondary" placeholder="Add any special requests..."></textarea><button onclick="app.placeOrder()" class="mt-6 w-full brand-bg text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:opacity-90 transition-all">Place Order</button></div>`;
-        }
-    },
-    renderOrderTracking() {
-        const container = document.getElementById('order-tracking-content');
-        if(!container || !this.state.activeOrder) return;
-        const statuses = ['Order Received', 'In the Kitchen', 'On its Way', 'Delivered'];
-        const currentStatusIndex = statuses.indexOf(this.state.activeOrder.status);
-        const itemsHtml = this.state.activeOrder.items.map(item => `<div class="flex justify-between text-secondary"><span>${item.name} (x${item.quantity})</span><span>₹${item.price * item.quantity}</span></div>`).join('');
-        container.innerHTML = `<div class="mt-6 text-center"><h2 class="text-2xl font-bold text-primary">Tracking Your Order</h2><p class="text-secondary">Order ID: ${this.state.activeOrder.id}</p><div class="my-8 space-y-4">${statuses.map((status, index) => `<div class="flex items-center"><div class="w-8 h-8 rounded-full flex items-center justify-center ${index <= currentStatusIndex ? 'brand-bg text-white' : 'bg-secondary text-primary'}">${index < currentStatusIndex ? '✓' : index + 1}</div><p class="ml-4 font-semibold ${index <= currentStatusIndex ? 'text-primary' : 'text-secondary'}">${status}</p></div>`).join('')}</div><div class="bg-secondary p-4 rounded-lg text-left"><h3 class="font-bold text-primary mb-2">Order Summary</h3>${itemsHtml}</div></div>`;
-    },
-    addToCart(item) {
-        sound.play('add_to_cart');
-        const existingItem = this.state.cart.find(ci => ci.name === item.name);
-        if (existingItem) { existingItem.quantity++; } else { this.state.cart.push({ ...item, quantity: 1 }); }
-        this.refreshCartDependentUI(true);
-        this.showToast(`${item.name} added`);
-    },
-    updateQuantity(itemName, change, fromMenu = false) {
-        sound.play('click');
-        const item = this.state.cart.find(ci => ci.name === itemName);
-        if (item) { item.quantity += change; if (item.quantity <= 0) { this.state.cart = this.state.cart.filter(ci => ci.name !== itemName); } }
-        this.refreshCartDependentUI(fromMenu);
-    },
-    refreshCartDependentUI(fromMenu = false) {
-        const totalItems = this.state.cart.reduce((sum, item) => sum + item.quantity, 0);
-        const cartCountEl = document.getElementById('cart-count');
-        if (cartCountEl) {
-            if (totalItems > 0 && !this.state.activeOrder) { 
-                cartCountEl.textContent = totalItems; 
-                cartCountEl.classList.remove('hidden'); 
-            } else { 
-                cartCountEl.classList.add('hidden'); 
-            }
-        }
-        if (this.state.currentPage === 'cart') this.renderCartPage();
-        else if (this.state.currentPage === 'order' && fromMenu) this.renderMenu();
-        this.saveState();
-    },
-    placeOrder() {
-        if (this.state.cart.length === 0) return;
-        sound.play('success');
-        const orderId = `T${this.state.tableNumber}-${Date.now().toString().slice(-4)}`;
-        this.state.activeOrder = { id: orderId, items: [...this.state.cart], notes: document.getElementById('order-notes')?.value || '', status: 'Order Received', table: this.state.tableNumber, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-        
-        let allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
-        allOrders.push(this.state.activeOrder);
-        localStorage.setItem('hxouseAllOrders', JSON.stringify(allOrders));
-        
-        this.state.cart = []; this.saveState();
-        sessionStorage.removeItem('promoShown'); // Reset promo shown flag for new order
-        this.navigateTo('cart'); this.showToast('Order placed successfully!');
-        this.showModal('modal-template-post-order');
+        const s = sounds[type]; if (!s) return;
+        o.type = s.type; o.frequency.setValueAtTime(s.freq, this.audioContext.currentTime);
+        g.gain.linearRampToValueAtTime(s.gain, this.audioContext.currentTime + 0.01);
+        if (s.secondFreq) { o.frequency.setValueAtTime(s.secondFreq, this.audioContext.currentTime + (s.len / 2)); }
+        g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + s.len);
+        o.start(this.audioContext.currentTime); o.stop(this.audioContext.currentTime + s.len);
     }
-});
-
-// --- Admin Panel ---
-const admin = {
-    isLoggedIn: false,
-    showLogin() { app.showModal('modal-template-admin-login'); },
-    login() {
-        const password = document.getElementById('admin-password').value;
-        if (password === 'admin123') {
-            this.isLoggedIn = true;
-            app.closeModal('admin-login-modal');
-            this.renderPanel();
-        } else {
-            app.showToast("Incorrect Password");
-        }
-    },
-    logout() {
-        this.isLoggedIn = false;
-        document.getElementById('admin-panel').classList.add('hidden');
-        document.getElementById('main-interface').classList.remove('hidden');
-    },
-    renderPanel() {
-        document.getElementById('main-interface').classList.add('hidden');
-        const panel = document.getElementById('admin-panel');
-        panel.classList.remove('hidden');
-
-        const allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
-        const activeOrders = allOrders.filter(o => o.status !== 'Delivered').sort((a,b) => b.id.slice(-4) - a.id.slice(-4));
-
-        panel.innerHTML = `
-            <header class="p-4 flex justify-between items-center bg-secondary">
-                <h1 class="text-2xl font-bold brand-text">Admin Panel</h1>
-                <button onclick="admin.logout()" class="font-semibold text-sm">Logout</button>
-            </header>
-            <div class="flex-grow p-4 space-y-4 overflow-y-auto">
-                ${activeOrders.length === 0 ? '<p class="text-center text-secondary">No active orders.</p>' : 
-                activeOrders.map(order => `
-                    <div class="bg-secondary rounded-lg p-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="font-bold text-primary">Order #${order.id}</h2>
-                            <span class="text-xs text-secondary">${order.timestamp}</span>
-                        </div>
-                        <div class="my-2">
-                            ${order.items.map(i => `<p class="text-sm text-secondary">${i.name} x ${i.quantity}</p>`).join('')}
-                            ${order.notes ? `<p class="text-sm italic text-primary mt-1">Notes: ${order.notes}</p>` : ''}
-                        </div>
-                        <div class="flex space-x-2 mt-2">
-                            <select onchange="admin.updateOrderStatus('${order.id}', this.value)" class="w-full p-2 rounded-md bg-white border-2">
-                                <option ${order.status === 'Order Received' ? 'selected' : ''}>Order Received</option>
-                                <option ${order.status === 'In the Kitchen' ? 'selected' : ''}>In the Kitchen</option>
-                                <option ${order.status === 'On its Way' ? 'selected' : ''}>On its Way</option>
-                                <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                            </select>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>`;
-    },
-    updateOrderStatus(orderId, newStatus) {
-        let allOrders = JSON.parse(localStorage.getItem('hxouseAllOrders')) || [];
-        const orderIndex = allOrders.findIndex(o => o.id === orderId);
-        if (orderIndex > -1) {
-            allOrders[orderIndex].status = newStatus;
-            localStorage.setItem('hxouseAllOrders', JSON.stringify(allOrders));
-            this.renderPanel();
-        }
-    },
-    getLoginModalHTML: () => `<div id="admin-login-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-primary mb-4">Admin Access</h2><input type="password" id="admin-password" class="w-full p-2 border rounded-md" placeholder="Enter password"><div class="flex justify-end space-x-2 mt-4"><button onclick="app.closeModal('admin-login-modal')" class="bg-gray-200 text-primary font-semibold py-2 px-4 rounded-lg">Cancel</button><button onclick="admin.login()" class="brand-bg text-white font-semibold py-2 px-4 rounded-lg">Login</button></div></div></div>`
 };
 
-// --- GAMES ---
-const spinTheWheel = {
-    state: { wheel: null, spinBtn: null, prize: null, rotation: 0, rotationSpeed: 0, friction: 0.995, isSpinning: false },
-    segments: [ {fillStyle: '#eae56f', text: '5% Off'}, {fillStyle: '#89f26e', text: 'Try Again'}, {fillStyle: '#7de6ef', text: 'Free Cookie'}, {fillStyle: '#e7706f', text: '10% Off'}, {fillStyle: '#eae56f', text: 'Try Again'}, {fillStyle: '#89f26e', text: 'Free Drink'} ],
-    start() { app.showModal('modal-template-spin-the-wheel'); this.init(); },
-    init() {
-        this.state.wheel = document.getElementById('spin-wheel-canvas');
-        this.state.spinBtn = document.getElementById('spin-btn');
-        if(!this.state.wheel || !this.state.spinBtn) return;
-        this.drawWheel();
-        this.state.spinBtn.onclick = () => this.spin();
+
+// =================================================================================
+//  SECTION 2: CORE APPLICATION LOGIC
+// =================================================================================
+const app = {
+    /**
+     * The main state object. All dynamic data that the UI depends on is stored here.
+     */
+    state: {
+        currentPage: 'home',
+        cart: [],
+        activeOrder: null,
+        tableNumber: null,
+        user: null,
+        customerProfile: null,
+        theme: 'light',
+        menuData: [],
+        orderSubscription: null,
+        currentMenuFilter: null, // To remember the active menu filter for re-rendering
     },
-    drawWheel() {
-        const ctx = this.state.wheel.getContext('2d');
-        const arcSize = (2 * Math.PI) / this.segments.length;
-        const centerX = this.state.wheel.width / 2;
-        const centerY = this.state.wheel.height / 2;
-        const radius = Math.min(centerX, centerY) * 0.9;
-        ctx.clearRect(0, 0, this.state.wheel.width, this.state.wheel.height);
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(this.state.rotation);
-        this.segments.forEach((seg, i) => {
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.arc(0, 0, radius, i * arcSize, (i + 1) * arcSize);
-            ctx.closePath();
-            ctx.fillStyle = seg.fillStyle;
-            ctx.fill();
-            ctx.save();
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 16px Inter';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.rotate((i + 0.5) * arcSize);
-            ctx.fillText(seg.text, radius * 0.6, 0);
-            ctx.restore();
-        });
-        ctx.restore();
-    },
-    spin() {
-        if (this.state.isSpinning) return;
-        this.state.isSpinning = true;
-        this.state.rotationSpeed = Math.random() * 0.4 + 0.4; // Initial power
-        this.state.spinBtn.disabled = true;
-        this.animate();
-    },
-    animate() {
-        this.state.rotation += this.state.rotationSpeed;
-        this.state.rotationSpeed *= this.state.friction;
-        this.drawWheel();
-        if (this.state.rotationSpeed > 0.001) {
-            requestAnimationFrame(() => this.animate());
-        } else {
-            this.state.rotationSpeed = 0;
-            this.state.isSpinning = false;
-            this.state.spinBtn.disabled = false;
-            const finalAngle = this.state.rotation % (2 * Math.PI);
-            const segmentIndex = Math.floor(this.segments.length - finalAngle / (2 * Math.PI) * this.segments.length) % this.segments.length;
-            const prize = this.segments[segmentIndex].text;
-            document.getElementById('spin-result').textContent = `You won: ${prize}!`;
-            sound.play('win');
-        }
-    },
-    getModalHTML: () => `<div id="spin-wheel-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><div class="relative inline-block"><canvas id="spin-wheel-canvas" width="280" height="280"></canvas><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full" style="clip-path: polygon(50% 100%, 0 0, 100% 0); width: 30px; height: 40px; background: #333;"></div></div><h3 id="spin-result" class="text-xl font-bold mt-4 h-8"></h3><button id="spin-btn" class="w-full mt-4 brand-bg font-semibold py-3 px-6 rounded-lg">SPIN</button><button onclick="app.closeModal('spin-wheel-modal')" class="w-full mt-2 bg-gray-200 text-primary font-semibold py-2 px-6 rounded-lg">Close</button></div></div>`
-};
-const ticTacToe = {
-    state: { board: [], currentPlayer: 'X', gameOver: false },
-    start() { app.showModal('modal-template-tic-tac-toe'); this.init(); },
-    init() {
-        this.state.board = Array(9).fill(null);
-        this.state.currentPlayer = 'X';
-        this.state.gameOver = false;
-        this.render();
-    },
-    render() {
-        const boardEl = document.getElementById('ttt-board');
-        const statusEl = document.getElementById('ttt-status');
-        if(!boardEl || !statusEl) return;
-        boardEl.innerHTML = '';
-        this.state.board.forEach((cell, index) => {
-            const cellEl = document.createElement('div');
-            cellEl.className = 'game-cell flex items-center justify-center text-5xl font-extrabold bg-white rounded-md cursor-pointer hover:bg-gray-50';
-            cellEl.textContent = cell || '';
-            if (!cell && !this.state.gameOver) { cellEl.onclick = () => this.makeMove(index); }
-            if (cell === 'X') cellEl.style.color = '#ef4444';
-            if (cell === 'O') cellEl.style.color = '#3b82f6';
-            boardEl.appendChild(cellEl);
-        });
-        statusEl.textContent = this.state.gameOver ? this.state.gameOver : `Player ${this.state.currentPlayer}'s turn`;
-    },
-    makeMove(index) {
-        if (this.state.board[index] || this.state.gameOver) return;
-        sound.play('click');
-        this.state.board[index] = this.state.currentPlayer;
-        if (this.checkWin()) {
-            this.state.gameOver = `Player ${this.state.currentPlayer} wins!`;
-            sound.play('win');
-        } else if (this.state.board.every(c => c)) {
-            this.state.gameOver = "It's a draw!";
-            sound.play('draw');
-        } else {
-            this.state.currentPlayer = this.state.currentPlayer === 'X' ? 'O' : 'X';
-        }
-        this.render();
-    },
-    checkWin() {
-        const lines = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
-        return lines.some(line => {
-            const [a, b, c] = line;
-            return this.state.board[a] && this.state.board[a] === this.state.board[b] && this.state.board[a] === this.state.board[c];
-        });
-    },
-    getModalHTML: () => `<div id="ttt-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-primary">Tic-Tac-Toe</h2><button onclick="app.closeModal('ttt-modal')" class="text-2xl font-bold">&times;</button></div><div id="ttt-game"><h3 id="ttt-status" class="text-center text-xl font-semibold mb-4 h-8"></h3><div id="ttt-board" class="grid grid-cols-3 gap-2 max-w-xs mx-auto p-2 bg-secondary rounded-lg"></div><button onclick="ticTacToe.init()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">New Game</button></div></div></div>`
-};
-const rockPaperScissors = {
-    choices: ['rock', 'paper', 'scissors'],
-    emojis: { rock: '✊', paper: '✋', scissors: '✌️' },
-    start() { app.showModal('modal-template-rock-paper-scissors'); this.reset(); },
-    reset() {
-        const playerEl = document.getElementById('rps-player');
-        const aiEl = document.getElementById('rps-ai');
-        const resultEl = document.getElementById('rps-result');
-        const buttonsEl = document.getElementById('rps-buttons');
-        if (playerEl) playerEl.textContent = '?';
-        if (aiEl) aiEl.textContent = '?';
-        if (resultEl) resultEl.textContent = 'Make your move!';
-        if (buttonsEl) buttonsEl.style.pointerEvents = 'auto';
-    },
-    play(playerChoice) {
-        sound.play('click');
-        const buttonsEl = document.getElementById('rps-buttons');
-        if(buttonsEl) buttonsEl.style.pointerEvents = 'none';
+    
+    /**
+     * Main application entry point.
+     * 1. Set theme and check URL for a table number from a QR code.
+     * 2. Authenticate the user (get session or create an anonymous one).
+     * 3. Fetch essential data (profile, menu).
+     * 4. Once data is ready, hide splash screen and show the app.
+     * 5. Route the user to the correct starting modal (onboarding vs. table entry).
+     */
+    async init() {
+        this.state.theme = localStorage.getItem('hxouse-theme') || 'light';
+        this.applyTheme();
+        this.getTableNumberFromURL();
         
-        const aiChoice = this.choices[Math.floor(Math.random() * 3)];
-        
-        const playerEl = document.getElementById('rps-player');
-        const aiEl = document.getElementById('rps-ai');
-        const resultEl = document.getElementById('rps-result');
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            this.state.user = session?.user;
+            if (!this.state.user) {
+                const { data: signInData, error } = await supabase.auth.signInAnonymously();
+                if (error) throw new Error(`Anonymous sign-in failed: ${error.message}`);
+                this.state.user = signInData.user;
+            }
+            
+            await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData() ]);
 
-        if(playerEl) playerEl.textContent = this.emojis[playerChoice];
-        if(aiEl) aiEl.textContent = this.emojis[aiChoice];
-        
-        let result = '';
-        if (playerChoice === aiChoice) {
-            result = "It's a Tie!";
-            sound.play('draw');
-        } else if ((playerChoice === 'rock' && aiChoice === 'scissors') || (playerChoice === 'paper' && aiChoice === 'rock') || (playerChoice === 'scissors' && aiChoice === 'paper')) {
-            result = 'You Win!';
-            sound.play('win');
-        } else {
-            result = 'AI Wins!';
+            document.getElementById('splash-screen').style.display = 'none';
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('app').classList.add('flex');
+
+            if (!this.state.customerProfile) {
+                this.showOnboardingModal();
+            } else if (this.state.tableNumber) {
+                this.startSession();
+            } else {
+                this.showTableNumberModal();
+            }
+
+        } catch (error) {
+            console.error("CRITICAL: Initialization failed.", error);
+            document.getElementById('splash-screen').innerHTML = `<div class="text-white text-center p-4">Could not load the app. Please check your connection and try again.</div>`;
         }
-        if(resultEl) resultEl.textContent = result;
-        setTimeout(() => this.reset(), 1500);
+
+        document.body.addEventListener('click', () => sound.init(), { once: true });
     },
-    getModalHTML: () => `<div id="rps-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-lg shadow-xl p-6 w-full max-w-sm text-center"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-primary">vs. AI</h2><button onclick="app.closeModal('rps-modal')" class="text-2xl font-bold">&times;</button></div><div id="rps-result" class="text-2xl font-bold mb-8 h-8"></div><div class="flex justify-center space-x-4 mb-8"><div class="text-center"><p class="font-bold">You</p><div id="rps-player" class="text-6xl p-4">?</div></div><div class="text-center"><p class="font-bold">AI</p><div id="rps-ai" class="text-6xl p-4">?</div></div></div><p class="mb-4 font-medium">Choose your move:</p><div id="rps-buttons" class="flex justify-center space-x-4"><button onclick="rockPaperScissors.play('rock')" class="text-4xl p-4 bg-secondary rounded-full hover:opacity-80 transition transform hover:scale-110">✊</button><button onclick="rockPaperScissors.play('paper')" class="text-4xl p-4 bg-secondary rounded-full hover:opacity-80 transition transform hover:scale-110">✋</button><button onclick="rockPaperScissors.play('scissors')" class="text-4xl p-4 bg-secondary rounded-full hover:opacity-80 transition transform hover:scale-110">✌️</button></div></div></div>`
+
+    // --- DATA & SESSION MANAGEMENT ---
+
+    /** Parses the window's URL for a 'table' query parameter from a QR code. */
+    getTableNumberFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const tableNum = params.get('table');
+        if (tableNum && !isNaN(parseInt(tableNum))) {
+            this.state.tableNumber = parseInt(tableNum);
+        }
+    },
+
+    /** Fetches the logged-in user's profile from the 'customers' table. */
+    async fetchCustomerProfile() { if (!this.state.user) return; try { const { data, error } = await supabase.from('customers').select('*').eq('id', this.state.user.id).single(); if (error && error.code !== 'PGRST116') throw error; if (data) this.state.customerProfile = data; } catch (error) { console.error('Error fetching profile:', error); this.showToast('Could not fetch your profile.'); } },
+
+    /** Fetches the entire menu structure from the database. */
+    async fetchMenuData() { try { const { data, error } = await supabase.from('menu_categories').select(`name, products (id, name, description, price, image_url, is_available)`).order('display_order'); if (error) throw error; this.state.menuData = data.map(c => ({ category: c.name, items: c.products })); } catch (error) { console.error('Error fetching menu:', error); this.showToast('Could not load the menu.'); } },
+    
+    /** Displays the onboarding modal, adapting based on whether a QR code was scanned. */
+    showOnboardingModal(){
+        const tableInputHTML = !this.state.tableNumber 
+            ? `<input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>`
+            : '';
+        const modalHTML =`<div id="onboarding-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold text-primary mb-2">Welcome to HXOUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p><div class="space-y-4"><input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Name" required>${tableInputHTML}<input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Mobile Number (Optional)"></div><button onclick="app.completeOnboarding()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Let's Go</button></div></div>`;
+        this.showModal(modalHTML);
+    },
+    
+    /** Handles new user submission, creating a profile and starting the session. */
+    async completeOnboarding(){
+        const name = document.getElementById('user-name-input').value.trim();
+        let tableNumber = this.state.tableNumber;
+        if (!tableNumber) {
+            const tableInput = document.getElementById('table-number-input');
+            if (!tableInput || !tableInput.value) return this.showToast("Please enter your table number.");
+            tableNumber = parseInt(tableInput.value);
+        }
+        if (!name) return this.showToast("Please enter your name.");
+        
+        // Note: The database column is `whatsapp_number`. We are collecting it as "Mobile Number".
+        const { data, error } = await supabase.from('customers').insert({ 
+            id: this.state.user.id, name, 
+            whatsapp_number: document.getElementById('mobile-number-input').value.trim() 
+        }).select().single();
+        if (error) return this.showToast('Could not save profile. Please try again.');
+        
+        this.state.customerProfile = data;
+        this.state.tableNumber = tableNumber;
+        this.closeModal('onboarding-modal');
+        this.startSession();
+    },
+    
+    /** Displays a welcome-back modal for a returning user to enter their table number manually. */
+    showTableNumberModal() { const m = `<div id="table-number-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold text-primary mb-2">Welcome back, ${this.state.customerProfile.name}!</h2><p class="text-secondary mb-6">Please enter your table number for today's visit.</p><div class="space-y-4"><input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required></div><button onclick="app.completeTableNumberEntry()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Continue</button></div></div>`; this.showModal(m); },
+
+    /** Handles submission of the table number form for a returning user. */
+    completeTableNumberEntry() { const tableNumber = document.getElementById('table-number-input').value; if (!tableNumber) return this.showToast("Please enter your table number."); this.state.tableNumber = parseInt(tableNumber); this.closeModal('table-number-modal'); this.startSession(); },
+
+    /** Final step after onboarding. Checks for active orders and shows the main UI. */
+    async startSession() { await this.fetchActiveOrder(); this.showMainInterface(); },
+    
+    /** Makes the main application interface (header, content, nav) visible. */
+    showMainInterface(){ document.getElementById('main-interface').classList.remove('hidden'); document.getElementById('bottom-nav').classList.remove('hidden'); this.renderBottomNav(); this.navigateTo('home'); },
+
+    // --- UI RENDERING & NAVIGATION ---
+    navigateTo(page){ if (!this.state.customerProfile) return; sound.play('click'); this.state.currentPage=page; const h=document.getElementById('page-header'), c=document.getElementById('page-content'); h.innerHTML='', c.innerHTML='', c.className='fade-in'; const p={home:{title:'HXOUSE',back:!1},order:{title:'Menu',back:!0},cart:{title:this.state.activeOrder?'Track Order':'My Cart',back:!0},play:{title:'Entertainment',back:!0},more:{title:'More Options',back:!0}}; const g=p[page]; h.innerHTML=`<div class="flex items-center space-x-2">${g.back?`<button onclick="app.navigateTo('home')" class="p-2 -ml-2 rounded-full hover:bg-secondary"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>`:''}<h1 class="text-3xl font-bold brand-text">${g.title}</h1></div><div class="text-right"><p class="font-semibold text-primary">${this.state.customerProfile.name}</p><p class="text-xs text-secondary">Table #${this.state.tableNumber || 'N/A'}</p></div>`; this.renderPageContent(page); this.updateActiveNav(page); },
+    renderPageContent(page){ const r = { home: this.renderHomePage, order: this.renderMenu, cart: this.renderCartPage, play: this.renderPlayPage, more: this.renderMorePage }; r[page]?.call(this); },
+    renderBottomNav(){const i={home:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`,order:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,cart:`<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`,play:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,more:`<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`};const p=['home','order','cart','play','more'];document.getElementById('bottom-nav').innerHTML=p.map(p=>`<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${i[p]}<span id="${p}-tab-label" class="text-xs font-semibold capitalize">${p}</span></button>`).join('')},
+    updateActiveNav(page){const cL=document.getElementById('cart-tab-label'),cI=document.getElementById('cart-icon-svg');this.state.activeOrder?(cL.textContent='Track',cI.innerHTML=`<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`):(cL.textContent='Cart',cI.innerHTML=`<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`);document.querySelectorAll('.nav-item').forEach(i=>{const a=i.dataset.page===page;i.classList.toggle('brand-text',a);i.classList.toggle('text-secondary',!a);i.style.transform=a?'scale(1.1)':'scale(1)'});this.refreshCartDependentUI()},
+    applyTheme(){document.body.dataset.theme=this.state.theme},
+    toggleTheme(t){this.state.theme=t;localStorage.setItem('hxouse-theme',t);this.applyTheme();this.renderMorePage()},
+    showModal(c){document.getElementById('modal-container').innerHTML=c},
+    closeModal(id){document.getElementById(id)?.remove()},
+    showToast(m){const t=document.getElementById('toast'),p=document.getElementById('toast-message');p.textContent=m;t.classList.remove('hidden');t.classList.add('toast');setTimeout(()=>{t.classList.remove('toast');t.classList.add('hidden')},3e3)},
+    renderHomePage(){const c=document.getElementById('page-content');let a=this.state.activeOrder?`<div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center"><h2 class="font-bold text-primary">Your order is ${this.state.activeOrder.status}!</h2><p class="text-secondary text-sm">Order ID: #${this.state.activeOrder.id.slice(0,6)}</p><button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button></div>`:'';c.innerHTML=`<div class="space-y-6"><div class="relative h-64 overflow-hidden rounded-b-2xl"><video src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4"><h1 class="text-4xl font-black tracking-tighter">HXOUSE</h1><p class="text-lg tracking-widest mt-1 font-light">COFFEE CO.</p></div></div><div class="p-4 space-y-6">${a}<div onclick="app.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm"><h2 class="text-2xl font-bold text-primary">Follow, Post & Get 5% Off!</h2><p class="mt-1 text-secondary">Follow, post a story, and show it at the counter.</p><button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">How it works &rarr;</button></div><div class="grid grid-cols-2 gap-4"><button onclick="app.showStaffRequestModal()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎️</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button><button onclick="app.showFeedbackModal()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">📝</span><p class="font-semibold mt-2 text-primary">Leave Feedback</p></button></div></div></div>`},
+    renderPlayPage(){const c=document.getElementById('page-content');c.innerHTML=`<div class="p-4 space-y-4">${Object.values(GAMES).map(g=>`<div class="bg-secondary p-6 rounded-xl"><h3 class="text-xl font-bold text-primary mb-2">${g.title}</h3><p class="text-secondary mb-4">${g.description}</p><button onclick="GAMES['${g.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg">Play</button></div>`).join("")}</div>`},
+    renderMorePage(){const c=document.getElementById('page-content');const o=[{i:"🎨",t:"Change Theme",a:"app.showThemeModal()"},{i:"📶",t:"View Wi-Fi Details",a:"app.showWifiModal()"},{i:"📜",t:"Order History",a:"app.showOrderHistoryModal()"},{i:"💸",t:"Bill Splitter",a:"app.showBillSplitterModal()"}];c.innerHTML=`<div class="p-4 space-y-3">${o.map(i=>`<button onclick="${i.a}" class="w-full flex items-center justify-between bg-secondary p-4 rounded-xl text-left"><div class="flex items-center"><span class="text-2xl mr-4">${i.i}</span><span class="font-semibold text-primary">${i.t}</span></div><span class="text-secondary">&rarr;</span></button>`).join("")}</div>`},
+    
+    // --- MENU & CART LOGIC ---
+    renderMenu() { const c=document.getElementById('page-content'); if(this.state.menuData.length===0){c.innerHTML=`<div class="p-4 text-center text-secondary">Loading menu...</div>`;return} const f=this.state.menuData[0].category; this.state.currentMenuFilter={type:'category',value:f}; c.innerHTML=`<div class="p-4"><div class="relative"><input type="text" id="menu-search" class="w-full p-3 pl-10 border-custom rounded-lg bg-secondary text-primary" placeholder="Search..."><span class="absolute left-3 top-3.5 text-secondary">🔍</span></div></div><div class="horizontal-scroll sticky top-0 bg-primary/80 backdrop-blur-sm z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">${this.state.menuData.map((c,i)=>`<button class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${i===0?'brand-text border-b-2 border-current':'text-secondary'}" data-category="${c.category}" onclick="app.filterMenuByCategory('${c.category}',this)">${c.category}</button>`).join('')}</div><div id="menu-items" class="p-4 grid grid-cols-1 gap-3"></div>`; document.getElementById('menu-search').addEventListener('input',(e)=>this.filterMenuBySearch(e.target.value)); this.filterMenuByCategory(f); },
+    filterMenuByCategory(c,t){if(t){document.querySelectorAll('.category-tab').forEach(t=>{t.classList.remove('brand-text','border-b-2','border-current');t.classList.add('text-secondary')});t.classList.add('brand-text','border-b-2','border-current');document.getElementById('menu-search').value=''}this.state.currentMenuFilter={type:'category',value:c};const d=this.state.menuData.find(d=>d.category===c);this.renderMenuItems(d?d.items.filter(i=>i.is_available):[])},
+    filterMenuBySearch(s){document.querySelectorAll('.category-tab').forEach(b=>b.classList.remove('brand-text','border-b-2','border-current'));this.state.currentMenuFilter={type:'search',value:s};const i=this.state.menuData.flatMap(c=>c.items).filter(i=>i.name.toLowerCase().includes(s.toLowerCase())&&i.is_available);this.renderMenuItems(i)},
+    rerenderMenu(){if(this.state.currentPage!=='order')return;const f=this.state.currentMenuFilter;if(!f)return;if(f.type==='category'){const t=document.querySelector(`.category-tab[data-category="${f.value}"]`);this.filterMenuByCategory(f.value,t)}else{this.filterMenuBySearch(f.value)}},
+    renderMenuItems(items){const container=document.getElementById('menu-items');container.innerHTML=!items||items.length===0?`<p class="text-secondary text-center">No items found.</p>`:items.map(item=>{const cartItem=this.state.cart.find(ci=>ci.id===item.id);const buttonHTML=cartItem?`<div class="flex items-center space-x-3"><button onclick="event.stopPropagation(); app.updateCartItemQuantity(${cartItem.cartId},-1)" class="brand-bg rounded-full w-8 h-8 font-bold">-</button><span class="font-bold text-primary w-4 text-center">${cartItem.quantity}</span><button onclick="event.stopPropagation(); app.updateCartItemQuantity(${cartItem.cartId},1)" class="brand-bg rounded-full w-8 h-8 font-bold">+</button></div>`:`<button onclick="event.stopPropagation();app.addToCartById(${item.id})" class="brand-bg rounded-full w-10 h-10 text-2xl font-light">+</button>`;return`<div onclick="app.showItemDetailModal(${item.id})" class="bg-secondary p-4 rounded-xl flex justify-between items-center cursor-pointer"><div class="flex items-center space-x-4"><div class="text-4xl flex-shrink-0 w-12 h-12 flex items-center justify-center bg-primary rounded-lg">${item.image_url||'🍴'}</div><div><h3 class="font-bold text-primary">${item.name}</h3><p class="font-semibold text-secondary">₹${item.price}</p></div></div>${buttonHTML}</div>`}).join('')},
+    showItemDetailModal(itemId){const item=this.state.menuData.flatMap(c=>c.items).find(i=>i.id===itemId);if(!item)return;this.showModal(`<div id="item-detail-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><div class="flex justify-between items-start"><div><h2 class="text-2xl font-bold text-primary">${item.name}</h2><p class="text-xl font-semibold text-secondary">₹${item.price}</p></div><div class="text-5xl">${item.image_url||'🍴'}</div></div><p class="text-secondary mt-2">${item.description||'A delicious choice.'}</p><div class="mt-6"><button onclick="app.addToCartById(${item.id})" class="w-full brand-bg font-semibold py-3 rounded-lg">Add to Cart</button></div></div></div>`)},
+    addToCartById(itemId){const cartItem=this.state.cart.find(i=>i.id===itemId);if(cartItem){cartItem.quantity++}else{const item=this.state.menuData.flatMap(c=>c.items).find(i=>i.id===itemId);if(!item)return;this.state.cart.push({cartId:Date.now(),...item,quantity:1,finalPrice:item.price});this.showToast(`${item.name} added to cart!`)}sound.play('add_to_cart');this.refreshPage()},
+    updateCartItemQuantity(cartId,change){const item=this.state.cart.find(i=>i.cartId===cartId);if(item){item.quantity+=change;if(item.quantity<=0)this.state.cart=this.state.cart.filter(i=>i.cartId!==cartId)}this.refreshPage()},
+    calculateCartTotal(){return this.state.cart.reduce((t,i)=>t+(i.finalPrice*i.quantity),0)},
+    refreshCartDependentUI(){const el=document.getElementById('cart-count');const total=this.state.cart.reduce((s,i)=>s+i.quantity,0);if(total>0&&!this.state.activeOrder){el.textContent=total;el.classList.remove('hidden')}else{el.classList.add('hidden')}},
+    refreshPage(){this.refreshCartDependentUI();this.renderPageContent(this.state.currentPage)},
+    renderCartPage(){const c=document.getElementById('page-content');if(this.state.activeOrder)this.renderOrderTracking(c);else if(this.state.cart.length>0)this.renderCart(c);else c.innerHTML=`<div class="text-center p-10"><h2 class="text-2xl font-bold text-primary">Your cart is empty</h2><p class="text-secondary mt-2">Add items from the menu to get started.</p><button onclick="app.navigateTo('order')" class="mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">View Menu</button></div>`},
+    renderCart(c){const t=this.calculateCartTotal();c.innerHTML=`<div class="p-4 space-y-3">${this.state.cart.map(i=>`<div class="bg-secondary p-3 rounded-xl"><div class="flex justify-between items-start"><p class="font-bold text-primary">${i.name}</p><p class="font-semibold text-primary">₹${i.finalPrice*i.quantity}</p></div><div class="flex justify-between items-center mt-2"><button onclick="app.updateCartItemQuantity(${i.cartId}, -Infinity)" class="text-red-500 font-semibold text-xs">Remove</button><div class="flex items-center space-x-3"><button onclick="app.updateCartItemQuantity(${i.cartId},-1)" class="bg-primary border-custom rounded-full w-6 h-6">-</button><span class="font-bold text-primary w-4 text-center">${i.quantity}</span><button onclick="app.updateCartItemQuantity(${i.cartId},1)" class="bg-primary border-custom rounded-full w-6 h-6">+</button></div></div></div>`).join('')}</div><div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div><div class="p-4 bg-primary border-t-custom"><div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${t}</span></div><button onclick="app.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button></div>`},
+    showPaymentModal(){const m=`<div id="payment-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2><div class="space-y-3"><button onclick="app.placeOrder('Pay at Counter')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button><button onclick="app.placeOrder('UPI / QR Code')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button></div><button onclick="app.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button></div></div>`;this.showModal(m)},
+    async placeOrder(paymentMethod){if(this.state.cart.length===0||!this.state.tableNumber)return this.showToast("Cart is empty or table number is missing.");this.closeModal('payment-modal');console.log("Placing order for table:",this.state.tableNumber);const{data:tableData,error:tableError}=await supabase.from('tables').select('id').eq('table_number',this.state.tableNumber).single();if(tableError||!tableData){console.error("Table lookup error:",tableError);return this.showToast(`Table #${this.state.tableNumber} is not a valid table.`)}console.log("Found table ID:",tableData.id);const{data:orderData,error:orderError}=await supabase.from('orders').insert({customer_id:this.state.user.id,table_id:tableData.id,total_amount:this.calculateCartTotal(),payment_method:paymentMethod,special_instructions:document.getElementById('special-instructions')?.value||''}).select().single();if(orderError){console.error("Order insert error:",orderError);return this.showToast(`Could not place order: ${orderError.message}`)}console.log("Order created:",orderData);const orderItems=this.state.cart.map(i=>({order_id:orderData.id,product_id:i.id,quantity:i.quantity,price_at_time_of_order:i.price}));const{error:itemsError}=await supabase.from('order_items').insert(orderItems);if(itemsError){console.error("Order items insert error:",itemsError);return this.showToast(`Could not save order items: ${itemsError.message}`)}console.log("Order placed successfully!");await this.fetchActiveOrder();this.state.cart=[];this.refreshPage();sound.play('success');this.showPlayGamesPrompt()},
+    async fetchActiveOrder(){if(!this.state.user)return;const{data,error}=await supabase.from('orders').select(`*, order_items(*, products(name))`).eq('customer_id',this.state.user.id).in('status',['received','accepted','preparing','ready']).order('created_at',{ascending:false}).limit(1).single();if(error&&error.code!=='PGRST116')console.error('Fetch active order error:',error);this.state.activeOrder=data||null;if(this.state.activeOrder){this.listenToOrderUpdates(this.state.activeOrder.id)}},
+    listenToOrderUpdates(orderId){if(this.state.orderSubscription)supabase.removeChannel(this.state.orderSubscription);this.state.orderSubscription=supabase.channel(`public:orders:id=eq.${orderId}`).on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders',filter:`id=eq.${orderId}`},p=>{if(!this.state.activeOrder)return;const u=p.new;if(u.status!==this.state.activeOrder.status){this.showToast(`Your order is now: ${u.status}`);this.state.activeOrder.status=u.status;if(['delivered','cancelled'].includes(u.status)){this.state.activeOrder=null;supabase.removeChannel(this.state.orderSubscription);this.state.orderSubscription=null;this.showToast('Order completed!')}this.refreshPage()}}).subscribe()},
+    renderOrderTracking(container){const o=this.state.activeOrder;if(!o){container.innerHTML='';return}const s=['received','accepted','preparing','ready','delivered'];const c=s.indexOf(o.status);const w=c*25;const i={received:'📝',accepted:'👍',preparing:'🧑‍🍳',ready:'🛎️',delivered:'😊'};const h=o.order_items?.length>0?o.order_items.map(t=>`<div class="flex justify-between text-sm py-1"><span class="text-primary">${t.products.name} x${t.quantity}</span></div>`).join(''):'<p class="text-sm text-secondary">Loading item details...</p>';container.innerHTML=`<div class="p-6"><h2 class="text-2xl font-bold text-center capitalize">Your Order is ${o.status}</h2><p class="text-secondary text-center mb-10">Order ID: #${o.id.slice(0,6)}</p><div class="tracker-container my-12"><div class="tracker-line"></div><div class="tracker-progress" style="width: ${w}%"></div>${s.map((t,d)=>`<div class="tracker-step ${d<=c?'active':''}"><div class="tracker-icon-container">${i[t]}</div><span class="tracker-label capitalize">${t}</span></div>`).join('')}</div><div class="bg-secondary p-4 rounded-xl mt-4"><h3 class="font-bold text-primary mb-2">Order Summary</h3>${h}<div class="flex justify-between font-bold mt-2 pt-2 border-t border-custom"><span>Total</span><span>₹${o.total_amount}</span></div></div></div>`},
+    showPlayGamesPrompt(){const m=`<div id="play-prompt-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl shadow-xl p-6 w-full max-w-sm text-center"><span class="text-4xl">🎮</span><h2 class="text-2xl font-bold mt-4">Order Received!</h2><p class="text-secondary my-2">While you wait, why not play a game?</p><button onclick="app.closeModal('play-prompt-modal'); app.navigateTo('play');" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Play Games</button><button onclick="app.closeModal('play-prompt-modal'); app.navigateTo('cart');" class="w-full mt-2 bg-secondary py-3 rounded-lg">Track Order</button></div></div>`;this.showModal(m)},
+    showInstagramPromo(){const c=Object.entries(STATIC_DATA.captionIdeas).map(([k,v])=>({n:k,i:{student:'🎓',office:'💼',couple:'❤️',friends:'🎉'}[k]}));const m=`<div id="insta-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold">Post & Get 5% Off!</h2><p class="text-secondary mt-1 mb-6">Choose your vibe for caption ideas!</p><div class="grid grid-cols-2 gap-4">${c.map(i=>`<button onclick="app.showCaptionIdeas('${i.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${i.i}</span><p class="font-semibold mt-2 capitalize">${i.n}</p></button>`).join('')}</div><button onclick="app.closeModal('insta-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button></div></div>`;this.showModal(m)},
+    showCaptionIdeas(category){this.closeModal('insta-modal');const i=STATIC_DATA.captionIdeas[category];const m=`<div id="caption-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-2xl font-bold">Caption Ideas</h2><p class="text-secondary mt-1 mb-4">Tap to copy. Tag us <span class="font-bold brand-text">@hxousecoffee</span>!</p><div class="space-y-2 max-h-48 overflow-y-auto">${i.map(s=>`<div onclick="app.copyCaption('${s.replace(/'/g,"\\'")}')" class="bg-secondary p-3 rounded-lg text-sm font-medium cursor-pointer flex justify-between"><span>${s}</span><span class="text-xs font-bold">COPY</span></div>`).join('')}</div><a href="https://www.instagram.com" target="_blank" class="block w-full text-center mt-6 brand-bg font-semibold py-3 rounded-lg">Open Instagram</a><button onclick="app.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
+    copyCaption(t){navigator.clipboard.writeText(t).then(()=>this.showToast('Copied!'),()=>this.showToast('Copy failed.'))},
+    showStaffRequestModal(){const m=`<div id="staff-req-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold mb-4">Request Service</h2><div class="grid grid-cols-2 gap-4"><button onclick="app.showToast('Waiter is on the way!');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">🙋‍♂️</span><p class="font-semibold mt-1">Waiter</p></button><button onclick="app.showToast('Water is on the way.');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">💧</span><p class="font-semibold mt-1">Water</p></button><button onclick="app.showToast('Your bill is being prepared.');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">💳</span><p class="font-semibold mt-1">The Bill</p></button><button onclick="app.showToast('Staff will be over to clean.');app.closeModal('staff-req-modal')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-2xl">🧹</span><p class="font-semibold mt-1">Cleaning</p></button></div><button onclick="app.closeModal('staff-req-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button></div></div>`;this.showModal(m)},
+    async showFeedbackModal(){const{data}=await supabase.from('orders').select('id').eq('customer_id',this.state.user.id).eq('status','delivered').order('created_at',{ascending:false}).limit(1).single();if(!data)return this.showToast("You can leave feedback after an order is complete.");this.showModal(`<div id="feedback-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold text-primary mb-4">Leave Feedback</h2><p class="text-sm text-secondary mb-2">For order #${data.id.slice(0,6)}</p><textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="4" placeholder="How was your experience?"></textarea><div class="flex space-x-2 mt-4"><button onclick="app.closeModal('feedback-modal')" class="w-1/2 bg-secondary font-semibold py-3 rounded-lg">Cancel</button><button onclick="app.submitFeedback('${data.id}')" class="w-1/2 brand-bg font-semibold py-3 rounded-lg">Submit</button></div></div></div>`)},
+    async submitFeedback(orderId){const content=document.getElementById('feedback-text').value.trim();if(!content)return this.showToast("Please enter your feedback.");const{error}=await supabase.from('feedback').insert({order_id:orderId,customer_id:this.state.user.id,content:content});if(error)return this.showToast(`Could not submit feedback: ${error.message}`);this.closeModal('feedback-modal');this.showToast("Thank you for your feedback!")},
+    showThemeModal(){const t=[{n:'light',i:'☀️'},{n:'dark',i:'🌙'},{n:'sunset',i:'🌆'},{n:'matcha',i:'🍵'}];const m=`<div id="theme-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl p-6 w-full max-w-lg"><h2 class="text-xl font-bold mb-4">Choose Theme</h2><div class="grid grid-cols-2 gap-4">${t.map(i=>`<button onclick="app.toggleTheme('${i.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${i.i}</span><p class="font-semibold mt-1 capitalize">${i.n}</p></button>`).join('')}</div><button onclick="app.closeModal('theme-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
+    showWifiModal(){const m=`<div id="wifi-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2><p class="text-secondary mb-4">Connect and enjoy!</p><div class="bg-secondary p-4 rounded-lg"><p class="text-xs">Network Name</p><p class="font-bold text-lg">HXOUSE_GUEST</p><hr class="border-custom my-3"><p class="text-xs">Password</p><p class="font-bold text-lg">coffeehouse</p></div><button onclick="app.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
+    async showOrderHistoryModal(){const{data}=await supabase.from('orders').select(`*, order_items (products(name), quantity)`).eq('customer_id',this.state.user.id).order('created_at',{ascending:false});const h=data?.length>0?data.map(o=>`<div class="bg-secondary p-3 rounded-lg"><div class="flex justify-between"><div><p class="font-bold">Order #${o.id.slice(0,6)}</p><p class="text-xs text-secondary">${new Date(o.created_at).toLocaleString()}</p></div><p class="font-semibold">₹${o.total_amount}</p></div><div class="text-sm text-secondary mt-2">${o.order_items.map(i=>`${i.products.name} (x${i.quantity})`).join(', ')}</div></div>`).join(''):'<p class="text-secondary text-center">No past orders found.</p>';this.showModal(`<div id="history-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-md"><h2 class="text-xl font-bold text-center mb-4">Order History</h2><div class="space-y-3 max-h-80 overflow-y-auto">${h}</div><button onclick="app.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`)},
+    showBillSplitterModal(){const m=`<div id="splitter-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm"><h2 class="text-xl font-bold text-center mb-4">Bill Splitter</h2><div class="space-y-4"><input type="number" id="bill-total" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Total Bill"><input type="number" id="bill-people" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Number of People"></div><button onclick="app.calculateSplit()" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Calculate</button><div id="split-result" class="mt-4 text-center h-8 font-bold text-xl"></div><button onclick="app.closeModal('splitter-modal')" class="w-full mt-4 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`;this.showModal(m)},
+    calculateSplit(){const t=parseFloat(document.getElementById('bill-total').value),e=parseInt(document.getElementById('bill-people').value),r=document.getElementById('split-result');r.textContent=t>0&&e>0?`Each person pays ₹${(t/e).toFixed(2)}`:"Invalid input"},
 };
 
+// =================================================================================
+//  SECTION 3: GAMES & INTERACTIVE MODULES
+// =================================================================================
+const GAMES = {
+    ticTacToe: {
+        id: 'ticTacToe', title: 'Tic-Tac-Toe', description: 'Classic 2-player game for your table.',
+        board: Array(9).fill(null), currentPlayer:"X", winner:null,
+        start(){this.reset();app.showModal(`<div id="ttt-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Tic-Tac-Toe</h2><p id="ttt-status" class="font-semibold text-secondary mb-4">Player X's turn</p><div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">${this.board.map((_,i)=>`<div class="aspect-square bg-secondary flex items-center justify-center text-4xl font-bold rounded-lg" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}</div><button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button><button onclick="app.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button></div></div>`)},
+        play(i){if(this.board[i]||this.winner)return;this.board[i]=this.currentPlayer;this.checkWinner();this.currentPlayer=this.currentPlayer==="X"?"O":"X";this.updateUI()},
+        checkWinner(){const l=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(let e of l){const[a,b,c]=e;if(this.board[a]&&this.board[a]===this.board[b]&&this.board[a]===this.board[c]){this.winner=this.board[a];sound.play("win");return}}if(this.board.every(c=>c)){this.winner="Draw";sound.play("draw")}},
+        updateUI(){document.querySelectorAll("#ttt-board>div").forEach((c,i)=>{c.textContent=this.board[i];c.style.color=this.board[i]==="X"?"#3b82f6":"#ef4444"});document.getElementById("ttt-status").textContent=this.winner?this.winner==="Draw"?"It's a Draw!":`Player ${this.winner} wins!`: `Player ${this.currentPlayer}'s turn`},
+        reset(){this.board.fill(null);this.currentPlayer="X";this.winner=null}
+    },
+    rockPaperScissors: {
+        id: 'rockPaperScissors', title: 'Rock Paper Scissors', description: 'Challenge our AI to a quick game.',
+        choices: ['✊', '✋', '✌️'],
+        start() {
+            app.showModal(`<div id="rps-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Rock Paper Scissors</h2><div class="flex justify-around items-center my-6"><div class="text-center"><p class="font-bold">You</p><p id="rps-player" class="text-6xl mt-2">?</p></div><p class="text-4xl font-bold">vs</p><div class="text-center"><p class="font-bold">AI</p><p id="rps-ai" class="text-6xl mt-2">?</p></div></div><p id="rps-result" class="font-bold text-lg h-8"></p><div class="flex justify-around mt-4">${this.choices.map((c, i) => `<button onclick="GAMES.rockPaperScissors.play(${i})" class="text-4xl p-4 bg-secondary rounded-full hover:scale-110">${c}</button>`).join("")}</div><button onclick="app.closeModal('rps-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button></div></div>`);
+        },
+        play(playerChoice) {
+            const aiChoice = Math.floor(Math.random() * 3);
+            document.getElementById('rps-player').textContent = this.choices[playerChoice];
+            document.getElementById('rps-ai').textContent = this.choices[aiChoice];
+            const resultEl = document.getElementById('rps-result');
+            if (playerChoice === aiChoice) { resultEl.textContent = "It's a Draw!"; sound.play('draw'); } 
+            else if ((playerChoice === 0 && aiChoice === 2) || (playerChoice === 1 && aiChoice === 0) || (playerChoice === 2 && aiChoice === 1)) { resultEl.textContent = 'You Win!'; sound.play('win'); } 
+            else { resultEl.textContent = 'AI Wins!'; sound.play('draw'); }
+        }
+    },
+    coffeeTrivia: {
+        id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your coffee knowledge!',
+        start() {
+            const item = STATIC_DATA.coffeeTrivia[Math.floor(Math.random() * STATIC_DATA.coffeeTrivia.length)];
+            app.showModal(`<div id="trivia-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-xl font-bold mb-2">Coffee Trivia</h2><p class="text-secondary mb-6">${item.q}</p><div class="bg-secondary p-4 rounded-lg"><p id="trivia-answer" class="font-bold text-lg opacity-0 transition-opacity">${item.a}</p></div><button onclick="document.getElementById('trivia-answer').style.opacity=1" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Show Answer</button><button onclick="app.closeModal('trivia-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button></div></div>`);
+        }
+    },
+    coffeeArt: {
+        id: 'coffeeArt', title: 'Coffee Art Studio', description: 'Unleash your inner barista and create some latte art.',
+        canvas: null, ctx: null, painting: false,
+        start() {
+            app.showModal(`<div id="art-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"><div class="modal-content bg-primary rounded-2xl p-6 w-full max-w-sm text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-64 h-64 mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair"><canvas id="coffee-art-canvas" class="absolute inset-0" width="256" height="256"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="app.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div></div>`);
+            this.initCanvas();
+        },
+        initCanvas() {
+            this.canvas = document.getElementById("coffee-art-canvas"); this.ctx = this.canvas.getContext("2d");
+            this.ctx.strokeStyle = "#ffffff"; this.ctx.lineWidth = 5; this.ctx.lineCap = "round";
+            this.canvas.addEventListener("pointerdown", this.startPosition.bind(this));
+            this.canvas.addEventListener("pointerup", this.finishedPosition.bind(this));
+            this.canvas.addEventListener("pointermove", this.draw.bind(this));
+        },
+        startPosition(e) { this.painting = true; this.draw(e); },
+        finishedPosition() { this.painting = false; this.ctx.beginPath(); },
+        draw(e) {
+            if (!this.painting) return; e.preventDefault();
+            const rect = this.canvas.getBoundingClientRect();
+            this.ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        },
+        changeColor(c) { this.ctx.strokeStyle = c; },
+        clearCanvas() { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); }
+    },
+};
+
+
+// =================================================================================
+//  SECTION 4: APP INITIALIZATION
+// =================================================================================
+
+/**
+ * The final step: wait for the HTML document to be fully loaded, then
+ * call the main `app.init()` function to start the application.
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    // A special handler to pass the isDelivered flag to the instagram modal template
-    const originalShowModal = app.showModal.bind(app);
-    app.showModal = function(templateId, ...args) {
-        if (templateId === 'modal-template-instagram') {
-            const isDelivered = args[0] || false;
-            const template = document.getElementById(templateId);
-            if (template) {
-                template.innerHTML = app.getInstagramModalHTML(isDelivered);
-            }
-        }
-        originalShowModal(templateId);
-    };
-
-    const modalTemplates = {
-        'modal-template-admin-login': admin.getLoginModalHTML(),
-        'modal-template-feedback': app.getFeedbackModalHTML(),
-        'modal-template-instagram': app.getInstagramModalHTML(), // Initial render
-        'modal-template-spin-the-wheel': spinTheWheel.getModalHTML(),
-        'modal-template-tic-tac-toe': ticTacToe.getModalHTML(),
-        'modal-template-rock-paper-scissors': rockPaperScissors.getModalHTML(),
-        'modal-template-post-order': app.getPostOrderModalHTML()
-    };
-
-    for (const id in modalTemplates) {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = modalTemplates[id];
-    }
     app.init();
 });
 </script>
 </body>
 </html>
+" in the document "Hxouse Customer App".
+I am looking for you to make the following changes: bro quantity not visible when i order something in menu page quantity should be visiblle also games  are not showing add my previous games for interaction and remove spin to win but add other games also ask for name and mobile number(optional) also track order not uilding up rn yk order is not placing
 
