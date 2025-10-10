@@ -40,7 +40,11 @@
         @keyframes toast-out { from { opacity: 1; } to { opacity: 0; display: none; } }
         
         .modal-overlay { animation: fadeIn 0.3s ease; }
-        .modal-content { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-content { 
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 85vh; /* Mobile compatibility fix */
+            overflow-y: auto;   /* Mobile compatibility fix */
+        }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         #splash-screen img { animation: pulse 2s infinite ease-in-out; }
@@ -69,6 +73,15 @@
             font-style: italic;
             font-weight: 600;
         }
+        .spinner {
+            border: 2px solid var(--bg-primary);
+            border-top: 2px solid var(--brand-primary);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body data-theme="light">
@@ -126,8 +139,8 @@ function setAppHeight() {
 window.addEventListener('resize', setAppHeight);
 setAppHeight();
 
-const SUPABASE_URL = 'https://jkrslxtnhtvrdllyjvxo.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprcnNseHRuaHR2cmRsbHlqdnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5ODQxNDgsImV4cCI6MjA3NTU2MDE0OH0.J8VzFmQeU_0sRd8MDO6YJMiJA9Cs0KVpwN-NVzyY5nk';
+const SUPABASE_URL = 'https://ndjpifvtfwwzrjjtqbpf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kanBpZnZ0Znd3enJqanRxYnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwNDQ2NTAsImV4cCI6MjA3NTYyMDY1MH0.j7QvHKwNVp4iju83XOUaxSADatqebYbPXQBOCVMTRdA';
 const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const STATIC_DATA = {
@@ -136,13 +149,7 @@ const STATIC_DATA = {
         office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ],
         couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffeeco", "Love is in the air, and it smells like coffee from @hxousecoffeeco." ],
         friends: [ "Good times and great coffee with the best crew! @hxousecoffeeco #Friends", "A perfect blend of friendship and coffee at @hxousecoffeeco!" ]
-    },
-    coffeeTrivia: [
-        { q: "Where was coffee first discovered?", a: "Ethiopia" },
-        { q: "What does 'espresso' mean in Italian?", a: "Expressed or Forced Out" },
-        { q: "What is the most expensive coffee in the world?", a: "Kopi Luwak" },
-        { q: "Which country is the largest producer of coffee?", a: "Brazil" }
-    ]
+    }
 };
 
 const sound = {
@@ -185,12 +192,12 @@ const app = {
         customerProfile: null,
         theme: 'light',
         menuData: [],
+        appSettings: {},
         orderSubscription: null,
         currentMenuCategory: null, 
     },
     
     async init() {
-        // PERF: Immediately check for saved theme to show UI faster
         const savedTheme = localStorage.getItem('hxouse-theme');
         if (savedTheme) {
             this.setThemeAndProceed(savedTheme, true);
@@ -211,7 +218,6 @@ const app = {
             themeScreen.style.display = 'none';
         }
         
-        // PERF: Don't wait for fade-out to start the app logic
         this.startAppFlow();
     },
 
@@ -228,7 +234,7 @@ const app = {
                 this.state.user = signInData.user;
             }
             
-            await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData() ]);
+            await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData(), this.fetchAppSettings() ]);
 
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
@@ -248,7 +254,6 @@ const app = {
         }
     },
 
-    // --- DATA & SESSION MANAGEMENT ---
     getTableNumberFromURL() {
         const params = new URLSearchParams(window.location.search);
         const tableNum = params.get('table');
@@ -270,6 +275,14 @@ const app = {
             if (error) throw error;
             this.state.menuData = data.map(c => ({ category: c.name, items: c.products }));
         } catch (error) { console.error('Error fetching menu:', error); ui.showToast('Could not load the menu.'); }
+    },
+    
+    async fetchAppSettings() {
+        try {
+            const { data, error } = await supabase.from('app_settings').select('key, value');
+            if (error) throw error;
+            this.state.appSettings = data.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {});
+        } catch (error) { console.error('Error fetching app settings:', error); }
     },
     
     showOnboardingModal(){
@@ -338,7 +351,6 @@ const app = {
         this.navigateTo('home');
     },
 
-    // --- UI RENDERING & NAVIGATION ---
     navigateTo(page){
         if (!this.state.customerProfile) return;
         sound.play('click');
@@ -351,7 +363,6 @@ const app = {
     applyTheme(){ document.body.dataset.theme = this.state.theme; },
     toggleTheme(t){ this.state.theme = t; localStorage.setItem('hxouse-theme', t); this.applyTheme(); this.navigateTo('more'); },
 
-    // --- CART & ORDER LOGIC ---
     addOrUpdateCartFromModal(itemId) {
         const quantity = parseInt($('#modal-quantity-select').value);
         const cartItem = this.state.cart.find(i => i.id === itemId);
@@ -377,21 +388,38 @@ const app = {
         ui.renderPageContent(this.state.currentPage);
     },
     
-    async placeOrder(paymentMethod){
+    async placeOrder(paymentMethod, btnElement){
         if (this.state.cart.length === 0 || !this.state.tableNumber) return ui.showToast("Cart is empty or table number is missing.");
-        ui.closeModal('payment-modal');
-
-        const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
-        if (tableError || !tableData) return ui.showToast(`Table #${this.state.tableNumber} is not a valid table.`);
         
-        const { data: orderData, error: orderError } = await supabase.from('orders').insert({
+        btnElement.disabled = true;
+        btnElement.innerHTML = `<span class="flex items-center justify-center"><div class="spinner mr-2"></div> Processing...</span>`;
+        
+        const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
+        if (tableError || !tableData) {
+            btnElement.disabled = false;
+            btnElement.innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></span>`;
+             $$('.payment-btn')[1].innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></span>`;
+
+            return ui.showToast(`Table #${this.state.tableNumber} is not a valid table.`);
+        }
+        
+        const orderPayload = {
             customer_id: this.state.user.id,
             table_id: tableData.id,
             total_amount: this.calculateCartTotal(),
             payment_method: paymentMethod,
-            special_instructions: $('#special-instructions')?.value || ''
-        }).select().single();
-        if (orderError) return ui.showToast(`Could not place order: ${orderError.message}`);
+            special_instructions: $('#special-instructions')?.value || '',
+            coupon_code: null,
+            discount_amount: 0
+        };
+        
+        const { data: orderData, error: orderError } = await supabase.from('orders').insert(orderPayload).select().single();
+        if (orderError) {
+             btnElement.disabled = false;
+             btnElement.innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></span>`;
+             $$('.payment-btn')[1].innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></span>`;
+            return ui.showToast(`Could not place order: ${orderError.message}`);
+        }
         
         const orderItems = this.state.cart.map(i => ({
             order_id: orderData.id,
@@ -402,19 +430,12 @@ const app = {
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
         if (itemsError) return ui.showToast(`Could not save order items: ${itemsError.message}`);
 
+        ui.closeModal('payment-modal');
         await this.fetchActiveOrder();
         this.state.cart = [];
         this.refreshPage();
         sound.play('success');
-        this.navigateTo('cart'); // Go to tracking page
-        ui.showModal('play-prompt-modal', `
-            <div class="text-center"><span class="text-4xl">🎮</span>
-                <h2 class="text-2xl font-bold mt-4">Order Received!</h2>
-                <p class="text-secondary my-2">While you wait, why not play a game?</p>
-                <button onclick="ui.closeModal('play-prompt-modal'); app.navigateTo('play');" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Play Games</button>
-                <button onclick="ui.closeModal('play-prompt-modal');" class="w-full mt-2 bg-secondary py-3 rounded-lg">No, Thanks</button>
-            </div>
-        `);
+        this.navigateTo('cart');
     },
     
     async fetchActiveOrder(){
@@ -447,7 +468,7 @@ const app = {
                         ui.showModal('review-modal', `
                             <div class="text-center"><span class="text-4xl">⭐</span>
                             <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2>
-                            <p class="text-secondary my-2">How was your experience with order #${orderId.slice(0,6)}?</p>
+                            <p class="text-secondary my-2">How was your experience?</p>
                             <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="3" placeholder="Tell us more..."></textarea>
                             <button onclick="app.submitFeedback('${orderId}')" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Submit Feedback</button>
                             <button onclick="ui.closeModal('review-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Maybe Later</button>
@@ -500,6 +521,9 @@ const app = {
 // =================================================================================
 const ui = {
     showModal(id, content) {
+        const existingModal = $(`#${id}`);
+        if (existingModal) existingModal.remove();
+
         const modalHTML = `<div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg">${content}</div></div>`;
         $('#modal-container').insertAdjacentHTML('beforeend', modalHTML);
     },
@@ -518,13 +542,12 @@ const ui = {
             home: { title: 'H<span class="classy-x">X</span>OUSE', back: false },
             order: { title: 'Menu', back: false },
             cart: { title: app.state.activeOrder ? 'Track Order' : 'My Cart', back: false },
-            play: { title: 'Entertainment', back: true },
-            more: { title: 'More Options', back: true },
+            social: { title: 'Social', back: false },
+            more: { title: 'More Options', back: false },
         };
-        const config = pageConfigs[page];
+        const config = pageConfigs[page] || { title: 'HXOUSE', back: false };
         header.innerHTML = `
             <div class="flex items-center space-x-2">
-                ${config.back ? `<button onclick="app.navigateTo('home')" class="p-2 -ml-2 rounded-full hover:bg-secondary"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>` : ''}
                 <h1 class="text-3xl font-bold brand-text">${config.title}</h1>
             </div>
             <div class="text-right">
@@ -536,20 +559,28 @@ const ui = {
     renderPageContent(page) {
         const content = $('#page-content');
         content.innerHTML = '';
-        content.className = 'fade-in';
         const renderers = {
             home: this.renderHomePage,
             order: this.renderMenuPage,
             cart: this.renderCartPage,
-            play: this.renderPlayPage,
+            social: this.renderSocialPage,
             more: this.renderMorePage,
         };
+        content.classList.remove('fade-in');
+        void content.offsetWidth; 
+        content.classList.add('fade-in');
         renderers[page]?.call(this);
     },
     
     renderBottomNav(){
-        const icons = { home: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`, order: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`, cart: `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`, play: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`, more: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>` };
-        const pages = ['home', 'order', 'cart', 'play', 'more'];
+        const icons = { home: `...`, order: `...`, cart: `...`, social: `...`, more: `...` };
+        icons.home = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`;
+        icons.order = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`;
+        icons.cart = `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`;
+        icons.social = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`;
+        icons.more = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`;
+        
+        const pages = ['home', 'order', 'cart', 'social', 'more'];
         $('#bottom-nav').innerHTML = pages.map(p => `<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${icons[p]}<span id="${p}-tab-label" class="text-xs font-semibold capitalize">${p}</span></button>`).join('');
     },
     
@@ -582,8 +613,8 @@ const ui = {
         }
     },
 
-    // --- PAGE RENDERERS ---
     renderHomePage(){
+        const settings = app.state.appSettings;
         const activeOrderHTML = app.state.activeOrder ? `
             <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center">
                 <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2>
@@ -594,22 +625,21 @@ const ui = {
         $('#page-content').innerHTML = `
             <div class="space-y-6">
                 <div class="relative h-64 overflow-hidden rounded-b-2xl">
-                    <video src="https://jkrslxtnhtvrdllyjvxo.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
+                    <video src="https://ndjpifvtfwwzrjjtqbpf.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
                     <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
-                        <h1 class="text-4xl font-bold">H<span class="classy-x">X</span>OUSE</h1>
-                        <p class="text-lg mt-1 font-light">COFFEE CO.</p>
+                        <h1 class="text-4xl font-bold">${settings.welcome_title || 'H<span class="classy-x">X</span>OUSE'}</h1>
+                        <p class="text-lg mt-1 font-light">${settings.welcome_subtitle || 'COFFEE CO.'}</p>
                     </div>
                 </div>
                 <div class="p-4 space-y-6">
                     ${activeOrderHTML}
-                    <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
-                        <h2 class="text-2xl font-bold text-primary">Follow & Get <span class="instagram-card">5% Off!</span></h2>
-                        <p class="mt-1 text-secondary">Follow, post a story, and show it at the counter.</p>
-                        <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">How it works &rarr;</button>
+                    <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
+                        <h2 class="text-2xl font-bold text-primary">${settings.promo_title || 'Post a Story & Get a <span class="instagram-card">Free Gift!</span>'}</h2>
+                        <p class="mt-1 text-secondary">${settings.promo_subtitle || 'Show your story at the counter to claim your surprise.'}</p>
+                        <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Learn More &rarr;</button>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4">
                         <button onclick="ui.showStaffRequestModal()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎️</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button>
-                        <button onclick="app.navigateTo('play')" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🎮</span><p class="font-semibold mt-2 text-primary">Games</p></button>
                     </div>
                 </div>
             </div>`;
@@ -660,7 +690,7 @@ const ui = {
                 const cartItem = app.state.cart.find(ci => ci.id === item.id);
                 const quantityBadge = cartItem ? `<div class="absolute -top-2 -right-2 brand-bg text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold shadow-lg">${cartItem.quantity}</div>` : '';
                 
-                return `<div class="bg-secondary p-4 rounded-xl flex justify-between items-center cursor-pointer relative" onclick="ui.showItemDetailModal(${item.id})">
+                return `<div class="bg-secondary p-4 rounded-xl flex justify-between items-center cursor-pointer relative" onclick="ui.showItemDetailModal('${item.id}')">
                             ${quantityBadge}
                             <div class="flex items-center space-x-4 flex-grow">
                                 <div class="text-4xl flex-shrink-0 w-12 h-12 flex items-center justify-center bg-primary rounded-lg">${item.image_url || '🍴'}</div>
@@ -701,7 +731,7 @@ const ui = {
             <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div>
             <div class="p-4 bg-primary border-t-custom sticky bottom-20">
                 <div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${total.toFixed(2)}</span></div>
-                <button onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
+                <button id="place-order-btn" onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
             </div>`;
     },
 
@@ -737,21 +767,33 @@ const ui = {
             </div>`;
     },
     
-    renderPlayPage(){
+    renderSocialPage(){
+        const settings = app.state.appSettings;
         $('#page-content').innerHTML = `
-            <div class="p-4 space-y-4">
-                ${Object.values(GAMES).map(game => `
-                    <div class="bg-secondary p-6 rounded-xl">
-                        <h3 class="text-xl font-bold text-primary mb-2">${game.title}</h3>
-                        <p class="text-secondary mb-4">${game.description}</p>
-                        <button onclick="GAMES['${game.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg">Play</button>
-                    </div>`).join("")}
-            </div>`;
+            <div class="p-4 space-y-6 text-center">
+                 <div class="bg-secondary p-6 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold text-primary">Join Our Community!</h2>
+                    <p class="text-secondary mt-1">Follow us on Instagram for updates, offers, and good vibes.</p>
+                    <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="instagram-card text-2xl font-bold my-4 block">@hxousecoffeeco</a>
+                    <div class="flex justify-center">
+                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://instagram.com/hxousecoffeeco" alt="Instagram QR Code" class="rounded-lg bg-white p-2">
+                    </div>
+                    <p class="text-xs text-secondary mt-2">Scan to follow!</p>
+                </div>
+
+                <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left">
+                     <h2 class="text-2xl font-bold text-primary">${settings.promo_title || 'Post a Story & Get a <span class="instagram-card">Free Gift!</span>'}</h2>
+                    <p class="mt-1 text-secondary">${settings.promo_subtitle || 'Show your story at the counter to claim your surprise.'}</p>
+                    <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Get Caption Ideas &rarr;</button>
+                </div>
+            </div>
+        `;
     },
-    
+
     renderMorePage(){
         const options = [
             { icon: "🎨", text: "Change Theme", action: "ui.showThemeModal()" },
+            { icon: "🎮", text: "Play Games", action: "ui.showGamesModal()" },
             { icon: "📶", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
             { icon: "📜", text: "Order History", action: "ui.showOrderHistoryModal()" },
         ];
@@ -766,11 +808,11 @@ const ui = {
 
     // --- MODAL RENDERERS ---
     showPaymentModal(){
-        ui.showModal('payment-modal', `
+         ui.showModal('payment-modal', `
             <h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2>
             <div class="space-y-3">
-                <button onclick="app.placeOrder('Pay at Counter')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
-                <button onclick="app.placeOrder('UPI / QR Code')" class="w-full flex items-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button>
+                <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
+                <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button>
             </div>
             <button onclick="ui.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
         `);
@@ -778,14 +820,9 @@ const ui = {
     
     showItemDetailModal(itemId){
         const item = app.state.menuData.flatMap(c => c.items).find(i => i.id === itemId); if (!item) return;
-        
         const cartItem = app.state.cart.find(ci => ci.id === itemId);
         const currentQuantity = cartItem ? cartItem.quantity : 1;
-
-        let optionsHTML = '';
-        for (let i = 1; i <= 10; i++) {
-            optionsHTML += `<option value="${i}" ${i === currentQuantity ? 'selected' : ''}>${i}</option>`;
-        }
+        let optionsHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${i + 1 === currentQuantity ? 'selected' : ''}>${i + 1}</option>`).join('');
 
         ui.showModal('item-detail-modal', `
             <div class="flex justify-between items-start">
@@ -798,15 +835,11 @@ const ui = {
             <p class="text-secondary mt-2">${item.description || 'A delicious choice.'}</p>
             <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-lg">
                 <label for="modal-quantity-select" class="font-semibold text-primary">Quantity:</label>
-                <select id="modal-quantity-select" class="bg-primary border border-custom text-primary font-semibold rounded-lg p-2">
-                    ${optionsHTML}
-                </select>
+                <select id="modal-quantity-select" class="bg-primary border border-custom text-primary font-semibold rounded-lg p-2">${optionsHTML}</select>
             </div>
             <div class="mt-6 grid grid-cols-2 gap-4">
                 <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button>
-                <button onclick="app.addOrUpdateCartFromModal(${item.id})" class="w-full brand-bg font-semibold py-3 rounded-lg">
-                    ${cartItem ? 'Update Quantity' : 'Add to Cart'}
-                </button>
+                <button onclick="app.addOrUpdateCartFromModal('${item.id}')" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
             </div>`);
     },
 
@@ -815,8 +848,8 @@ const ui = {
             name: key, icon: { student: '🎓', office: '💼', couple: '❤️', friends: '🎉' }[key]
         }));
         ui.showModal('insta-modal', `
-            <h2 class="text-2xl font-bold">Post & Get 5% Off!</h2>
-            <p class="text-secondary mt-1 mb-6">Choose your vibe for caption ideas!</p>
+            <h2 class="text-2xl font-bold">Post & Get a Free Gift!</h2>
+            <p class="text-secondary mt-1 mb-6">Choose your vibe for caption ideas, post a story tagging us, and show it at the counter!</p>
             <div class="grid grid-cols-2 gap-4">${vibes.map(v => `
                 <button onclick="ui.showCaptionIdeas('${v.name}')" class="bg-secondary p-4 rounded-xl text-center">
                     <span class="text-3xl">${v.icon}</span><p class="font-semibold mt-2 capitalize">${v.name}</p>
@@ -838,26 +871,8 @@ const ui = {
                 </div>`).join('')}
             </div>
             <a href="instagram://story-camera" class="block w-full text-center mt-6 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white font-semibold py-3 rounded-lg">Open Instagram Story</a>
-            <div class="mt-4 text-center">
-                 <button id="reveal-code-btn" onclick="ui.revealDiscount()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">I've Posted, Get My Code!</button>
-            </div>
-            <div id="discount-code-container" class="hidden mt-4 bg-secondary p-4 rounded-lg text-center">
-                <p class="text-secondary text-sm">Here is your 5% discount code!</p>
-                <div class="flex items-center justify-center space-x-2 my-2">
-                    <p id="discount-code" class="text-2xl font-bold brand-text tracking-widest">HXOUSE5</p>
-                    <button onclick="app.copyCaption('HXOUSE5')" class="bg-primary p-2 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                    </button>
-                </div>
-                <p class="text-xs text-secondary">Show this code at the counter.</p>
-            </div>
             <button onclick="ui.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button>
         `);
-    },
-
-    revealDiscount() {
-        $('#reveal-code-btn').style.display = 'none';
-        $('#discount-code-container').classList.remove('hidden');
     },
     
     showStaffRequestModal(){
@@ -875,6 +890,21 @@ const ui = {
                 </button>`).join('')}
             </div>
             <button onclick="ui.closeModal('staff-req-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+        `);
+    },
+    
+    showGamesModal() {
+        ui.showModal('games-modal', `
+            <h2 class="text-xl font-bold text-center mb-4">Entertainment</h2>
+            <div class="space-y-3">
+                ${Object.values(GAMES).map(game => `
+                    <div class="bg-secondary p-4 rounded-xl">
+                        <h3 class="text-lg font-bold text-primary mb-1">${game.title}</h3>
+                        <p class="text-secondary text-sm mb-3">${game.description}</p>
+                        <button onclick="GAMES['${game.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg text-sm">Play</button>
+                    </div>`).join("")}
+            </div>
+            <button onclick="ui.closeModal('games-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
         `);
     },
 
@@ -918,7 +948,7 @@ const ui = {
         
         ui.showModal('history-modal', `
             <h2 class="text-xl font-bold text-center mb-4">Order History</h2>
-            <div class="space-y-3 max-h-80 overflow-y-auto">${historyHTML}</div>
+            <div class="space-y-3">${historyHTML}</div>
             <button onclick="ui.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
         `);
     }
@@ -931,7 +961,20 @@ const GAMES = {
     ticTacToe: {
         id: 'ticTacToe', title: 'Tic-Tac-Toe', description: 'Classic 2-player game for your table.',
         board: Array(9).fill(null), currentPlayer:"X", winner:null,
-        start(){this.reset(); ui.showModal('ttt-modal', `<h2 class="text-2xl font-bold mb-2 text-center">Tic-Tac-Toe</h2><p id="ttt-status" class="font-semibold text-secondary mb-4 text-center">Player X's turn</p><div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">${this.board.map((_,i)=>`<div class="aspect-square bg-secondary flex items-center justify-center text-4xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}</div><button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button><button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>`)},
+        start(){
+            this.reset(); 
+            ui.showModal('ttt-modal', `
+                <h2 class="text-2xl font-bold mb-2 text-center">Tic-Tac-Toe</h2>
+                <p id="ttt-status" class="font-semibold text-secondary mb-4 text-center">Player X's turn</p>
+                <div class="w-full max-w-[250px] mx-auto">
+                    <div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">
+                        ${this.board.map((_,i)=>`<div class="aspect-square bg-secondary flex items-center justify-center text-5xl sm:text-6xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}
+                    </div>
+                </div>
+                <button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button>
+                <button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>
+            `);
+        },
         play(i){if(this.board[i]||this.winner)return;this.board[i]=this.currentPlayer;this.checkWinner();this.currentPlayer=this.currentPlayer==="X"?"O":"X";this.updateUI()},
         checkWinner(){const l=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(let e of l){const[a,b,c]=e;if(this.board[a]&&this.board[a]===this.board[b]&&this.board[a]===this.board[c]){this.winner=this.board[a];sound.play("win");return}}if(this.board.every(c=>c)){this.winner="Draw";sound.play("draw")}},
         updateUI(){$$("#ttt-board > div").forEach((c,i)=>{c.textContent=this.board[i];c.style.color=this.board[i]==="X"?"#3b82f6":"#ef4444"});$("#ttt-status").textContent=this.winner?this.winner==="Draw"?"It's a Draw!":`Player ${this.winner} wins!`: `Player ${this.currentPlayer}'s turn`},
@@ -939,8 +982,14 @@ const GAMES = {
     },
     coffeeTrivia: {
         id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your coffee knowledge!',
+        trivia: [
+            { q: "Where was coffee first discovered?", a: "Ethiopia" },
+            { q: "What does 'espresso' mean in Italian?", a: "Expressed or Forced Out" },
+            { q: "What is the most expensive coffee in the world?", a: "Kopi Luwak" },
+            { q: "Which country is the largest producer of coffee?", a: "Brazil" }
+        ],
         start() {
-            const item = STATIC_DATA.coffeeTrivia[Math.floor(Math.random() * STATIC_DATA.coffeeTrivia.length)];
+            const item = this.trivia[Math.floor(Math.random() * this.trivia.length)];
             ui.showModal('trivia-modal', `<div class="text-center"><h2 class="text-xl font-bold mb-2">Coffee Trivia</h2><p class="text-secondary mb-6">${item.q}</p><div class="bg-secondary p-4 rounded-lg"><p id="trivia-answer" class="font-bold text-lg opacity-0 transition-opacity duration-500">${item.a}</p></div><button onclick="$('#trivia-answer').style.opacity=1" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Show Answer</button><div class="flex space-x-2 mt-2"><button onclick="GAMES.coffeeTrivia.start()" class="w-full bg-secondary py-3 rounded-lg">Next Question</button><button onclick="ui.closeModal('trivia-modal')" class="w-full bg-secondary py-3 rounded-lg">Close</button></div></div>`);
         }
     },
@@ -948,26 +997,43 @@ const GAMES = {
         id: 'coffeeArt', title: 'Coffee Art Studio', description: 'Unleash your inner barista and create some latte art.',
         canvas: null, ctx: null, painting: false,
         start() {
-            ui.showModal('art-modal', `<div class="text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-64 h-64 mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair"><canvas id="coffee-art-canvas" class="absolute inset-0" width="256" height="256"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div>`);
+            ui.showModal('art-modal', `<div class="text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-full aspect-square mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair" id="canvas-container"><canvas id="coffee-art-canvas"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div>`);
             this.initCanvas();
         },
         initCanvas() {
-            this.canvas = $("#coffee-art-canvas"); this.ctx = this.canvas.getContext("2d");
+            this.canvas = $("#coffee-art-canvas");
+            const container = $('#canvas-container');
+            if (!this.canvas || !container) return;
+            this.ctx = this.canvas.getContext("2d");
+            const size = container.clientWidth;
+            this.canvas.width = size;
+            this.canvas.height = size;
             this.ctx.strokeStyle = "#ffffff"; this.ctx.lineWidth = 5; this.ctx.lineCap = "round";
             this.canvas.addEventListener("pointerdown", this.startPosition.bind(this));
             this.canvas.addEventListener("pointerup", this.finishedPosition.bind(this));
             this.canvas.addEventListener("pointermove", this.draw.bind(this));
+            this.canvas.addEventListener("touchstart", this.startPosition.bind(this), { passive: false });
+            this.canvas.addEventListener("touchend", this.finishedPosition.bind(this));
+            this.canvas.addEventListener("touchmove", this.draw.bind(this), { passive: false });
+        },
+        getEventPosition(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+            }
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
         },
         startPosition(e) { this.painting = true; this.draw(e); },
         finishedPosition() { this.painting = false; this.ctx.beginPath(); },
         draw(e) {
-            if (!this.painting) return; e.preventDefault();
-            const rect = this.canvas.getBoundingClientRect();
-            this.ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top); this.ctx.stroke();
-            this.ctx.beginPath(); this.ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            if (!this.painting) return; 
+            e.preventDefault();
+            const { x, y } = this.getEventPosition(e);
+            this.ctx.lineTo(x, y); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.moveTo(x, y);
         },
-        changeColor(c) { this.ctx.strokeStyle = c; },
-        clearCanvas() { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); }
+        changeColor(c) { if(this.ctx) this.ctx.strokeStyle = c; },
+        clearCanvas() { if(this.ctx) this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); }
     },
 };
 
