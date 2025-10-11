@@ -72,7 +72,24 @@
             font-family: 'Playfair Display', serif;
             font-style: italic;
             font-weight: 600;
+            font-size: 1.5em; /* Adjusted size */
+            vertical-align: -0.2em; /* Re-aligned for balance */
         }
+        /* This pseudo-element creates the swoosh over the X */
+        /*
+        .classy-x::before {
+            content: '';
+            position: absolute;
+            top: 0.1em;
+            left: -0.2em;
+            width: .9em;
+            height: .5em;
+            border-left: 0.1em solid currentColor;
+            border-top: 0.1em solid currentColor;
+            border-radius: 100% 0 0 0; /* Creates a quarter-circle shape */
+            transform: rotate(55deg) skewX(10deg); /* Position and shape the swoosh */
+        }
+        */
         .spinner {
             border: 2px solid var(--bg-primary);
             border-top: 2px solid var(--brand-primary);
@@ -1251,4 +1268,9 @@ document.addEventListener('DOMContentLoaded', () => app.init());
 </script>
 </body>
 </html>
+
+
+
+
+
 
