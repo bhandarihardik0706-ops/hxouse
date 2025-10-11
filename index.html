@@ -394,7 +394,7 @@ const app = {
             ? `<input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>`
             : '';
         ui.showModal('onboarding-modal', `
-            <h2 class="text-2xl font-bold text-primary mb-2">Welcome to HXOUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p>
+            <h2 class="text-2xl font-bold text-primary mb-2">Welcome to H<span class="classy-x">X</span>OUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p>
             <div class="space-y-4">
                 <input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Name" required>
                 ${tableInputHTML}
@@ -654,7 +654,7 @@ const ui = {
             social: { title: 'Social', back: false },
             more: { title: 'More Options', back: false },
         };
-        const config = pageConfigs[page] || { title: 'HXOUSE', back: false };
+        const config = pageConfigs[page] || { title: 'H<span class="classy-x">X</span>OUSE', back: false };
         header.innerHTML = `
             <div class="flex items-center space-x-2">
                 <h1 class="text-3xl font-bold brand-text">${config.title}</h1>
@@ -1098,37 +1098,105 @@ const ui = {
 const GAMES = {
     ticTacToe: {
         id: 'ticTacToe', title: 'Tic-Tac-Toe', description: 'Classic 2-player game for your table.',
-        board: Array(9).fill(null), currentPlayer:"X", winner:null,
-        start(){
-            this.reset(); 
+        board: Array(9).fill(null),
+        currentPlayer: "X",
+        winner: null,
+        start() {
+            this.reset();
             ui.showModal('ttt-modal', `
                 <h2 class="text-2xl font-bold mb-2 text-center">Tic-Tac-Toe</h2>
                 <p id="ttt-status" class="font-semibold text-secondary mb-4 text-center">Player X's turn</p>
                 <div class="w-full max-w-[250px] mx-auto">
                     <div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">
-                        ${this.board.map((_,i)=>`<div class="aspect-square bg-secondary flex items-center justify-center text-5xl sm:text-6xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}
+                        ${this.board.map((_, i) => `<div class="aspect-square bg-secondary flex items-center justify-center text-5xl sm:text-6xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}
                     </div>
                 </div>
                 <button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button>
                 <button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>
             `);
         },
-        play(i){if(this.board[i]||this.winner)return;this.board[i]=this.currentPlayer;this.checkWinner();this.currentPlayer=this.currentPlayer==="X"?"O":"X";this.updateUI()},
-        checkWinner(){const l=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(let e of l){const[a,b,c]=e;if(this.board[a]&&this.board[a]===this.board[b]&&this.board[a]===this.board[c]){this.winner=this.board[a];sound.play("win");return}}if(this.board.every(c=>c)){this.winner="Draw";sound.play("draw")}},
-        updateUI(){$$("#ttt-board > div").forEach((c,i)=>{c.textContent=this.board[i];c.style.color=this.board[i]==="X"?"#3b82f6":"#ef4444"});$("#ttt-status").textContent=this.winner?this.winner==="Draw"?"It's a Draw!":`Player ${this.winner} wins!`: `Player ${this.currentPlayer}'s turn`},
-        reset(){this.board.fill(null);this.currentPlayer="X";this.winner=null}
+        play(i) {
+            if (this.board[i] || this.winner) return;
+            this.board[i] = this.currentPlayer;
+            this.checkWinner();
+            this.currentPlayer = this.currentPlayer === "X" ? "O" : "X";
+            this.updateUI();
+        },
+        checkWinner() {
+            const lines = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]             // Diagonals
+            ];
+            for (let line of lines) {
+                const [a, b, c] = line;
+                if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
+                    this.winner = this.board[a];
+                    sound.play("win");
+                    return;
+                }
+            }
+            if (this.board.every(cell => cell)) {
+                this.winner = "Draw";
+                sound.play("draw");
+            }
+        },
+        updateUI() {
+            $$("#ttt-board > div").forEach((cell, i) => {
+                cell.textContent = this.board[i];
+                cell.style.color = this.board[i] === "X" ? "#3b82f6" : "#ef4444";
+            });
+            $("#ttt-status").textContent = this.winner ? (this.winner === "Draw" ? "It's a Draw!" : `Player ${this.winner} wins!`) : `Player ${this.currentPlayer}'s turn`;
+        },
+        reset() {
+            this.board.fill(null);
+            this.currentPlayer = "X";
+            this.winner = null;
+        }
     },
     coffeeTrivia: {
         id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your coffee knowledge!',
+        currentQuestion: null,
         trivia: [
-            { q: "Where was coffee first discovered?", a: "Ethiopia" },
-            { q: "What does 'espresso' mean in Italian?", a: "Expressed or Forced Out" },
-            { q: "What is the most expensive coffee in the world?", a: "Kopi Luwak" },
-            { q: "Which country is the largest producer of coffee?", a: "Brazil" }
+            { q: "Where was coffee first discovered?", o: ["Brazil", "Ethiopia", "Colombia", "Vietnam"], a: 1 },
+            { q: "What does 'espresso' mean in Italian?", o: ["Fast Coffee", "Dark Coffee", "Expressed or Forced Out", "Morning Ritual"], a: 2 },
+            { q: "What is the most expensive coffee in the world, often involving an animal?", o: ["Blue Mountain", "Geisha", "Kopi Luwak", "Bourbon"], a: 2 },
+            { q: "Which country is the largest producer of coffee?", o: ["Brazil", "Vietnam", "Indonesia", "India"], a: 0 }
         ],
         start() {
-            const item = this.trivia[Math.floor(Math.random() * this.trivia.length)];
-            ui.showModal('trivia-modal', `<div class="text-center"><h2 class="text-xl font-bold mb-2">Coffee Trivia</h2><p class="text-secondary mb-6">${item.q}</p><div class="bg-secondary p-4 rounded-lg"><p id="trivia-answer" class="font-bold text-lg opacity-0 transition-opacity duration-500">${item.a}</p></div><button onclick="$('#trivia-answer').style.opacity=1" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Show Answer</button><div class="flex space-x-2 mt-2"><button onclick="GAMES.coffeeTrivia.start()" class="w-full bg-secondary py-3 rounded-lg">Next Question</button><button onclick="ui.closeModal('trivia-modal')" class="w-full bg-secondary py-3 rounded-lg">Close</button></div></div>`);
+            this.currentQuestion = this.trivia[Math.floor(Math.random() * this.trivia.length)];
+            const item = this.currentQuestion;
+            ui.showModal('trivia-modal', `
+                <div class="text-center">
+                    <h2 class="text-xl font-bold mb-2">Coffee Trivia</h2>
+                    <p class="text-secondary mb-6 h-12">${item.q}</p>
+                    <div id="trivia-options" class="space-y-3">
+                        ${item.o.map((opt, index) => `<button class="trivia-option w-full bg-secondary font-semibold p-3 rounded-lg text-left" onclick="GAMES.coffeeTrivia.checkAnswer(${index}, ${item.a})">${opt}</button>`).join('')}
+                    </div>
+                    <button onclick="ui.closeModal('trivia-modal')" class="w-full mt-6 bg-secondary py-3 rounded-lg">Close</button>
+                </div>
+            `);
+        },
+        checkAnswer(selectedIndex, correctIndex) {
+            const options = $$('.trivia-option');
+            options.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === correctIndex) {
+                    btn.classList.remove('bg-secondary');
+                    btn.classList.add('bg-green-500', 'text-white');
+                } else if (index === selectedIndex) {
+                    btn.classList.remove('bg-secondary');
+                    btn.classList.add('bg-red-500', 'text-white');
+                }
+            });
+
+            if (selectedIndex === correctIndex) {
+                sound.play('success');
+            } else {
+                sound.play('draw');
+            }
+
+            setTimeout(() => this.start(), 2000);
         }
     },
     coffeeArt: {
