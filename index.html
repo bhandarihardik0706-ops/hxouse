@@ -23,7 +23,7 @@
         [data-theme="sunset"] { --bg-primary: var(--bg-primary-sunset); --bg-secondary: var(--bg-secondary-sunset); --text-primary: var(--text-primary-sunset); --text-secondary: var(--text-secondary-sunset); --border-color: var(--border-sunset); --brand-primary: var(--brand-primary-sunset); }
         [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
         
-        html, body { height: 100%; overflow: hidden; }
+        html, body { height: 100%; }
         body { font-family: 'Poppins', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .app-container { background-color: var(--bg-primary); transition: background-color 0.5s ease; height: var(--app-height); }
         .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
@@ -351,15 +351,24 @@ const app = {
         this.getTableNumberFromURL();
         
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            this.state.user = session?.user;
-            if (!this.state.user) {
-                const { data: signInData, error } = await supabase.auth.signInAnonymously();
-                if (error) throw new Error(`Anonymous sign-in failed: ${error.message}`);
-                this.state.user = signInData.user;
-            }
-            
-            await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData(), this.fetchAppSettings() ]);
+            const setupPromise = new Promise(async (resolve, reject) => {
+                const { data: { session } } = await supabase.auth.getSession();
+                this.state.user = session?.user;
+                if (!this.state.user) {
+                    const { data: signInData, error } = await supabase.auth.signInAnonymously();
+                    if (error) return reject(new Error(`Anonymous sign-in failed: ${error.message}`));
+                    this.state.user = signInData.user;
+                }
+                
+                await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData(), this.fetchAppSettings() ]);
+                resolve();
+            });
+
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('App took too long to load.')), 10000); // 10-second timeout
+            });
+
+            await Promise.race([setupPromise, timeoutPromise]);
 
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
@@ -1268,6 +1277,7 @@ document.addEventListener('DOMContentLoaded', () => app.init());
 </script>
 </body>
 </html>
+
 
 
 
