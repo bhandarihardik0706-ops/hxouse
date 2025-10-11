@@ -54,9 +54,9 @@
         .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
         .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
-        .tracker-line { position: absolute; top: 18px; left: 10%; width: 80%; height: 4px; background-color: var(--border-color); }
-        .tracker-progress { position: absolute; top: 18px; left: 10%; height: 4px; background-color: var(--brand-primary); transition: width 0.5s ease-in-out; }
-        .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 60px; position: relative; z-index: 1; }
+        .tracker-line { position: absolute; top: 18px; left: 25%; width: 50%; height: 4px; background-color: var(--border-color); }
+        .tracker-progress { position: absolute; top: 18px; left: 25%; height: 4px; background-color: var(--brand-primary); transition: width 0.5s ease-in-out; }
+        .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 80px; position: relative; z-index: 1; }
         .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
         .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
         .tracker-label { margin-top: 8px; font-size: 10px; font-weight: 600; transition: color 0.3s ease; }
@@ -84,25 +84,10 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body data-theme="light">
-
-    <!-- Theme Selection Screen: First thing the user sees -->
-    <div id="theme-selection-screen" class="fixed inset-0 bg-black flex items-center justify-center z-[101]">
-        <div class="text-center text-white p-8">
-            <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-32 h-32 object-contain mx-auto mb-6 rounded-full">
-            <h1 class="text-3xl font-bold mb-2">Welcome to H<span class="classy-x">X</span>OUSE</h1>
-            <p class="text-gray-400 mb-8">First, choose a theme for your experience.</p>
-            <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-                <button onclick="app.setThemeAndProceed('light')" class="bg-gray-200 text-black p-4 rounded-xl text-center"><span class="text-3xl">☀️</span><p class="font-semibold mt-1">Light</p></button>
-                <button onclick="app.setThemeAndProceed('dark')" class="bg-gray-800 text-white p-4 rounded-xl text-center"><span class="text-3xl">🌙</span><p class="font-semibold mt-1">Dark</p></button>
-                <button onclick="app.setThemeAndProceed('sunset')" class="bg-indigo-900 text-orange-300 p-4 rounded-xl text-center"><span class="text-3xl">🌆</span><p class="font-semibold mt-1">Sunset</p></button>
-                <button onclick="app.setThemeAndProceed('matcha')" class="bg-green-100 text-green-900 p-4 rounded-xl text-center"><span class="text-3xl">🍵</span><p class="font-semibold mt-1">Matcha</p></button>
-            </div>
-        </div>
-    </div>
+<body data-theme="matcha">
 
     <!-- Splash Screen: Shown during initial auth and data load -->
-    <div id="splash-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-[100] hidden">
+    <div id="splash-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-[100]">
         <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full">
     </div>
 
@@ -138,18 +123,152 @@ function setAppHeight() {
 }
 window.addEventListener('resize', setAppHeight);
 setAppHeight();
-
-const SUPABASE_URL = 'https://ndjpifvtfwwzrjjtqbpf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kanBpZnZ0Znd3enJqanRxYnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwNDQ2NTAsImV4cCI6MjA3NTYyMDY1MH0.j7QvHKwNVp4iju83XOUaxSADatqebYbPXQBOCVMTRdA';
+// NEW SUPABASE DETAILS
+const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
 const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const STATIC_DATA = {
+    bestSellers: [10, 39, 61, 93], // IDs for Lotus Biscoff Cappuccino, Nutella Shake, Crispy Paneer Burger, Tandoori Paneer Pizza
     captionIdeas: {
         student: [ "Fueling my study session with @hxousecoffeeco ☕️📚 #StudentLife", "Caffeine and concentration, courtesy of @hxousecoffeeco." ],
         office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ],
         couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffeeco", "Love is in the air, and it smells like coffee from @hxousecoffeeco." ],
         friends: [ "Good times and great coffee with the best crew! @hxousecoffeeco #Friends", "A perfect blend of friendship and coffee at @hxousecoffeeco!" ]
-    }
+    },
+    // NEW STATIC MENU WITH EMOJIS
+    menu: [
+        {
+            category: 'Hot Beverages', items: [
+                { id: 1, name: 'Espresso', price: 90, description: 'A concentrated coffee brew.', image_url: '☕️' },
+                { id: 2, name: 'Americano', price: 95, description: 'Espresso with hot water.', image_url: '☕️' },
+                { id: 3, name: 'Macchiato', price: 120, description: 'Espresso with a dash of frothy milk.', image_url: '☕️' },
+                { id: 4, name: 'Cappuccino', price: 150, description: 'Espresso, hot milk, and steamed milk foam.', image_url: '☕️' },
+                { id: 5, name: 'Cafe Latte', price: 165, description: 'Espresso with steamed milk.', image_url: '☕️' },
+                { id: 6, name: 'Flat White', price: 140, description: 'Espresso with microfoam.', image_url: '☕️' },
+                { id: 7, name: 'Cafe Mocha', price: 180, description: 'A chocolate-flavoured variant of a caffè latte.', image_url: '🍫' },
+                { id: 8, name: 'Hazelnut Cappuccino', price: 180, description: 'Cappuccino with a nutty hazelnut flavour.', image_url: '🌰' },
+                { id: 9, name: 'Nutella Cappuccino', price: 200, description: 'A delicious blend of cappuccino and Nutella.', image_url: '🍫' },
+                { id: 10, name: 'Lotus Biscoff Cappuccino', price: 220, description: 'Cappuccino with the sweet taste of Biscoff.', image_url: '🍪' },
+                { id: 11, name: 'Lemon Iced Tea', price: 120, description: 'Refreshing iced tea with a hint of lemon.', image_url: '🍋' },
+                { id: 12, name: 'Peach Iced Tea', price: 140, description: 'Sweet and fruity peach-flavoured iced tea.', image_url: '🍑' },
+                { id: 13, name: 'Strawberry Iced Tea', price: 140, description: 'A delightful strawberry twist on iced tea.', image_url: '🍓' },
+                { id: 14, name: 'Cranberry Iced Tea', price: 150, description: 'Tart and refreshing cranberry iced tea.', image_url: '🥤' },
+                { id: 15, name: 'Watermelon Iced Tea', price: 150, description: 'Cool and hydrating watermelon iced tea.', image_url: '🍉' },
+                { id: 16, name: 'Lemon Honey Tea', price: 110, description: 'Soothing hot tea with lemon and honey.', image_url: '🍯' },
+                { id: 17, name: 'Green Tea', price: 120, description: 'A healthy and calming green tea.', image_url: '🍵' },
+                { id: 18, name: 'Ginger Green Tea', price: 130, description: 'Green tea with a spicy kick of ginger.', image_url: '🍵' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Cold Beverages', items: [
+                { id: 19, name: 'Classic Frappe', price: 150, description: 'A classic cold coffee delight.', image_url: '🧊' },
+                { id: 20, name: 'Mocha Frappe', price: 175, description: 'Rich chocolate and coffee blended to perfection.', image_url: '🍫' },
+                { id: 21, name: 'Caramel Frappe', price: 180, description: 'Sweet caramel goodness in a cup.', image_url: '🍮' },
+                { id: 22, name: 'Chocolate Frappe', price: 190, description: 'For the ultimate chocolate lover.', image_url: '🍫' },
+                { id: 23, name: 'Nutella Frappe', price: 220, description: 'Creamy, dreamy Nutella frappe.', image_url: '🍫' },
+                { id: 24, name: 'Hazelnut Frappe', price: 210, description: 'A nutty and delicious frappe.', image_url: '🌰' },
+                { id: 25, name: 'Oreo Frappe', price: 220, description: 'Cookies and cream in a coffee drink.', image_url: '🍪' },
+                { id: 26, name: 'Classic Iced Coffee', price: 140, description: 'Simply refreshing iced coffee.', image_url: '🧊' },
+                { id: 27, name: 'Iced Latte', price: 150, description: 'Smooth and creamy iced latte.', image_url: '🧊' },
+                { id: 28, name: 'Iced Americano', price: 150, description: 'Bold and invigorating iced americano.', image_url: '🧊' },
+                { id: 29, name: 'Iced Vanilla', price: 170, description: 'A touch of vanilla sweetness in your iced coffee.', image_url: '🧊' },
+                { id: 30, name: 'Iced Mocha', price: 170, description: 'Chocolatey and cool iced mocha.', image_url: '🍫' },
+                { id: 31, name: 'Iced Caramel', price: 170, description: 'Sweet caramel meets cold coffee.', image_url: '🍮' },
+                { id: 32, name: 'Ginger Ale Espresso', price: 190, description: 'A unique and zesty coffee creation.', image_url: '🥤' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Shakes & Mocktails', items: [
+                { id: 33, name: 'Chocolate Shake', price: 150, description: 'A rich and creamy chocolate shake.', image_url: '🍫' },
+                { id: 34, name: 'Strawberry Shake', price: 180, description: 'Sweet and fruity strawberry shake.', image_url: '🍓' },
+                { id: 35, name: 'Butterscotch Shake', price: 180, description: 'Classic butterscotch flavor in a shake.', image_url: '🍮' },
+                { id: 36, name: 'Oreo Shake', price: 190, description: 'The perfect cookies and cream shake.', image_url: '🍪' },
+                { id: 37, name: 'Kitkat Shake', price: 190, description: 'Your favorite chocolate bar in a shake.', image_url: '🍫' },
+                { id: 38, name: 'Lotus Biscoff Shake', price: 220, description: 'A decadent Lotus Biscoff shake.', image_url: '🍪' },
+                { id: 39, name: 'Nutella Shake', price: 240, description: 'An indulgent Nutella shake.', image_url: '🍫' },
+                { id: 40, name: 'Classic Lemonade', price: 140, description: 'A timeless and refreshing lemonade.', image_url: '🍋' },
+                { id: 41, name: 'Virgin Mojito', price: 150, description: 'A classic mint and lime mocktail.', image_url: '🍹' },
+                { id: 42, name: 'Black Currant', price: 150, description: 'A fruity and flavorful black currant mocktail.', image_url: '🍇' },
+                { id: 43, name: 'Strawberry Mojito', price: 170, description: 'A sweet twist on the classic mojito.', image_url: '🍓' },
+                { id: 44, name: 'Green Apple Mojito', price: 170, description: 'A tart and refreshing green apple mojito.', image_url: '🍏' },
+                { id: 45, name: 'Watermelon Mojito', price: 170, description: 'A cool and hydrating watermelon mojito.', image_url: '🍉' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Soups & Salads', items: [
+                { id: 46, name: 'Hot & Sour Soup', price: 120, description: 'Zesty, bold, and full of flavor.', image_url: '🍲' },
+                { id: 47, name: 'Tomato Basil Soup', price: 130, description: 'Hearty, comforting, and classic.', image_url: '🍅' },
+                { id: 48, name: 'Veg Clear Soup', price: 125, description: 'Simple, fresh, and nourishing.', image_url: '🥣' },
+                { id: 49, name: 'Broccoli Cheddar Soup', price: 160, description: 'Creamy, crunchy, and refreshing.', image_url: '🥦' },
+                { id: 50, name: 'Greek Salad', price: 230, description: 'Zesty and Mediterranean classic.', image_url: '🥗' },
+                { id: 51, name: 'Exotic Veg Salad', price: 240, description: 'Colorful, crunchy, and refreshing.', image_url: '🥗' },
+                { id: 52, name: 'Tandoori Paneer Tikka Salad', price: 260, description: 'Bold, spicy, and desi delight.', image_url: '🥗' },
+                { id: 53, name: 'Caesar Salad', price: 280, description: 'Classic, creamy, and irresistible.', image_url: '🥗' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Breads & Burgers', items: [
+                { id: 54, name: 'Cheese Garlic Toast', price: 245, description: 'Simple, cheesy, and irresistible.', image_url: '🍞' },
+                { id: 55, name: 'Chilli Cheese Garlic Toast', price: 260, description: 'Spicy, cheesy, and fiery good.', image_url: '🌶️' },
+                { id: 56, name: 'Cheese & Corn Garlic Toast', price: 280, description: 'Cheesy, crunchy, and delightful.', image_url: '🌽' },
+                { id: 57, name: 'Creamy Pesto Bruschetta', price: 285, description: 'Fresh, creamy, and full of flavor.', image_url: '🌿' },
+                { id: 58, name: 'Aloo Tikki Burger', price: 260, description: 'The desi favorite in a bun.', image_url: '🍔' },
+                { id: 59, name: 'Classic Veggie Burger', price: 270, description: 'The true classic bite.', image_url: '🍔' },
+                { id: 60, name: 'Mexican Burger', price: 320, description: 'Spicy, zesty, and full of fiesta flavor.', image_url: '🇲🇽' },
+                { id: 61, name: 'Crispy Paneer Patty Burger', price: 360, description: 'Paneer lovers\' ultimate burger.', image_url: '🍔' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Snacks & Mini Plates', items: [
+                { id: 62, name: 'Crispy Corn Chat', price: 190, description: 'Zesty, crispy, and addictive.', image_url: '🌽' },
+                { id: 63, name: 'Dahi Ke Kebab', price: 220, description: 'Creamy, soft, and indulgent.', image_url: '🍢' },
+                { id: 64, name: 'Hara Bhara Kebab', price: 240, description: 'Nutritious, flavorful, and hearty.', image_url: '🧆' },
+                { id: 65, name: 'Papad Paneer Finger', price: 245, description: 'Crunchy, spicy, and irresistible.', image_url: '🍢' },
+                { id: 66, name: 'Cheese Onion Ring', price: 230, description: 'Golden crunchy outside, cheesy inside.', image_url: '🧅' },
+                { id: 67, name: 'Cigar Roll', price: 245, description: 'Light, crunchy, and cheesy.', image_url: '🌯' },
+                { id: 68, name: 'Stuffed Jacket Potato', price: 270, description: 'Hearty, wholesome, and comforting.', image_url: '🥔' },
+                { id: 69, name: 'Jalapeno Cheese Popper', price: 280, description: 'Spicy, cheesy, and addictive.', image_url: '🌶️' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Sandwiches & Fries', items: [
+                { id: 70, name: 'Grilled Cheese Sandwich', price: 260, description: 'Classic grilled cheese.', image_url: '🥪' },
+                { id: 71, name: 'Pesto Grilled Veg Sandwich', price: 280, description: 'Fresh, cheesy, and bursting with herby flavor.', image_url: '🌿' },
+                { id: 72, name: 'Paneer Tikka Sandwich', price: 290, description: 'Spicy, smoky, and desi-fusion goodness.', image_url: '🥪' },
+                { id: 73, name: 'Grilled Spinach Corn Sandwich', price: 280, description: 'Nutritious, creamy, and satisfying.', image_url: '🌽' },
+                { id: 74, name: 'Mushroom Cheese Sandwich', price: 270, description: 'Earthy, cheesy, and comforting.', image_url: '🍄' },
+                { id: 75, name: 'Classic French Fries', price: 129, description: 'Simple, crunchy, and always loved.', image_url: '🍟' },
+                { id: 76, name: 'Peri - Peri Fries', price: 139, description: 'Spicy, herby, and full of zest.', image_url: '🌶️' },
+                { id: 77, name: 'Nachos Fries', price: 179, description: 'The ultimate snack fusion.', image_url: '🧀' },
+                { id: 78, name: 'Loaded Nachos Fries', price: 199, description: 'Cheesy, saucy, and indulgent.', image_url: '🧀' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Pastas & Wraps', items: [
+                { id: 79, name: 'The Spicy Arrabiata (Red)', price: 280, description: 'Bold, tangy, and fiery.', image_url: '🍝' },
+                { id: 80, name: 'Alfredo (Penne/Fusilli)', price: 300, description: 'Smooth, creamy, and indulgent.', image_url: '🍝' },
+                { id: 81, name: 'Mamarossa (Pink Sauce)', price: 320, description: 'Perfectly balanced and luscious.', image_url: '🍝' },
+                { id: 82, name: 'Mac & Cheese', price: 360, description: 'Cheesy, gooey, and comforting.', image_url: '🧀' },
+                { id: 83, name: 'Spaghetti Aglio E Olio', price: 300, description: 'Simple, classic, and flavorful.', image_url: '🍝' },
+                { id: 84, name: 'Cheesy Lasagne', price: 350, description: 'Rich, layered, and satisfying.', image_url: ' lasagna' },
+                { id: 85, name: 'Spaghetti Creamy Pesto', price: 370, description: 'Herby, creamy, and refreshing.', image_url: '🌿' },
+                { id: 86, name: 'Veg Kathi Roll', price: 190, description: 'The desi street favorite.', image_url: '🌯' },
+                { id: 87, name: 'Falafel Wrap', price: 220, description: 'Wholesome, crunchy, and mediterranean.', image_url: '🧆' },
+                { id: 88, name: 'Peri Peri Cottage Cheese Wrap', price: 280, description: 'Bold, fiery, and flavorful.', image_url: '🌶️' },
+                { id: 89, name: 'Corn Cheese Wrap', price: 290, description: 'Cheesy, sweet, and satisfying.', image_url: '🌽' },
+            ].map(i => ({...i, is_available: true}))
+        },
+        {
+            category: 'Pizzas', items: [
+                { id: 90, name: 'Margherita Pizza', price: 260, description: 'Simple, elegant, and irresistibly fresh.', image_url: '🍕' },
+                { id: 91, name: 'Calabrese Pizza', price: 320, description: 'Spicy, tangy, and bursting with bold mediterranean flavors.', image_url: '🍕' },
+                { id: 92, name: 'Garden Fresh Pizza', price: 340, description: 'Colorful, crunchy, and straight from the garden.', image_url: '🍕' },
+                { id: 93, name: 'Tandoori Paneer Tikka Pizza', price: 380, description: 'Spicy, cheesy, and full of desi goodness.', image_url: '🍕' },
+                { id: 94, name: 'Pesto Mushroom Pizza', price: 370, description: 'Where Indian street flavor meets Italian crust.', image_url: '🍕' },
+            ].map(i => ({...i, is_available: true}))
+        },
+    ]
 };
 
 const sound = {
@@ -190,7 +309,7 @@ const app = {
         tableNumber: null,
         user: null,
         customerProfile: null,
-        theme: 'light',
+        theme: 'matcha',
         menuData: [],
         appSettings: {},
         orderSubscription: null,
@@ -198,30 +317,19 @@ const app = {
     },
     
     async init() {
-        const savedTheme = localStorage.getItem('hxouse-theme');
-        if (savedTheme) {
-            this.setThemeAndProceed(savedTheme, true);
-        }
         document.body.addEventListener('click', () => sound.init(), { once: true });
+        this.startAppFlow();
     },
 
-    setThemeAndProceed(theme, isAlreadySet = false) {
+    setThemeAndProceed(theme) {
         this.state.theme = theme;
         localStorage.setItem('hxouse-theme', theme);
         this.applyTheme();
-
-        const themeScreen = $('#theme-selection-screen');
-        if (!isAlreadySet) {
-            themeScreen.classList.add('fade-out');
-            setTimeout(() => themeScreen.style.display = 'none', 500);
-        } else {
-            themeScreen.style.display = 'none';
-        }
-        
         this.startAppFlow();
     },
 
     async startAppFlow() {
+        this.applyTheme();
         $('#splash-screen').classList.remove('hidden');
         this.getTableNumberFromURL();
         
@@ -270,11 +378,7 @@ const app = {
     },
 
     async fetchMenuData() {
-        try {
-            const { data, error } = await supabase.from('menu_categories').select(`name, products (id, name, description, price, image_url, is_available)`).order('display_order');
-            if (error) throw error;
-            this.state.menuData = data.map(c => ({ category: c.name, items: c.products }));
-        } catch (error) { console.error('Error fetching menu:', error); ui.showToast('Could not load the menu.'); }
+        this.state.menuData = STATIC_DATA.menu;
     },
     
     async fetchAppSettings() {
@@ -392,55 +496,60 @@ const app = {
         if (this.state.cart.length === 0 || !this.state.tableNumber) return ui.showToast("Cart is empty or table number is missing.");
         
         btnElement.disabled = true;
+        const originalBtnHTML = btnElement.innerHTML;
         btnElement.innerHTML = `<span class="flex items-center justify-center"><div class="spinner mr-2"></div> Processing...</span>`;
         
-        const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
-        if (tableError || !tableData) {
+        try {
+            const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
+            if (tableError || !tableData) {
+                throw new Error(`Table #${this.state.tableNumber} is not a valid table.`);
+            }
+            
+            const orderPayload = {
+                customer_id: this.state.user.id,
+                table_id: tableData.id,
+                total_amount: this.calculateCartTotal(),
+                payment_method: paymentMethod,
+                special_instructions: $('#special-instructions')?.value || '',
+            };
+            
+            const { data: orderData, error: orderError } = await supabase.from('orders').insert(orderPayload).select().single();
+            if (orderError) throw orderError;
+            
+            const orderItems = this.state.cart.map(i => ({
+                order_id: orderData.id,
+                product_id: i.id,
+                quantity: i.quantity,
+                price_at_time_of_order: i.price
+            }));
+
+            const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+            if (itemsError) {
+                await supabase.from('orders').delete().eq('id', orderData.id);
+                throw itemsError;
+            }
+
+            ui.closeModal('payment-modal');
+            await this.fetchActiveOrder();
+            this.state.cart = [];
+            this.refreshPage();
+            sound.play('success');
+            this.navigateTo('cart');
+
+        } catch (error) {
+            console.error("Order failed:", error);
+            ui.showToast(`Order failed: ${error.message}`);
             btnElement.disabled = false;
-            btnElement.innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></span>`;
-             $$('.payment-btn')[1].innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></span>`;
-
-            return ui.showToast(`Table #${this.state.tableNumber} is not a valid table.`);
+            btnElement.innerHTML = originalBtnHTML;
+            // Also reset the other button if it exists
+            const otherBtn = [...$$('.payment-btn')].find(b => b !== btnElement);
+            if(otherBtn) otherBtn.disabled = false;
         }
-        
-        const orderPayload = {
-            customer_id: this.state.user.id,
-            table_id: tableData.id,
-            total_amount: this.calculateCartTotal(),
-            payment_method: paymentMethod,
-            special_instructions: $('#special-instructions')?.value || '',
-            coupon_code: null,
-            discount_amount: 0
-        };
-        
-        const { data: orderData, error: orderError } = await supabase.from('orders').insert(orderPayload).select().single();
-        if (orderError) {
-             btnElement.disabled = false;
-             btnElement.innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></span>`;
-             $$('.payment-btn')[1].innerHTML = `<span class="flex items-center justify-center"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></span>`;
-            return ui.showToast(`Could not place order: ${orderError.message}`);
-        }
-        
-        const orderItems = this.state.cart.map(i => ({
-            order_id: orderData.id,
-            product_id: i.id,
-            quantity: i.quantity,
-            price_at_time_of_order: i.price
-        }));
-        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-        if (itemsError) return ui.showToast(`Could not save order items: ${itemsError.message}`);
-
-        ui.closeModal('payment-modal');
-        await this.fetchActiveOrder();
-        this.state.cart = [];
-        this.refreshPage();
-        sound.play('success');
-        this.navigateTo('cart');
     },
     
     async fetchActiveOrder(){
         if (!this.state.user) return;
-        const { data, error } = await supabase.from('orders').select(`*, order_items(*, products(name))`).eq('customer_id', this.state.user.id).in('status', ['received', 'accepted', 'preparing', 'ready']).order('created_at', { ascending: false }).limit(1).single();
+        const { data, error } = await supabase.from('orders').select(`*, order_items(*, products(name))`).eq('customer_id', this.state.user.id).eq('status', 'received').order('created_at', { ascending: false }).limit(1).single();
         if (error && error.code !== 'PGRST116') console.error('Fetch active order error:', error);
         
         this.state.activeOrder = data || null;
@@ -621,21 +730,44 @@ const ui = {
                 <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p>
                 <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
             </div>` : '';
+        
+        const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
+        const promoSubtitle = 'Show your bill & story at the counter to claim your gift from H<span class="classy-x">X</span>OUSE.';
+        
+        const bestSellerItems = STATIC_DATA.bestSellers.map(id => {
+            return app.state.menuData.flatMap(c => c.items).find(item => item.id === id);
+        }).filter(Boolean); // Filter out any undefined items if ID not found
+
+        const bestSellersHTML = bestSellerItems.map(item => `
+            <div onclick="ui.showItemDetailModal(${item.id})" class="cursor-pointer flex-shrink-0 w-40 bg-secondary rounded-xl p-3 flex flex-col items-center text-center">
+                <div class="text-5xl mb-2">${item.image_url || '🍴'}</div>
+                <h3 class="font-bold text-primary text-sm flex-grow">${item.name}</h3>
+                <p class="font-semibold text-secondary text-sm mt-1">₹${item.price}</p>
+            </div>
+        `).join('');
             
         $('#page-content').innerHTML = `
             <div class="space-y-6">
                 <div class="relative h-64 overflow-hidden rounded-b-2xl">
-                    <video src="https://ndjpifvtfwwzrjjtqbpf.supabase.co/storage/v1/object/public/assets/a19eea6d-62bc-4efb-81df-945ca9f2e0bd-output.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
+                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
                     <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
                         <h1 class="text-4xl font-bold">${settings.welcome_title || 'H<span class="classy-x">X</span>OUSE'}</h1>
                         <p class="text-lg mt-1 font-light">${settings.welcome_subtitle || 'COFFEE CO.'}</p>
                     </div>
                 </div>
-                <div class="p-4 space-y-6">
-                    ${activeOrderHTML}
+                <div class="p-4 space-y-8">
+                    ${activeOrderHTML ? `<div class="mb-6">${activeOrderHTML}</div>` : ''}
+                    
+                    <div>
+                        <h2 class="text-2xl font-bold text-primary mb-4 px-1">Our Best Sellers</h2>
+                        <div class="horizontal-scroll flex space-x-4 overflow-x-auto pb-2">
+                            ${bestSellersHTML}
+                        </div>
+                    </div>
+
                     <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
-                        <h2 class="text-2xl font-bold text-primary">${settings.promo_title || 'Post a Story & Get a <span class="instagram-card">Free Gift!</span>'}</h2>
-                        <p class="mt-1 text-secondary">${settings.promo_subtitle || 'Show your story at the counter to claim your surprise.'}</p>
+                        <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
+                        <p class="mt-1 text-secondary">${promoSubtitle}</p>
                         <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Learn More &rarr;</button>
                     </div>
                     <div class="grid grid-cols-1 gap-4">
@@ -690,12 +822,12 @@ const ui = {
                 const cartItem = app.state.cart.find(ci => ci.id === item.id);
                 const quantityBadge = cartItem ? `<div class="absolute -top-2 -right-2 brand-bg text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold shadow-lg">${cartItem.quantity}</div>` : '';
                 
-                return `<div class="bg-secondary p-4 rounded-xl flex justify-between items-center cursor-pointer relative" onclick="ui.showItemDetailModal('${item.id}')">
+                return `<div class="bg-secondary p-4 rounded-xl flex justify-between items-center cursor-pointer relative" onclick="ui.showItemDetailModal(${item.id})">
                             ${quantityBadge}
-                            <div class="flex items-center space-x-4 flex-grow">
+                            <div class="flex items-center space-x-4 flex-grow min-w-0">
                                 <div class="text-4xl flex-shrink-0 w-12 h-12 flex items-center justify-center bg-primary rounded-lg">${item.image_url || '🍴'}</div>
-                                <div>
-                                    <h3 class="font-bold text-primary">${item.name}</h3>
+                                <div class="min-w-0">
+                                    <h3 class="font-bold text-primary truncate">${item.name}</h3>
                                     <p class="font-semibold text-secondary">₹${item.price}</p>
                                 </div>
                             </div>
@@ -715,6 +847,9 @@ const ui = {
 
     renderCart(container){
         const total = app.calculateCartTotal();
+        const eligibleForHamper = total >= 799;
+        const hamperMessage = eligibleForHamper ? `<div class="p-4"><div class="bg-green-100 border border-green-200 text-green-800 p-3 rounded-lg text-center font-semibold">🎉 You're eligible for a free hamper! Don't forget to post a story.</div></div>` : '';
+
         container.innerHTML = `
             <div class="p-4 space-y-3">${app.state.cart.map(i => `
                 <div class="bg-secondary p-3 rounded-xl">
@@ -728,6 +863,7 @@ const ui = {
                     </div>
                 </div>`).join('')}
             </div>
+            ${hamperMessage}
             <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div>
             <div class="p-4 bg-primary border-t-custom sticky bottom-20">
                 <div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${total.toFixed(2)}</span></div>
@@ -738,19 +874,19 @@ const ui = {
     renderOrderTracking(container) {
         const order = app.state.activeOrder;
         if (!order) { container.innerHTML = ''; return; }
-        const statuses = ['received', 'accepted', 'preparing', 'ready', 'delivered'];
-        const currentIndex = statuses.indexOf(order.status);
-        const width = currentIndex * 25;
-        const icons = { received: '📝', accepted: '👍', preparing: '🧑‍🍳', ready: '🛎️', delivered: '😊' };
         
-        const itemsHTML = order.order_items?.length > 0 ? order.order_items.map(item => `
-            <div class="flex justify-between text-sm py-1"><span class="text-primary">${item.products.name} x${item.quantity}</span></div>`).join('') : '<p class="text-sm text-secondary">Loading item details...</p>';
+        const statuses = ['received', 'delivered'];
+        const icons = { received: '📝', delivered: '😊' };
+        // Since we only track 'received' orders, current index is always 0.
+        const currentIndex = 0; 
+        const width = 0; // Progress bar is at the start for a 'received' order.
         
         container.innerHTML = `
-            <div class="p-6">
-                <h2 class="text-2xl font-bold text-center capitalize">Your Order is ${order.status}</h2>
+            <div class="p-6 flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl font-bold text-center capitalize">Your Order is Received</h2>
                 <p class="text-secondary text-center mb-10">Order ID: #${order.id.slice(0,6)}</p>
-                <div class="tracker-container my-12">
+                
+                <div class="tracker-container my-12 w-full max-w-sm justify-center space-x-24">
                     <div class="tracker-line"></div>
                     <div class="tracker-progress" style="width: ${width}%"></div>
                     ${statuses.map((status, index) => `
@@ -759,16 +895,18 @@ const ui = {
                             <span class="tracker-label capitalize">${status}</span>
                         </div>`).join('')}
                 </div>
-                <div class="bg-secondary p-4 rounded-xl mt-4">
-                    <h3 class="font-bold text-primary mb-2">Order Summary</h3>
-                    ${itemsHTML}
-                    <div class="flex justify-between font-bold mt-2 pt-2 border-t border-custom"><span>Total</span><span>₹${order.total_amount}</span></div>
+
+                <div class="mt-auto pt-10 text-center">
+                    <p class="text-secondary mb-4">While you wait, why not play a game?</p>
+                    <button onclick="ui.showGamesModal()" class="brand-bg font-semibold py-3 px-8 rounded-lg">Play Games</button>
                 </div>
             </div>`;
     },
     
     renderSocialPage(){
-        const settings = app.state.appSettings;
+        const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
+        const promoSubtitle = 'Show your bill & story at the counter to claim your gift from H<span class="classy-x">X</span>OUSE.';
+        
         $('#page-content').innerHTML = `
             <div class="p-4 space-y-6 text-center">
                  <div class="bg-secondary p-6 rounded-xl shadow-sm">
@@ -782,8 +920,8 @@ const ui = {
                 </div>
 
                 <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left">
-                     <h2 class="text-2xl font-bold text-primary">${settings.promo_title || 'Post a Story & Get a <span class="instagram-card">Free Gift!</span>'}</h2>
-                    <p class="mt-1 text-secondary">${settings.promo_subtitle || 'Show your story at the counter to claim your surprise.'}</p>
+                     <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
+                    <p class="mt-1 text-secondary">${promoSubtitle}</p>
                     <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Get Caption Ideas &rarr;</button>
                 </div>
             </div>
@@ -839,7 +977,7 @@ const ui = {
             </div>
             <div class="mt-6 grid grid-cols-2 gap-4">
                 <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button>
-                <button onclick="app.addOrUpdateCartFromModal('${item.id}')" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
+                <button onclick="app.addOrUpdateCartFromModal(${item.id})" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
             </div>`);
     },
 
@@ -848,8 +986,8 @@ const ui = {
             name: key, icon: { student: '🎓', office: '💼', couple: '❤️', friends: '🎉' }[key]
         }));
         ui.showModal('insta-modal', `
-            <h2 class="text-2xl font-bold">Post & Get a Free Gift!</h2>
-            <p class="text-secondary mt-1 mb-6">Choose your vibe for caption ideas, post a story tagging us, and show it at the counter!</p>
+            <h2 class="text-2xl font-bold">Post for a Free Hamper!</h2>
+            <p class="text-secondary mt-1 mb-6">If your order is over ₹799, post a story tagging us, and show both at the counter!</p>
             <div class="grid grid-cols-2 gap-4">${vibes.map(v => `
                 <button onclick="ui.showCaptionIdeas('${v.name}')" class="bg-secondary p-4 rounded-xl text-center">
                     <span class="text-3xl">${v.icon}</span><p class="font-semibold mt-2 capitalize">${v.name}</p>
@@ -923,9 +1061,9 @@ const ui = {
                 <h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2>
                 <p class="text-secondary mb-4">Connect and enjoy!</p>
                 <div class="bg-secondary p-4 rounded-lg">
-                    <p class="text-xs">Network Name</p><p class="font-bold text-lg">HXOUSE_GUEST</p>
+                    <p class="text-xs">Network Name</p><p class="font-bold text-lg">THE CO-WORK HUB</p>
                     <hr class="border-custom my-3">
-                    <p class="text-xs">Password</p><p class="font-bold text-lg">coffeehouse</p>
+                    <p class="text-xs">Password</p><p class="font-bold text-lg">95462418</p>
                 </div>
                 <button onclick="ui.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
             </div>
