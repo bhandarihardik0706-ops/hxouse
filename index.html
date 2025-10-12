@@ -23,7 +23,7 @@
         [data-theme="sunset"] { --bg-primary: var(--bg-primary-sunset); --bg-secondary: var(--bg-secondary-sunset); --text-primary: var(--text-primary-sunset); --text-secondary: var(--text-secondary-sunset); --border-color: var(--border-sunset); --brand-primary: var(--brand-primary-sunset); }
         [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
         
-        html, body { height: 100%; }
+        html, body { height: 100%; overflow: hidden; }
         body { font-family: 'Poppins', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .app-container { background-color: var(--bg-primary); transition: background-color 0.5s ease; height: var(--app-height); }
         .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
@@ -75,21 +75,6 @@
             font-size: 1.5em; /* Adjusted size */
             vertical-align: -0.2em; /* Re-aligned for balance */
         }
-        /* This pseudo-element creates the swoosh over the X */
-        /*
-        .classy-x::before {
-            content: '';
-            position: absolute;
-            top: 0.1em;
-            left: -0.2em;
-            width: .9em;
-            height: .5em;
-            border-left: 0.1em solid currentColor;
-            border-top: 0.1em solid currentColor;
-            border-radius: 100% 0 0 0; /* Creates a quarter-circle shape */
-            transform: rotate(55deg) skewX(10deg); /* Position and shape the swoosh */
-        }
-        */
         .spinner {
             border: 2px solid var(--bg-primary);
             border-top: 2px solid var(--brand-primary);
@@ -101,7 +86,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body data-theme="matcha">
 
     <!-- Splash Screen: Shown during initial auth and data load -->
     <div id="splash-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-[100]">
@@ -112,13 +97,13 @@
     <div id="app" class="app-container max-w-lg mx-auto shadow-2xl flex flex-col hidden">
         <main class="flex-grow overflow-y-auto">
             <div id="main-interface" class="hidden">
-                <header id="page-header" class="sticky top-0 bg-primary z-20 h-24 px-4 flex justify-between items-center border-b border-custom"></header>
+                <header id="page-header" class="sticky top-0 bg-primary/80 backdrop-blur-sm z-20 h-16 px-4 flex justify-between items-center border-b border-custom"></header>
                 <div id="page-content"></div>
             </div>
             <!-- Spacer to ensure content scrolls above the bottom nav bar -->
-            <div class="h-28 flex-shrink-0"></div>
+            <div class="h-20 flex-shrink-0"></div>
         </main>
-        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-20 z-30 hidden"></nav>
+        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary/80 backdrop-blur-sm border-t border-custom flex justify-around items-center h-16 z-30 hidden"></nav>
     </div>
 
     <!-- Global Containers for Modals & Toasts -->
@@ -152,140 +137,7 @@ const STATIC_DATA = {
         office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ],
         couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffeeco", "Love is in the air, and it smells like coffee from @hxousecoffeeco." ],
         friends: [ "Good times and great coffee with the best crew! @hxousecoffeeco #Friends", "A perfect blend of friendship and coffee at @hxousecoffeeco!" ]
-    },
-    // NEW STATIC MENU WITH EMOJIS
-    menu: [
-        {
-            category: 'Hot Beverages', items: [
-                { id: 1, name: 'Espresso', price: 90, description: 'A concentrated coffee brew.', image_url: '☕️' },
-                { id: 2, name: 'Americano', price: 95, description: 'Espresso with hot water.', image_url: '☕️' },
-                { id: 3, name: 'Macchiato', price: 120, description: 'Espresso with a dash of frothy milk.', image_url: '☕️' },
-                { id: 4, name: 'Cappuccino', price: 150, description: 'Espresso, hot milk, and steamed milk foam.', image_url: '☕️' },
-                { id: 5, name: 'Cafe Latte', price: 165, description: 'Espresso with steamed milk.', image_url: '☕️' },
-                { id: 6, name: 'Flat White', price: 140, description: 'Espresso with microfoam.', image_url: '☕️' },
-                { id: 7, name: 'Cafe Mocha', price: 180, description: 'A chocolate-flavoured variant of a caffè latte.', image_url: '🍫' },
-                { id: 8, name: 'Hazelnut Cappuccino', price: 180, description: 'Cappuccino with a nutty hazelnut flavour.', image_url: '🌰' },
-                { id: 9, name: 'Nutella Cappuccino', price: 200, description: 'A delicious blend of cappuccino and Nutella.', image_url: '🍫' },
-                { id: 10, name: 'Lotus Biscoff Cappuccino', price: 220, description: 'Cappuccino with the sweet taste of Biscoff.', image_url: '🍪' },
-                { id: 11, name: 'Lemon Iced Tea', price: 120, description: 'Refreshing iced tea with a hint of lemon.', image_url: '🍋' },
-                { id: 12, name: 'Peach Iced Tea', price: 140, description: 'Sweet and fruity peach-flavoured iced tea.', image_url: '🍑' },
-                { id: 13, name: 'Strawberry Iced Tea', price: 140, description: 'A delightful strawberry twist on iced tea.', image_url: '🍓' },
-                { id: 14, name: 'Cranberry Iced Tea', price: 150, description: 'Tart and refreshing cranberry iced tea.', image_url: '🥤' },
-                { id: 15, name: 'Watermelon Iced Tea', price: 150, description: 'Cool and hydrating watermelon iced tea.', image_url: '🍉' },
-                { id: 16, name: 'Lemon Honey Tea', price: 110, description: 'Soothing hot tea with lemon and honey.', image_url: '🍯' },
-                { id: 17, name: 'Green Tea', price: 120, description: 'A healthy and calming green tea.', image_url: '🍵' },
-                { id: 18, name: 'Ginger Green Tea', price: 130, description: 'Green tea with a spicy kick of ginger.', image_url: '🍵' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Cold Beverages', items: [
-                { id: 19, name: 'Classic Frappe', price: 150, description: 'A classic cold coffee delight.', image_url: '🧊' },
-                { id: 20, name: 'Mocha Frappe', price: 175, description: 'Rich chocolate and coffee blended to perfection.', image_url: '🍫' },
-                { id: 21, name: 'Caramel Frappe', price: 180, description: 'Sweet caramel goodness in a cup.', image_url: '🍮' },
-                { id: 22, name: 'Chocolate Frappe', price: 190, description: 'For the ultimate chocolate lover.', image_url: '🍫' },
-                { id: 23, name: 'Nutella Frappe', price: 220, description: 'Creamy, dreamy Nutella frappe.', image_url: '🍫' },
-                { id: 24, name: 'Hazelnut Frappe', price: 210, description: 'A nutty and delicious frappe.', image_url: '🌰' },
-                { id: 25, name: 'Oreo Frappe', price: 220, description: 'Cookies and cream in a coffee drink.', image_url: '🍪' },
-                { id: 26, name: 'Classic Iced Coffee', price: 140, description: 'Simply refreshing iced coffee.', image_url: '🧊' },
-                { id: 27, name: 'Iced Latte', price: 150, description: 'Smooth and creamy iced latte.', image_url: '🧊' },
-                { id: 28, name: 'Iced Americano', price: 150, description: 'Bold and invigorating iced americano.', image_url: '🧊' },
-                { id: 29, name: 'Iced Vanilla', price: 170, description: 'A touch of vanilla sweetness in your iced coffee.', image_url: '🧊' },
-                { id: 30, name: 'Iced Mocha', price: 170, description: 'Chocolatey and cool iced mocha.', image_url: '🍫' },
-                { id: 31, name: 'Iced Caramel', price: 170, description: 'Sweet caramel meets cold coffee.', image_url: '🍮' },
-                { id: 32, name: 'Ginger Ale Espresso', price: 190, description: 'A unique and zesty coffee creation.', image_url: '🥤' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Shakes & Mocktails', items: [
-                { id: 33, name: 'Chocolate Shake', price: 150, description: 'A rich and creamy chocolate shake.', image_url: '🍫' },
-                { id: 34, name: 'Strawberry Shake', price: 180, description: 'Sweet and fruity strawberry shake.', image_url: '🍓' },
-                { id: 35, name: 'Butterscotch Shake', price: 180, description: 'Classic butterscotch flavor in a shake.', image_url: '🍮' },
-                { id: 36, name: 'Oreo Shake', price: 190, description: 'The perfect cookies and cream shake.', image_url: '🍪' },
-                { id: 37, name: 'Kitkat Shake', price: 190, description: 'Your favorite chocolate bar in a shake.', image_url: '🍫' },
-                { id: 38, name: 'Lotus Biscoff Shake', price: 220, description: 'A decadent Lotus Biscoff shake.', image_url: '🍪' },
-                { id: 39, name: 'Nutella Shake', price: 240, description: 'An indulgent Nutella shake.', image_url: '🍫' },
-                { id: 40, name: 'Classic Lemonade', price: 140, description: 'A timeless and refreshing lemonade.', image_url: '🍋' },
-                { id: 41, name: 'Virgin Mojito', price: 150, description: 'A classic mint and lime mocktail.', image_url: '🍹' },
-                { id: 42, name: 'Black Currant', price: 150, description: 'A fruity and flavorful black currant mocktail.', image_url: '🍇' },
-                { id: 43, name: 'Strawberry Mojito', price: 170, description: 'A sweet twist on the classic mojito.', image_url: '🍓' },
-                { id: 44, name: 'Green Apple Mojito', price: 170, description: 'A tart and refreshing green apple mojito.', image_url: '🍏' },
-                { id: 45, name: 'Watermelon Mojito', price: 170, description: 'A cool and hydrating watermelon mojito.', image_url: '🍉' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Soups & Salads', items: [
-                { id: 46, name: 'Hot & Sour Soup', price: 120, description: 'Zesty, bold, and full of flavor.', image_url: '🍲' },
-                { id: 47, name: 'Tomato Basil Soup', price: 130, description: 'Hearty, comforting, and classic.', image_url: '🍅' },
-                { id: 48, name: 'Veg Clear Soup', price: 125, description: 'Simple, fresh, and nourishing.', image_url: '🥣' },
-                { id: 49, name: 'Broccoli Cheddar Soup', price: 160, description: 'Creamy, crunchy, and refreshing.', image_url: '🥦' },
-                { id: 50, name: 'Greek Salad', price: 230, description: 'Zesty and Mediterranean classic.', image_url: '🥗' },
-                { id: 51, name: 'Exotic Veg Salad', price: 240, description: 'Colorful, crunchy, and refreshing.', image_url: '🥗' },
-                { id: 52, name: 'Tandoori Paneer Tikka Salad', price: 260, description: 'Bold, spicy, and desi delight.', image_url: '🥗' },
-                { id: 53, name: 'Caesar Salad', price: 280, description: 'Classic, creamy, and irresistible.', image_url: '🥗' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Breads & Burgers', items: [
-                { id: 54, name: 'Cheese Garlic Toast', price: 245, description: 'Simple, cheesy, and irresistible.', image_url: '🍞' },
-                { id: 55, name: 'Chilli Cheese Garlic Toast', price: 260, description: 'Spicy, cheesy, and fiery good.', image_url: '🌶️' },
-                { id: 56, name: 'Cheese & Corn Garlic Toast', price: 280, description: 'Cheesy, crunchy, and delightful.', image_url: '🌽' },
-                { id: 57, name: 'Creamy Pesto Bruschetta', price: 285, description: 'Fresh, creamy, and full of flavor.', image_url: '🌿' },
-                { id: 58, name: 'Aloo Tikki Burger', price: 260, description: 'The desi favorite in a bun.', image_url: '🍔' },
-                { id: 59, name: 'Classic Veggie Burger', price: 270, description: 'The true classic bite.', image_url: '🍔' },
-                { id: 60, name: 'Mexican Burger', price: 320, description: 'Spicy, zesty, and full of fiesta flavor.', image_url: '🇲🇽' },
-                { id: 61, name: 'Crispy Paneer Patty Burger', price: 360, description: 'Paneer lovers\' ultimate burger.', image_url: '🍔' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Snacks & Mini Plates', items: [
-                { id: 62, name: 'Crispy Corn Chat', price: 190, description: 'Zesty, crispy, and addictive.', image_url: '🌽' },
-                { id: 63, name: 'Dahi Ke Kebab', price: 220, description: 'Creamy, soft, and indulgent.', image_url: '🍢' },
-                { id: 64, name: 'Hara Bhara Kebab', price: 240, description: 'Nutritious, flavorful, and hearty.', image_url: '🧆' },
-                { id: 65, name: 'Papad Paneer Finger', price: 245, description: 'Crunchy, spicy, and irresistible.', image_url: '🍢' },
-                { id: 66, name: 'Cheese Onion Ring', price: 230, description: 'Golden crunchy outside, cheesy inside.', image_url: '🧅' },
-                { id: 67, name: 'Cigar Roll', price: 245, description: 'Light, crunchy, and cheesy.', image_url: '🌯' },
-                { id: 68, name: 'Stuffed Jacket Potato', price: 270, description: 'Hearty, wholesome, and comforting.', image_url: '🥔' },
-                { id: 69, name: 'Jalapeno Cheese Popper', price: 280, description: 'Spicy, cheesy, and addictive.', image_url: '🌶️' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Sandwiches & Fries', items: [
-                { id: 70, name: 'Grilled Cheese Sandwich', price: 260, description: 'Classic grilled cheese.', image_url: '🥪' },
-                { id: 71, name: 'Pesto Grilled Veg Sandwich', price: 280, description: 'Fresh, cheesy, and bursting with herby flavor.', image_url: '🌿' },
-                { id: 72, name: 'Paneer Tikka Sandwich', price: 290, description: 'Spicy, smoky, and desi-fusion goodness.', image_url: '🥪' },
-                { id: 73, name: 'Grilled Spinach Corn Sandwich', price: 280, description: 'Nutritious, creamy, and satisfying.', image_url: '🌽' },
-                { id: 74, name: 'Mushroom Cheese Sandwich', price: 270, description: 'Earthy, cheesy, and comforting.', image_url: '🍄' },
-                { id: 75, name: 'Classic French Fries', price: 129, description: 'Simple, crunchy, and always loved.', image_url: '🍟' },
-                { id: 76, name: 'Peri - Peri Fries', price: 139, description: 'Spicy, herby, and full of zest.', image_url: '🌶️' },
-                { id: 77, name: 'Nachos Fries', price: 179, description: 'The ultimate snack fusion.', image_url: '🧀' },
-                { id: 78, name: 'Loaded Nachos Fries', price: 199, description: 'Cheesy, saucy, and indulgent.', image_url: '🧀' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Pastas & Wraps', items: [
-                { id: 79, name: 'The Spicy Arrabiata (Red)', price: 280, description: 'Bold, tangy, and fiery.', image_url: '🍝' },
-                { id: 80, name: 'Alfredo (Penne/Fusilli)', price: 300, description: 'Smooth, creamy, and indulgent.', image_url: '🍝' },
-                { id: 81, name: 'Mamarossa (Pink Sauce)', price: 320, description: 'Perfectly balanced and luscious.', image_url: '🍝' },
-                { id: 82, name: 'Mac & Cheese', price: 360, description: 'Cheesy, gooey, and comforting.', image_url: '🧀' },
-                { id: 83, name: 'Spaghetti Aglio E Olio', price: 300, description: 'Simple, classic, and flavorful.', image_url: '🍝' },
-                { id: 84, name: 'Cheesy Lasagne', price: 350, description: 'Rich, layered, and satisfying.', image_url: '🍝' },
-                { id: 85, name: 'Spaghetti Creamy Pesto', price: 370, description: 'Herby, creamy, and refreshing.', image_url: '🌿' },
-                { id: 86, name: 'Veg Kathi Roll', price: 190, description: 'The desi street favorite.', image_url: '🌯' },
-                { id: 87, name: 'Falafel Wrap', price: 220, description: 'Wholesome, crunchy, and mediterranean.', image_url: '🧆' },
-                { id: 88, name: 'Peri Peri Cottage Cheese Wrap', price: 280, description: 'Bold, fiery, and flavorful.', image_url: '🌶️' },
-                { id: 89, name: 'Corn Cheese Wrap', price: 290, description: 'Cheesy, sweet, and satisfying.', image_url: '🌽' },
-            ].map(i => ({...i, is_available: true}))
-        },
-        {
-            category: 'Pizzas', items: [
-                { id: 90, name: 'Margherita Pizza', price: 260, description: 'Simple, elegant, and irresistibly fresh.', image_url: '🍕' },
-                { id: 91, name: 'Calabrese Pizza', price: 320, description: 'Spicy, tangy, and bursting with bold mediterranean flavors.', image_url: '🍕' },
-                { id: 92, name: 'Garden Fresh Pizza', price: 340, description: 'Colorful, crunchy, and straight from the garden.', image_url: '🍕' },
-                { id: 93, name: 'Tandoori Paneer Tikka Pizza', price: 380, description: 'Spicy, cheesy, and full of desi goodness.', image_url: '🍕' },
-                { id: 94, name: 'Pesto Mushroom Pizza', price: 370, description: 'Where Indian street flavor meets Italian crust.', image_url: '🍕' },
-            ].map(i => ({...i, is_available: true}))
-        },
-    ]
+    }
 };
 
 const sound = {
@@ -335,7 +187,6 @@ const app = {
     
     async init() {
         document.body.addEventListener('click', () => sound.init(), { once: true });
-        this.state.theme = localStorage.getItem('hxouse-theme') || 'matcha';
         this.startAppFlow();
     },
 
@@ -352,24 +203,15 @@ const app = {
         this.getTableNumberFromURL();
         
         try {
-            const setupPromise = new Promise(async (resolve, reject) => {
-                const { data: { session } } = await supabase.auth.getSession();
-                this.state.user = session?.user;
-                if (!this.state.user) {
-                    const { data: signInData, error } = await supabase.auth.signInAnonymously();
-                    if (error) return reject(new Error(`Anonymous sign-in failed: ${error.message}`));
-                    this.state.user = signInData.user;
-                }
-                
-                await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData(), this.fetchAppSettings() ]);
-                resolve();
-            });
-
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('App took too long to load.')), 10000); // 10-second timeout
-            });
-
-            await Promise.race([setupPromise, timeoutPromise]);
+            const { data: { session } } = await supabase.auth.getSession();
+            this.state.user = session?.user;
+            if (!this.state.user) {
+                const { data: signInData, error } = await supabase.auth.signInAnonymously();
+                if (error) throw new Error(`Anonymous sign-in failed: ${error.message}`);
+                this.state.user = signInData.user;
+            }
+            
+            await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData(), this.fetchAppSettings() ]);
 
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
@@ -405,7 +247,29 @@ const app = {
     },
 
     async fetchMenuData() {
-        this.state.menuData = STATIC_DATA.menu;
+        // Now fetching menu from the database instead of static data
+        try {
+            const { data, error } = await supabase.from('products').select('*').order('id');
+            if (error) throw error;
+            
+            // Group items by category
+            const groupedMenu = data.reduce((acc, item) => {
+                let category = acc.find(c => c.category === item.category);
+                if (!category) {
+                    category = { category: item.category, items: [] };
+                    acc.push(category);
+                }
+                category.items.push(item);
+                return acc;
+            }, []);
+
+            this.state.menuData = groupedMenu;
+
+        } catch (error) {
+            console.error('Error fetching menu data:', error);
+            ui.showToast('Could not load the menu.');
+            this.state.menuData = []; // Fallback to empty menu
+        }
     },
     
     async fetchAppSettings() {
@@ -684,10 +548,10 @@ const ui = {
         const config = pageConfigs[page] || { title: 'H<span class="classy-x">X</span>OUSE', back: false };
         header.innerHTML = `
             <div class="flex items-center space-x-2">
-                <h1 class="text-3xl font-bold brand-text">${config.title}</h1>
+                <h1 class="text-2xl font-bold brand-text">${config.title}</h1>
             </div>
             <div class="text-right">
-                <p class="font-semibold text-primary">${app.state.customerProfile.name}</p>
+                <p class="font-semibold text-primary text-sm">${app.state.customerProfile.name}</p>
                 <p class="text-xs text-secondary">Table #${app.state.tableNumber || 'N/A'}</p>
             </div>`;
     },
@@ -775,9 +639,10 @@ const ui = {
             
         $('#page-content').innerHTML = `
             <div class="space-y-6">
-                <div id="home-video-container" class="relative h-64 overflow-hidden rounded-b-2xl">
+                <div class="relative h-48 overflow-hidden rounded-b-2xl">
+                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
                     <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
-                        <h1 class="text-4xl font-bold">${settings.welcome_title || 'H<span class="classy-x">X</span>OUSE'}</h1>
+                        <h1 class="text-3xl font-bold">${settings.welcome_title || 'H<span class="classy-x">X</span>OUSE'}</h1>
                         <p class="text-lg mt-1 font-light">${settings.welcome_subtitle || 'COFFEE CO.'}</p>
                     </div>
                 </div>
@@ -801,19 +666,6 @@ const ui = {
                     </div>
                 </div>
             </div>`;
-        
-        const videoContainer = $('#home-video-container');
-        if(videoContainer) {
-            const video = document.createElement('video');
-            video.src = 'https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4';
-            video.autoplay = true;
-            video.loop = true;
-            video.muted = true;
-            video.playsInline = true;
-            video.preload = 'metadata';
-            video.className = 'absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2';
-            videoContainer.prepend(video);
-        }
     },
     
     renderMenuPage() {
@@ -827,7 +679,7 @@ const ui = {
         }
 
         content.innerHTML = `
-            <div class="horizontal-scroll sticky top-24 bg-primary z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
+            <div class="horizontal-scroll sticky top-16 bg-primary/80 backdrop-blur-sm z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
                 ${app.state.menuData.map(c => `<button 
                     class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${app.state.currentMenuCategory === c.category ? 'brand-text border-b-2 border-current' : 'text-secondary'}" 
                     data-category="${c.category}" 
@@ -904,7 +756,7 @@ const ui = {
             </div>
             ${hamperMessage}
             <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div>
-            <div class="p-4 bg-primary border-t-custom sticky bottom-20">
+            <div class="p-4 bg-primary border-t-custom sticky bottom-16">
                 <div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${total.toFixed(2)}</span></div>
                 <button id="place-order-btn" onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
             </div>`;
@@ -1125,7 +977,7 @@ const ui = {
         
         ui.showModal('history-modal', `
             <h2 class="text-xl font-bold text-center mb-4">Order History</h2>
-            <div class="space-y-3">${historyHTML}</div>
+            <div class="space-y-3 max-h-60 overflow-y-auto">${historyHTML}</div>
             <button onclick="ui.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
         `);
     }
@@ -1290,14 +1142,4 @@ document.addEventListener('DOMContentLoaded', () => app.init());
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
 
