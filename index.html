@@ -7,15 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
-        /* --- THEMES & STYLES --- */
+        /* --- "Espresso & Cream" Theme --- */
         :root {
             --bg-primary-light: #FFFFFF; --bg-secondary-light: #F3F4F6; --text-primary-light: #111827; --text-secondary-light: #6B7280; --border-light: #E5E7EB; --brand-primary-light: #111827;
             --bg-primary-dark: #111111; --bg-secondary-dark: #1F2023; --text-primary-dark: #F9FAFB; --text-secondary-dark: #9CA3AF; --border-dark: #374151; --brand-primary-dark: #FFFFFF;
             --bg-primary-sunset: #1E1E2E; --bg-secondary-sunset: #2D2D44; --text-primary-sunset: #F6F6F6; --text-secondary-sunset: #A8A8C3; --border-sunset: #4A4A6A; --brand-primary-sunset: #FFA756;
-            --bg-primary-matcha: #F0FFF4; --bg-secondary-matcha: #DCF2E3; --text-primary-matcha: #2F4858; --text-secondary-matcha: #5C7A89; --border-matcha: #B8D8C0; --brand-primary-matcha: #3A8154;
+            
+            --bg-primary-matcha: #FFFDF9; 
+            --bg-secondary-matcha: #F5F3EF; 
+            --text-primary-matcha: #2D231E; 
+            --text-secondary-matcha: #796A61; 
+            --border-matcha: #EAE5E0; 
+            --brand-primary-matcha: #D95F2B; 
+
             --app-height: 100vh;
         }
         [data-theme="light"] { --bg-primary: var(--bg-primary-light); --bg-secondary: var(--bg-secondary-light); --text-primary: var(--text-primary-light); --text-secondary: var(--text-secondary-light); --border-color: var(--border-light); --brand-primary: var(--brand-primary-light); }
@@ -24,26 +32,49 @@
         [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
         
         html, body { height: 100%; overflow: hidden; }
-        body { font-family: 'Poppins', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
-        .app-container { background-color: var(--bg-primary); transition: background-color 0.5s ease; height: var(--app-height); }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #000000; 
+            color: var(--text-primary); 
+            -webkit-tap-highlight-color: transparent; 
+            transition: background-color 0.5s ease; 
+        }
+        .app-container { 
+            background-color: var(--bg-primary); 
+            transition: background-color 0.5s ease; 
+            height: var(--app-height); 
+        }
+        
+        /* Utility Classes */
         .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
         .bg-primary { background-color: var(--bg-primary); } .bg-secondary { background-color: var(--bg-secondary); }
         .border-custom { border-color: var(--border-color); } .brand-text { color: var(--brand-primary); }
-        .brand-bg { background-color: var(--brand-primary); color: var(--bg-primary); }
+        .brand-bg { 
+            background-color: var(--brand-primary); 
+            color: var(--bg-primary); 
+        }
         .brand-border { border-color: var(--brand-primary); }
         
-        .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .fade-out { animation: fadeOut 0.5s ease-in-out forwards; } @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; } to: { opacity: 1; } }
+        .fade-out { animation: fadeOut 0.5s ease-in-out forwards; } @keyframes fadeOut { from { opacity: 1; } to: { opacity: 0; } }
         
-        .toast { animation: toast-in 0.5s ease, toast-out 0.5s ease forwards; }
+        .toast { 
+            animation: toast-in 0.5s cubic-bezier(0.16, 1, 0.3, 1), toast-out 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            bottom: -100px; 
+        }
         @keyframes toast-in { from { bottom: -100px; opacity: 0; } to { bottom: 80px; opacity: 1; } }
-        @keyframes toast-out { from { opacity: 1; } to { opacity: 0; display: none; } }
+        @keyframes toast-out { from { bottom: 80px; opacity: 1; } to { bottom: -100px; opacity: 0; display: none; } }
         
-        .modal-overlay { animation: fadeIn 0.3s ease; }
+        .modal-overlay { 
+            animation: fadeIn 0.3s ease; 
+            backdrop-filter: blur(4px);
+        }
         .modal-content { 
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            max-height: 85vh; /* Mobile compatibility fix */
-            overflow-y: auto;   /* Mobile compatibility fix */
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 1.5rem 1.5rem 0 0; /* 24px */
         }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
@@ -53,28 +84,47 @@
         .horizontal-scroll::-webkit-scrollbar { display: none; }
         .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
+        /* Order Tracker */
         .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
         .tracker-line-container { position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background-color: var(--border-color); border-radius: 2px; }
         .tracker-progress { height: 100%; background-color: var(--brand-primary); border-radius: 2px; transition: width 0.5s ease-in-out; }
         .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 80px; position: relative; z-index: 1; }
-        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
-        .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
+        .tracker-icon-container { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            background-color: var(--bg-primary); 
+            border: 2px solid var(--border-color); 
+            display: flex; align-items: center; justify-content: center; 
+            transition: all 0.3s ease; 
+            color: var(--text-secondary);
+        }
+        .tracker-step.active .tracker-icon-container { 
+            border-color: var(--brand-primary); 
+            background-color: var(--brand-primary); 
+            color: var(--bg-primary);
+            transform: scale(1.1); 
+        }
         .tracker-label { margin-top: 8px; font-size: 10px; font-weight: 600; transition: color 0.3s ease; }
         .tracker-step.active .tracker-label { color: var(--brand-primary); }
 
+        /* Instagram Gradient Text */
         .instagram-card {
             background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        
+        /* Classy X */
         .classy-x {
             font-family: 'Playfair Display', serif;
-            font-style: italic;
+            font-style: normal; 
             font-weight: 600;
-            font-size: 1.5em; /* Adjusted size */
-            vertical-align: -0.2em; /* Re-aligned for balance */
+            font-size: 1.1em; 
+            vertical-align: -0.1em; 
+            margin: 0 -0.1em; 
         }
+        
+        /* Spinner */
         .spinner {
             border: 2px solid var(--bg-primary);
             border-top: 2px solid var(--brand-primary);
@@ -84,11 +134,80 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Bottom Nav */
+        .nav-item {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .nav-item-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 4.5rem; 
+            height: 2.5rem; 
+            border-radius: 9999px;
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-item.active .nav-item-content {
+            background-color: var(--brand-primary);
+            color: var(--bg-primary);
+        }
+        .nav-item.active .nav-label {
+            font-weight: 700;
+        }
+        
+        /* Category Tabs */
+        .category-tab {
+            padding: 0.5rem 1rem; 
+            border-radius: 9999px;
+            transition: all 0.2s ease-in-out;
+        }
+        .category-tab.active {
+            background-color: var(--brand-primary);
+            color: var(--bg-primary);
+        }
+        
+        /* General Component Styling (Interactive) */
+        .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.75rem 1rem; 
+            font-weight: 600;
+            border-radius: 0.75rem; /* 12px */
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+        .btn:hover, .card-clickable:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+        .btn:active, .card-clickable:active {
+            transform: scale(0.98);
+            opacity: 1;
+        }
+        .btn-brand {
+            background-color: var(--brand-primary);
+            color: var(--bg-primary);
+        }
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .card {
+            background-color: var(--bg-secondary);
+            border-radius: 1rem; /* 16px */
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            transition: all 0.2s ease;
+        }
     </style>
 </head>
 <body data-theme="matcha">
 
-    <!-- Splash Screen: Shown during initial auth and data load -->
+    <!-- Splash Screen -->
     <div id="splash-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-[100]">
         <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full">
     </div>
@@ -100,16 +219,15 @@
                 <header id="page-header" class="sticky top-0 bg-primary z-20 h-16 px-4 flex justify-between items-center border-b border-custom"></header>
                 <div id="page-content"></div>
             </div>
-            <!-- Spacer to ensure content scrolls above the bottom nav bar -->
-            <div class="h-20 flex-shrink-0"></div>
+            <div class="h-24 flex-shrink-0"></div>
         </main>
-        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-16 z-30 hidden"></nav>
+        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-20 z-30 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] hidden"></nav>
     </div>
 
-    <!-- Global Containers for Modals & Toasts -->
+    <!-- Global Containers -->
     <div id="modal-container"></div>
-    <div id="toast" class="hidden fixed right-4 brand-bg py-3 px-5 rounded-lg shadow-xl z-50">
-        <p id="toast-message"></p>
+    <div id="toast" class="hidden fixed right-4 brand-bg py-3 px-5 rounded-xl shadow-xl z-50">
+        <p id="toast-message" class="font-semibold"></p>
     </div>
     
 <script>
@@ -131,7 +249,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const STATIC_DATA = {
-    bestSellers: [10, 39, 61, 93], // IDs for Lotus Biscoff Cappuccino, Nutella Shake, Crispy Paneer Burger, Tandoori Paneer Pizza
     captionIdeas: {
         student: [ "Fueling my study session with @hxousecoffeeco ☕️📚 #StudentLife", "Caffeine and concentration, courtesy of @hxousecoffeeco." ],
         office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ],
@@ -178,16 +295,45 @@ const app = {
         tableNumber: null,
         user: null,
         customerProfile: null,
-        theme: 'matcha',
+        theme: localStorage.getItem('hxouse-theme') || 'matcha', 
         menuData: [],
         appSettings: {},
         orderSubscription: null,
-        currentMenuCategory: null, 
+        currentMenuCategory: 'All', // UPDATED: Default to 'All'
+        currentSearchTerm: '', // NEW: For search bar
     },
     
     async init() {
         document.body.addEventListener('click', () => sound.init(), { once: true });
+        
+        // Back Button/History Logic
+        const initialHash = window.location.hash.replace('#', '');
+        const validPages = ['home', 'order', 'cart', 'social', 'more'];
+        if (initialHash && validPages.includes(initialHash)) {
+            this.state.currentPage = initialHash;
+            history.replaceState({ page: initialHash }, '', '#' + initialHash);
+        } else {
+            history.replaceState({ page: 'home' }, '', '#home');
+            this.state.currentPage = 'home';
+        }
+        window.onpopstate = this.handlePopState.bind(this);
+
         this.startAppFlow();
+    },
+
+    handlePopState(event) {
+        const state = event.state;
+        
+        if (ui.isModalOpen()) {
+            ui.closeAllModals(true); 
+            return; 
+        }
+
+        if (state && state.page) {
+            this.navigateTo(state.page, true); // `true` = isPopping
+        } else {
+            this.navigateTo('home', true); // Fallback
+        }
     },
 
     async startAppFlow() {
@@ -204,7 +350,11 @@ const app = {
                 this.state.user = signInData.user;
             }
             
-            await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData(), this.fetchAppSettings() ]);
+            await Promise.all([ 
+                this.fetchCustomerProfile(), 
+                this.fetchMenuData(), 
+                this.fetchAppSettings() 
+            ]);
 
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
@@ -241,7 +391,11 @@ const app = {
 
     async fetchMenuData() {
         try {
-            const { data, error } = await supabase.from('products').select('*').order('id');
+            // UPDATED: Added `is_available` to the query, `false` items will be hidden
+            const { data, error } = await supabase.from('products')
+                .select('*')
+                .eq('is_available', true)
+                .order('id');
             if (error) throw error;
             
             const groupedMenu = data.reduce((acc, item) => {
@@ -262,7 +416,7 @@ const app = {
             this.state.menuData = [];
         }
     },
-    
+        
     async fetchAppSettings() {
         try {
             const { data, error } = await supabase.from('app_settings').select('key, value');
@@ -273,16 +427,16 @@ const app = {
     
     showOnboardingModal(){
         const tableInputHTML = !this.state.tableNumber 
-            ? `<input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>`
+            ? `<input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-xl bg-secondary text-primary" placeholder="Your Table Number" required>`
             : '';
         ui.showModal('onboarding-modal', `
             <h2 class="text-2xl font-bold text-primary mb-2">Welcome to H<span class="classy-x">X</span>OUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p>
             <div class="space-y-4">
-                <input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Name" required>
+                <input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-xl bg-secondary text-primary" placeholder="Your Name" required>
                 ${tableInputHTML}
-                <input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Mobile Number (Optional)">
+                <input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-xl bg-secondary text-primary" placeholder="Mobile Number (Optional)">
             </div>
-            <button onclick="app.completeOnboarding()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Let's Go</button>
+            <button onclick="app.completeOnboarding()" class="btn btn-brand w-full mt-6">Let's Go</button>
         `);
     },
     
@@ -312,8 +466,8 @@ const app = {
         ui.showModal('table-number-modal', `
             <h2 class="text-2xl font-bold text-primary mb-2">Welcome back, ${this.state.customerProfile.name}!</h2>
             <p class="text-secondary mb-6">Please enter your table number for today's visit.</p>
-            <input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>
-            <button onclick="app.completeTableNumberEntry()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Continue</button>
+            <input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-xl bg-secondary text-primary" placeholder="Your Table Number" required>
+            <button onclick="app.completeTableNumberEntry()" class="btn btn-brand w-full mt-6">Continue</button>
         `);
     },
 
@@ -327,25 +481,34 @@ const app = {
 
     async startSession() {
         await this.fetchActiveOrder();
-        this.showMainInterface();
+        this.showMainInterface(this.state.currentPage, true);
     },
     
-    showMainInterface(){
+    showMainInterface(page, isPopping = false){
         $('#main-interface').classList.remove('hidden');
         $('#bottom-nav').classList.remove('hidden');
         ui.renderBottomNav();
-        this.navigateTo('home');
+        this.navigateTo(page, isPopping);
     },
 
-    navigateTo(page){
+    navigateTo(page, isPopping = false){
+        if (this.state.currentPage === page && !isPopping) return; 
         if (!this.state.customerProfile) return;
-        sound.play('click');
+        
+        if (!isPopping) sound.play('click'); 
+        
         this.state.currentPage = page;
         ui.renderHeader(page);
         ui.renderPageContent(page);
         ui.updateActiveNav(page);
+
+        if (!isPopping) {
+            history.pushState({ page: page }, '', '#' + page);
+        }
     },
 
+    // REMOVED: jumpToCategory. 'order' page is now the destination.
+    
     applyTheme(){ document.body.dataset.theme = this.state.theme; },
     toggleTheme(t){ this.state.theme = t; localStorage.setItem('hxouse-theme', t); this.applyTheme(); this.navigateTo('more'); },
 
@@ -456,12 +619,13 @@ const app = {
                     this.state.orderSubscription = null;
                     if (updatedOrder.status === 'delivered') {
                         ui.showModal('review-modal', `
-                            <div class="text-center"><span class="text-4xl">⭐</span>
-                            <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2>
-                            <p class="text-secondary my-2">How was your experience?</p>
-                            <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="3" placeholder="Tell us more..."></textarea>
-                            <button onclick="app.submitFeedback('${orderId}')" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Submit Feedback</button>
-                            <button onclick="ui.closeModal('review-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Maybe Later</button>
+                            <div class="text-center">
+                                <i data-lucide="star" class="w-12 h-12 inline-block text-yellow-400 fill-yellow-400"></i>
+                                <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2>
+                                <p class="text-secondary my-2">How was your experience?</p>
+                                <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-xl bg-secondary" rows="3" placeholder="Tell us more..."></textarea>
+                                <button onclick="app.submitFeedback('${orderId}')" class="btn btn-brand w-full mt-4">Submit Feedback</button>
+                                <button onclick="ui.closeModal('review-modal')" class="btn btn-secondary w-full mt-2">Maybe Later</button>
                             </div>
                         `);
                     } else {
@@ -509,19 +673,47 @@ const app = {
 // SECTION 3: UI COMPONENTS & RENDERERS
 // =================================================================================
 const ui = {
+    refreshIcons() {
+        lucide.createIcons();
+    },
+
     showModal(id, content) {
         const existingModal = $(`#${id}`);
         if (existingModal) existingModal.remove();
-
-        const modalHTML = `<div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg">${content}</div></div>`;
+        const modalHTML = `<div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-end justify-center z-50 p-4 pt-10"><div class="modal-content bg-primary shadow-xl p-6 w-full max-w-lg">${content}</div></div>`;
         $('#modal-container').insertAdjacentHTML('beforeend', modalHTML);
+        
+        history.pushState({ modal: id }, '', window.location.href);
+
+        this.refreshIcons();
     },
-    closeModal(id) { $(`#${id}`)?.remove(); },
+    closeModal(id, isPopping = false) {
+        const modal = $(`#${id}`);
+        if (!modal) return false;
+        
+        modal.remove();
+        
+        if (!isPopping && history.state && history.state.modal === id) {
+            history.back();
+        }
+        return true;
+    },
+    isModalOpen() { 
+        return !!$('#modal-container').firstElementChild; 
+    },
+    closeAllModals(isPopping = false) {
+        $$('#modal-container > div').forEach(modal => {
+            this.closeModal(modal.id, isPopping);
+        });
+    },
+
     showToast(message, duration = 3000) {
         const toast = $('#toast'), p = $('#toast-message');
         p.textContent = message;
         toast.classList.remove('hidden');
-        toast.style.animation = `toast-in 0.5s ease, toast-out 0.5s ease ${duration / 1000 - 0.5}s forwards`;
+        toast.style.animation = 'none';
+        void toast.offsetWidth; 
+        toast.style.animation = `toast-in 0.5s cubic-bezier(0.16, 1, 0.3, 1), toast-out 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${duration / 1000 - 0.5}s forwards`;
         
         setTimeout(() => {
             toast.classList.add('hidden');
@@ -563,160 +755,210 @@ const ui = {
         void content.offsetWidth; 
         content.classList.add('fade-in');
         renderers[page]?.call(this);
+        this.refreshIcons();
     },
     
     renderBottomNav(){
-        const icons = { home: `...`, order: `...`, cart: `...`, social: `...`, more: `...` };
-        icons.home = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`;
-        icons.order = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`;
-        icons.cart = `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`;
-        icons.social = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`;
-        icons.more = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`;
-        
+        const icons = { 
+            home: 'home', 
+            order: 'book-open', 
+            cart: 'shopping-cart', 
+            social: 'users', 
+            more: 'menu' 
+        };
         const pages = ['home', 'order', 'cart', 'social', 'more'];
-        $('#bottom-nav').innerHTML = pages.map(p => `<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${icons[p]}<span id="${p}-tab-label" class="text-xs font-bold capitalize">${p}</span></button>`).join('');
+        $('#bottom-nav').innerHTML = pages.map(p => `
+            <button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">
+                <div class="nav-item-content">
+                    <i data-lucide="${icons[p]}" class="w-6 h-6"></i>
+                    <span id="${p}-tab-label" class="nav-label text-xs capitalize mt-0.5">${p}</span>
+                </div>
+            </button>`).join('');
+        this.refreshIcons();
     },
     
     updateActiveNav(page) {
-        const cartLabel = $('#cart-tab-label'), cartIcon = $('#cart-icon-svg');
+        // --- FIXED: Added null checks ---
+        const cartLabel = $('#cart-tab-label');
+        const cartIcon = $$('.nav-item[data-page="cart"] i')[0];
+        
         if (app.state.activeOrder) {
-            cartLabel.textContent = 'Track';
-            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`;
+            if (cartLabel) cartLabel.textContent = 'Track';
+            if (cartIcon) cartIcon.setAttribute('data-lucide', 'clipboard-list');
         } else {
-            cartLabel.textContent = 'Cart';
-            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`;
+            if (cartLabel) cartLabel.textContent = 'Cart';
+            if (cartIcon) cartIcon.setAttribute('data-lucide', 'shopping-cart');
         }
+        
         $$('.nav-item').forEach(item => {
-            const isActive = item.dataset.page === page;
-            item.classList.toggle('brand-text', isActive);
-            item.classList.toggle('text-secondary', !isActive);
-            item.style.transform = isActive ? 'scale(1.1)' : 'scale(1)';
+            item.classList.toggle('active', item.dataset.page === page);
         });
+        
+        this.refreshIcons();
         this.refreshCartDependentUI();
     },
 
     refreshCartDependentUI() {
-        const el = $('#cart-count');
+        const existingCount = $('#cart-count');
+        if (existingCount) existingCount.remove();
+
         const total = app.state.cart.reduce((s, i) => s + i.quantity, 0);
         if (total > 0 && !app.state.activeOrder) {
-            el.textContent = total;
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
+            const cartNav = $('.nav-item[data-page="cart"] .nav-item-content');
+            if (cartNav) {
+                cartNav.classList.add('relative');
+                cartNav.innerHTML += `<span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">${total}</span>`;
+            }
         }
     },
 
+    // --- NEW: Redesigned Home Page (with Video) ---
     renderHomePage(){
         const settings = app.state.appSettings;
-        const activeOrderHTML = app.state.activeOrder ? `
-            <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center">
-                <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2>
-                <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p>
-                <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
-            </div>` : '';
-        
         const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
-        const promoSubtitle = 'Show your bill & story at the counter to claim your gift from H<span class="classy-x">X</span>OUSE.';
         
-        const bestSellerItems = STATIC_DATA.bestSellers.map(id => {
-            return app.state.menuData.flatMap(c => c.items).find(item => item.id === id);
-        }).filter(Boolean);
-
-        const bestSellersHTML = bestSellerItems.map(item => `
-            <div onclick="ui.showItemDetailModal(${item.id})" class="cursor-pointer flex-shrink-0 w-40 bg-secondary rounded-xl p-3 flex flex-col items-center text-center">
-                <div class="text-5xl mb-2">${item.image_url || '🍴'}</div>
-                <h3 class="font-bold text-primary text-sm flex-grow">${item.name}</h3>
-                <p class="font-semibold text-secondary text-sm mt-1">₹${item.price}</p>
-            </div>
-        `).join('');
-            
         $('#page-content').innerHTML = `
             <div class="space-y-6">
-                <div class="relative h-48 overflow-hidden rounded-b-2xl">
+                <!-- Video Slideshow is Back -->
+                <div class="relative h-64 overflow-hidden rounded-b-2xl">
                     <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
                     <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
-                        <h1 class="text-3xl font-bold">${settings.welcome_title || 'H<span class="classy-x">X</span>OUSE'}</h1>
+                        <h1 class="text-3xl font-bold" style="font-family: 'Playfair Display', serif;">${settings.welcome_title || 'H<span class="classy-x">X</span>OUSE'}</h1>
                         <p class="text-lg mt-1 font-light">${settings.welcome_subtitle || 'COFFEE CO.'}</p>
                     </div>
                 </div>
+                
                 <div class="p-4 space-y-8">
-                    ${activeOrderHTML ? `<div class="mb-6">${activeOrderHTML}</div>` : ''}
+                    <button onclick="app.navigateTo('order')" class="btn btn-brand w-full text-lg py-4">
+                        <i data-lucide="book-open" class="w-5 h-5 mr-2"></i>
+                        View Full Menu
+                    </button>
                     
-                    <div>
-                        <h2 class="text-2xl font-bold text-primary mb-4 px-1">Our Best Sellers</h2>
-                        <div class="horizontal-scroll flex space-x-4 overflow-x-auto pb-2">
-                            ${bestSellersHTML}
-                        </div>
+                    <div onclick="app.navigateTo('social')" class="card card-clickable cursor-pointer group relative p-6 overflow-hidden">
+                        <i data-lucide="gift" class="absolute -top-4 -right-4 w-24 h-24 text-primary opacity-5"></i>
+                        <h2 class="text-xl font-bold text-primary">${promoTitle}</h2>
+                        <p class="mt-1 text-secondary text-sm">Tap to learn more & get caption ideas.</p>
                     </div>
 
-                    <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
-                        <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
-                        <p class="mt-1 text-secondary">${promoSubtitle}</p>
-                        <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Learn More &rarr;</button>
-                    </div>
                     <div class="grid grid-cols-1 gap-4">
-                        <button onclick="app.sendStaffCall()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎️</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button>
+                        <button onclick="app.sendStaffCall()" class="card card-clickable p-4 text-center flex flex-col items-center justify-center h-28">
+                            <i data-lucide="bell" class="w-8 h-8 brand-text"></i>
+                            <p class="font-semibold mt-2 text-primary">Call Staff</p>
+                        </button>
                     </div>
                 </div>
             </div>`;
     },
     
+    // --- UPDATED: Menu Page (with Search and "All" tab) ---
     renderMenuPage() {
         const content = $('#page-content');
         if (app.state.menuData.length === 0) {
             content.innerHTML = `<div class="p-4 text-center text-secondary">Loading menu...</div>`; return;
         }
 
+        // Create categories array with "All"
+        let categories = [{ category: 'All' }, ...app.state.menuData];
+
+        // Set default category if not set
         if (!app.state.currentMenuCategory) {
-            app.state.currentMenuCategory = app.state.menuData[0].category;
+            app.state.currentMenuCategory = 'All';
         }
 
         content.innerHTML = `
-            <div class="horizontal-scroll sticky top-16 bg-primary z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
-                ${app.state.menuData.map(c => `<button 
-                    class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${app.state.currentMenuCategory === c.category ? 'brand-text border-b-2 border-current' : 'text-secondary'}" 
+            <!-- NEW: Search Bar -->
+            <div class="p-4 sticky top-16 bg-primary z-10 border-b border-custom">
+                <div class="relative">
+                    <input type="text" id="menu-search-input" 
+                           oninput="ui.handleSearch(this.value)" 
+                           value="${app.state.currentSearchTerm}"
+                           class="w-full pl-10 pr-4 py-3 rounded-xl bg-secondary border border-custom text-primary" 
+                           placeholder="Search menu...">
+                    <i data-lucide="search" class="w-5 h-5 text-secondary absolute left-3 top-1/2 -translate-y-1/2"></i>
+                </div>
+            </div>
+            
+            <!-- Category Tabs -->
+            <div class="horizontal-scroll sticky top-[141px] bg-primary z-10 flex space-x-2 px-4 py-3 overflow-x-auto border-b border-custom">
+                ${categories.map(c => `<button 
+                    class="category-tab whitespace-nowrap font-semibold py-2 px-4 rounded-full ${app.state.currentMenuCategory === c.category ? 'active' : 'text-secondary'}" 
                     data-category="${c.category}" 
                     onclick="ui.filterMenuByCategory('${c.category}', this)">
                     ${c.category}
                 </button>`).join('')}
             </div>
-            <div id="menu-items" class="p-4 grid grid-cols-2 gap-4"></div>`;
+            
+            <div id="menu-items" class="p-4 space-y-4"></div>`;
 
-        this.filterMenuByCategory(app.state.currentMenuCategory);
+        this.updateMenuDisplay(); // Initial render
+    },
+
+    // --- NEW: Search handler ---
+    handleSearch(term) {
+        app.state.currentSearchTerm = term.toLowerCase();
+        this.updateMenuDisplay();
     },
 
     filterMenuByCategory(category, tabElement) {
         app.state.currentMenuCategory = category; 
-
-        if (tabElement) {
-            $$('.category-tab').forEach(tab => {
-                tab.classList.remove('brand-text', 'border-b-2', 'border-current');
-                tab.classList.add('text-secondary');
-            });
-            tabElement.classList.add('brand-text', 'border-b-2', 'border-current');
-        }
-        const data = app.state.menuData.find(d => d.category === category);
-        this.renderMenuItems(data ? data.items.filter(i => i.is_available) : []);
+        
+        $$('.category-tab').forEach(tab => tab.classList.remove('active'));
+        if(tabElement) tabElement.classList.add('active');
+        
+        this.updateMenuDisplay();
     },
 
+    // --- NEW: Central function to update menu items based on state ---
+    updateMenuDisplay() {
+        let allItems = app.state.menuData.flatMap(c => c.items);
+        let itemsToShow = [];
+
+        // 1. Filter by Category
+        if (app.state.currentMenuCategory === 'All') {
+            itemsToShow = allItems;
+        } else {
+            itemsToShow = allItems.filter(i => i.category === app.state.currentMenuCategory);
+        }
+
+        // 2. Filter by Search Term
+        if (app.state.currentSearchTerm) {
+            itemsToShow = itemsToShow.filter(i => 
+                i.name.toLowerCase().includes(app.state.currentSearchTerm) ||
+                (i.description && i.description.toLowerCase().includes(app.state.currentSearchTerm))
+            );
+        }
+
+        this.renderMenuItems(itemsToShow);
+        this.refreshIcons();
+    },
+
+    // Typographical Menu List
     renderMenuItems(items) {
         const container = $('#menu-items');
-        container.innerHTML = !items || items.length === 0 ? `<p class="text-secondary text-center">No items found.</p>` :
-            items.map(item => {
+        if (items.length === 0) {
+            container.innerHTML = `<p class="text-secondary text-center p-8">No items match your search.</p>`;
+            return;
+        }
+
+        container.innerHTML = items.map(item => {
                 const cartItem = app.state.cart.find(ci => ci.id === item.id);
                 const quantityBadge = cartItem ? `<div class="absolute top-2 right-2 brand-bg text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold shadow-lg">${cartItem.quantity}</div>` : '';
-                
-                return `<div class="bg-secondary rounded-lg shadow-sm overflow-hidden cursor-pointer relative" onclick="ui.showItemDetailModal(${item.id})">
-                            ${quantityBadge}
-                            <div class="w-full h-32 flex items-center justify-center text-5xl bg-primary">${item.image_url || '🍴'}</div>
-                            <div class="p-3">
-                                <h3 class="font-semibold text-sm truncate text-primary">${item.name}</h3>
-                                <div class="flex justify-between items-center mt-2">
-                                    <p class="font-bold text-secondary">₹${item.price}</p>
-                                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xl font-bold brand-text">+</div>
-                                </div>
-                            </div>
-                        </div>`;
+
+                return `
+                <div class="card overflow-hidden relative">
+                    ${quantityBadge}
+                    <div class="p-4 flex justify-between items-start cursor-pointer" onclick="ui.showItemDetailModal(${item.id})">
+                        <div class="flex-grow pr-4">
+                            <h3 class="font-semibold text-lg text-primary">${item.name}</h3>
+                            <p class="text-secondary text-sm mt-1">${item.description || ''}</p>
+                            <p class="font-bold text-primary text-base mt-3">₹${item.price}</p>
+                        </div>
+                        <button onclick="event.stopPropagation(); ui.showItemDetailModal(${item.id})" class="btn btn-brand w-12 h-12 rounded-xl p-0 flex-shrink-0">
+                            <i data-lucide="plus" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+                `;
             }).join('');
     },
     
@@ -724,7 +966,12 @@ const ui = {
         const content = $('#page-content');
         if (app.state.activeOrder) this.renderOrderTracking(content);
         else if (app.state.cart.length > 0) this.renderCart(content);
-        else content.innerHTML = `<div class="text-center p-10"><h2 class="text-2xl font-bold text-primary">Your cart is empty</h2><p class="text-secondary mt-2">Add items from the menu to get started.</p><button onclick="app.navigateTo('order')" class="mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">View Menu</button></div>`;
+        else content.innerHTML = `<div class="text-center p-10 flex flex-col items-center">
+            <i data-lucide="shopping-basket" class="w-20 h-20 text-secondary opacity-50"></i>
+            <h2 class="text-2xl font-bold text-primary mt-4">Your cart is empty</h2>
+            <p class="text-secondary mt-2">Add items from the menu to get started.</p>
+            <button onclick="app.navigateTo('order')" class="btn btn-brand mt-6">View Menu</button>
+            </div>`;
     },
 
     renderCart(container){
@@ -732,29 +979,35 @@ const ui = {
         let hamperMessage = '';
         if (total > 0 && total < 799) {
             const amountNeeded = 799 - total;
-            hamperMessage = `<div class="p-4"><div class="bg-yellow-100 border border-yellow-200 text-yellow-800 p-3 rounded-lg text-center font-bold">🛒 Order for ₹${amountNeeded.toFixed(2)} more to get a free hamper!</div></div>`;
+            hamperMessage = `<div class="p-4"><div class="bg-orange-100 border border-orange-200 text-orange-800 p-3 rounded-xl text-center font-semibold text-sm flex items-center justify-center">
+                <i data-lucide="gift" class="w-4 h-4 mr-2"></i>
+                Order for ₹${amountNeeded.toFixed(2)} more to get a free hamper!
+                </div></div>`;
         } else if (total >= 799) {
-            hamperMessage = `<div class="p-4"><div class="bg-green-100 border border-green-200 text-green-800 p-3 rounded-lg text-center font-bold">🎉 You're eligible for a free hamper! Don't forget to post a story.</div></div>`;
+            hamperMessage = `<div class="p-4"><div class="bg-green-100 border border-green-200 text-green-800 p-3 rounded-xl text-center font-semibold text-sm flex items-center justify-center">
+                <i data-lucide="party-popper" class="w-4 h-4 mr-2"></i>
+                You're eligible for a free hamper! Don't forget to post a story.
+                </div></div>`;
         }
 
         container.innerHTML = `
             <div class="p-4 space-y-3">${app.state.cart.map(i => `
-                <div class="bg-secondary p-3 rounded-xl">
+                <div class="card p-3">
                     <div class="flex justify-between items-start">
                         <p class="font-bold text-primary">${i.name}</p>
                         <p class="font-semibold text-primary">₹${(i.price * i.quantity).toFixed(2)}</p>
                     </div>
                     <div class="flex justify-between items-center mt-2">
-                        <button onclick="app.state.cart = app.state.cart.filter(ci => ci.cartId !== ${i.cartId}); app.refreshPage();" class="text-red-500 font-semibold text-xs">Remove</button>
+                        <button onclick="app.state.cart = app.state.cart.filter(ci => ci.cartId !== ${i.cartId}); app.refreshPage();" class="text-red-500 font-semibold text-xs hover:underline">Remove</button>
                         <p class="text-sm text-secondary">Quantity: ${i.quantity}</p>
                     </div>
                 </div>`).join('')}
             </div>
             ${hamperMessage}
-            <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div>
-            <div class="p-4 bg-primary border-t-custom sticky bottom-16">
+            <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-xl bg-secondary" placeholder="Add special instructions..."></textarea></div>
+            <div class="p-4 bg-primary border-t border-custom sticky bottom-20">
                 <div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${total.toFixed(2)}</span></div>
-                <button id="place-order-btn" onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
+                <button id="place-order-btn" onclick="ui.showPaymentModal()" class="btn btn-brand w-full text-lg py-4">Proceed to Payment</button>
             </div>`;
     },
 
@@ -763,7 +1016,7 @@ const ui = {
         if (!order) { container.innerHTML = ''; return; }
         
         const statuses = ['received', 'preparing', 'delivered'];
-        const icons = { received: '📝', preparing: '🍳', delivered: '😊' };
+        const icons = { received: 'clipboard-list', preparing: 'chef-hat', delivered: 'smile' };
         const currentIndex = statuses.indexOf(order.status);
         const progressPercentage = currentIndex > 0 ? (currentIndex / (statuses.length - 1)) * 100 : 0;
         
@@ -778,14 +1031,14 @@ const ui = {
                     </div>
                     ${statuses.map((status, index) => `
                         <div class="tracker-step ${index <= currentIndex ? 'active' : ''}">
-                            <div class="tracker-icon-container">${icons[status]}</div>
+                            <div class="tracker-icon-container"><i data-lucide="${icons[status]}" class="w-5 h-5"></i></div>
                             <span class="tracker-label capitalize">${status}</span>
                         </div>`).join('')}
                 </div>
 
                 <div class="mt-auto pt-10 text-center">
                     <p class="text-secondary mb-4">While you wait, why not play a game?</p>
-                    <button onclick="ui.showGamesModal()" class="brand-bg font-semibold py-3 px-8 rounded-lg">Play Games</button>
+                    <button onclick="ui.showGamesModal()" class="btn btn-brand px-8">Play Games</button>
                 </div>
             </div>`;
     },
@@ -796,20 +1049,21 @@ const ui = {
         
         $('#page-content').innerHTML = `
             <div class="p-4 space-y-6 text-center">
-                 <div class="bg-secondary p-6 rounded-xl shadow-sm">
+                 <div class="card p-6">
                     <h2 class="text-2xl font-bold text-primary">Join Our Community!</h2>
                     <p class="text-secondary mt-1">Follow us on Instagram for updates, offers, and good vibes.</p>
                     <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="instagram-card text-2xl font-bold my-4 block">@hxousecoffeeco</a>
                     <div class="flex justify-center">
-                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://instagram.com/hxousecoffeeco" alt="Instagram QR Code" class="rounded-lg bg-white p-2">
+                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://instagram.com/hxousecoffeeco" alt="Instagram QR Code" class="rounded-lg bg-white p-2 border border-custom">
                     </div>
                     <p class="text-xs text-secondary mt-2">Scan to follow!</p>
                 </div>
 
-                <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left">
-                     <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
+                <div onclick="ui.showInstagramPromo()" class="card card-clickable cursor-pointer group relative p-6 overflow-hidden text-left">
+                    <i data-lucide="gift" class="absolute -top-4 -right-4 w-24 h-24 text-primary opacity-5"></i>
+                    <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
                     <p class="mt-1 text-secondary">${promoSubtitle}</p>
-                    <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Get Caption Ideas &rarr;</button>
+                    <button class="btn btn-brand mt-4 text-sm px-4 py-2">Get Caption Ideas &rarr;</button>
                 </div>
             </div>
         `;
@@ -817,16 +1071,19 @@ const ui = {
 
     renderMorePage(){
         const options = [
-            { icon: "🎨", text: "Change Theme", action: "ui.showThemeModal()" },
-            { icon: "🎮", text: "Play Games", action: "ui.showGamesModal()" },
-            { icon: "📶", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
-            { icon: "📜", text: "Order History", action: "ui.showOrderHistoryModal()" },
+            { icon: "palette", text: "Change Theme", action: "ui.showThemeModal()" },
+            { icon: "gamepad-2", text: "Play Games", action: "ui.showGamesModal()" },
+            { icon: "wifi", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
+            { icon: "history", text: "Order History", action: "ui.showOrderHistoryModal()" },
         ];
         $('#page-content').innerHTML = `
             <div class="p-4 space-y-3">${options.map(opt => `
-                <button onclick="${opt.action}" class="w-full flex items-center justify-between bg-secondary p-4 rounded-xl text-left">
-                    <div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>
-                    <span class="text-secondary">&rarr;</span>
+                <button onclick="${opt.action}" class="w-full flex items-center justify-between card card-clickable p-4 text-left">
+                    <div class="flex items-center">
+                        <i data-lucide="${opt.icon}" class="w-6 h-6 brand-text mr-4"></i>
+                        <span class="font-semibold text-primary">${opt.text}</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-secondary"></i>
                 </button>`).join("")}
             </div>`;
     },
@@ -836,10 +1093,16 @@ const ui = {
          ui.showModal('payment-modal', `
             <h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2>
             <div class="space-y-3">
-                <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
-                <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button>
+                <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn btn btn-secondary w-full">
+                    <i data-lucide="landmark" class="w-5 h-5 mr-3"></i>
+                    <span>Pay at Counter</span>
+                </button>
+                <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn btn btn-secondary w-full">
+                    <i data-lucide="smartphone" class="w-5 h-5 mr-3"></i>
+                    <span>UPI / QR Code</span>
+                </button>
             </div>
-            <button onclick="ui.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+            <button onclick="ui.closeModal('payment-modal')" class="btn btn-secondary w-full mt-6">Cancel</button>
         `);
     },
     
@@ -850,37 +1113,35 @@ const ui = {
         let optionsHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${i + 1 === currentQuantity ? 'selected' : ''}>${i + 1}</option>`).join('');
 
         ui.showModal('item-detail-modal', `
-            <div class="flex justify-between items-start">
-                <div>
-                    <h2 class="text-2xl font-bold text-primary">${item.name}</h2>
-                    <p class="text-xl font-semibold text-secondary">₹${item.price}</p>
-                </div>
-                <div class="text-5xl">${item.image_url || '🍴'}</div>
+            <div>
+                <h2 class="text-2xl font-bold text-primary">${item.name}</h2>
+                <p class="text-xl font-semibold text-secondary">₹${item.price}</p>
             </div>
             <p class="text-secondary mt-2">${item.description || 'A delicious choice.'}</p>
-            <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-lg">
+            <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-xl">
                 <label for="modal-quantity-select" class="font-semibold text-primary">Quantity:</label>
                 <select id="modal-quantity-select" class="bg-primary border border-custom text-primary font-semibold rounded-lg p-2">${optionsHTML}</select>
             </div>
             <div class="mt-6 grid grid-cols-2 gap-4">
-                <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button>
-                <button onclick="app.addOrUpdateCartFromModal(${item.id})" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
+                <button onclick="ui.closeModal('item-detail-modal')" class="btn btn-secondary">Back</button>
+                <button onclick="app.addOrUpdateCartFromModal(${item.id})" class="btn btn-brand">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
             </div>`);
     },
 
     showInstagramPromo(){
         const vibes = Object.entries(STATIC_DATA.captionIdeas).map(([key, _]) => ({
-            name: key, icon: { student: '🎓', office: '💼', couple: '❤️', friends: '🎉' }[key]
+            name: key, icon: { student: 'graduation-cap', office: 'briefcase', couple: 'heart', friends: 'party-popper' }[key]
         }));
         ui.showModal('insta-modal', `
             <h2 class="text-2xl font-bold">Post for a Free Hamper!</h2>
             <p class="text-secondary mt-1 mb-6">If your order is over ₹799, post a story tagging us, and show both at the counter!</p>
             <div class="grid grid-cols-2 gap-4">${vibes.map(v => `
-                <button onclick="ui.showCaptionIdeas('${v.name}')" class="bg-secondary p-4 rounded-xl text-center">
-                    <span class="text-3xl">${v.icon}</span><p class="font-semibold mt-2 capitalize">${v.name}</p>
+                <button onclick="ui.showCaptionIdeas('${v.name}')" class="btn btn-secondary flex-col h-28">
+                    <i data-lucide="${v.icon}" class="w-8 h-8"></i>
+                    <p class="font-semibold mt-2 capitalize">${v.name}</p>
                 </button>`).join('')}
             </div>
-            <button onclick="ui.closeModal('insta-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+            <button onclick="ui.closeModal('insta-modal')" class="btn btn-secondary w-full mt-6">Cancel</button>
         `);
     },
 
@@ -892,11 +1153,14 @@ const ui = {
             <p class="text-secondary mt-1 mb-4">Tap to copy. Tag us <span class="font-bold brand-text">@hxousecoffeeco</span>!</p>
             <div class="space-y-2 max-h-48 overflow-y-auto">${captions.map(c => `
                 <div onclick="app.copyCaption('${c.replace(/'/g, "\\'")}')" class="bg-secondary p-3 rounded-lg text-sm font-medium cursor-pointer flex justify-between items-center">
-                    <span>${c}</span><span class="text-xs font-bold brand-text">COPY</span>
+                    <span>${c}</span><i data-lucide="copy" class="w-4 h-4 brand-text ml-2"></i>
                 </div>`).join('')}
             </div>
-            <a href="instagram://story-camera" class="block w-full text-center mt-6 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white font-semibold py-3 rounded-lg">Open Instagram Story</a>
-            <button onclick="ui.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+            <a href="instagram://story-camera" class="btn btn-brand w-full text-center mt-6" style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white;">
+                <i data-lucide="instagram" class="w-5 h-5 mr-2"></i>
+                Open Instagram Story
+            </a>
+            <button onclick="ui.closeModal('caption-modal')" class="btn btn-secondary w-full mt-2">Close</button>
         `);
     },
     
@@ -905,36 +1169,40 @@ const ui = {
             <h2 class="text-xl font-bold text-center mb-4">Entertainment</h2>
             <div class="space-y-3">
                 ${Object.values(GAMES).map(game => `
-                    <div class="bg-secondary p-4 rounded-xl">
+                    <div class="card p-4">
                         <h3 class="text-lg font-bold text-primary mb-1">${game.title}</h3>
                         <p class="text-secondary text-sm mb-3">${game.description}</p>
-                        <button onclick="GAMES['${game.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg text-sm">Play</button>
+                        <button onclick="GAMES['${game.id}'].start()" class="btn btn-brand text-sm px-4 py-2">Play</button>
                     </div>`).join("")}
             </div>
-            <button onclick="ui.closeModal('games-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+            <button onclick="ui.closeModal('games-modal')" class="btn btn-secondary w-full mt-6">Close</button>
         `);
     },
 
     showThemeModal() {
-        const themes = [ { n: 'light', i: '☀️' }, { n: 'dark', i: '🌙' }, { n: 'sunset', i: '🌆' }, { n: 'matcha', i: '🍵' }];
+        const themes = [ { n: 'matcha', i: 'coffee' }, { n: 'light', i: 'sun' }, { n: 'dark', i: 'moon' }, { n: 'sunset', i: 'sunset' }];
         ui.showModal('theme-modal', `
             <h2 class="text-xl font-bold mb-4">Choose Theme</h2>
-            <div class="grid grid-cols-2 gap-4">${themes.map(t => `<button onclick="app.toggleTheme('${t.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${t.i}</span><p class="font-semibold mt-1 capitalize">${t.n}</p></button>`).join('')}</div>
-            <button onclick="ui.closeModal('theme-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+            <div class="grid grid-cols-2 gap-4">${themes.map(t => `<button onclick="app.toggleTheme('${t.n}')" class="btn btn-secondary flex-col h-28 ${app.state.theme === t.n ? 'brand-border' : ''}">
+                <i data-lucide="${t.i}" class="w-8 h-8"></i>
+                <p class="font-semibold mt-2 capitalize">${t.n}</p>
+                </button>`).join('')}</div>
+            <button onclick="ui.closeModal('theme-modal')" class="btn btn-secondary w-full mt-6">Close</button>
         `);
     },
     
     showWifiModal() {
         ui.showModal('wifi-modal', `
             <div class="text-center">
-                <h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2>
+                <i data-lucide="wifi" class="w-12 h-12 brand-text mx-auto"></i>
+                <h2 class="text-xl font-bold mt-4 mb-2">Wi-Fi Network</h2>
                 <p class="text-secondary mb-4">Connect and enjoy!</p>
-                <div class="bg-secondary p-4 rounded-lg">
+                <div class="card p-4">
                     <p class="text-xs">Network Name</p><p class="font-bold text-lg">THE CO-WORK HUB</p>
                     <hr class="border-custom my-3">
                     <p class="text-xs">Password</p><p class="font-bold text-lg">95462418</p>
                 </div>
-                <button onclick="ui.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+                <button onclick="ui.closeModal('wifi-modal')" class="btn btn-secondary w-full mt-6">Close</button>
             </div>
         `);
     },
@@ -942,7 +1210,7 @@ const ui = {
     async showOrderHistoryModal() {
         const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity)`).eq('customer_id', app.state.user.id).order('created_at', { ascending: false });
         const historyHTML = data?.length > 0 ? data.map(o => `
-            <div class="bg-secondary p-3 rounded-lg">
+            <div class="card p-3">
                 <div class="flex justify-between">
                     <div>
                         <p class="font-bold">Order #${o.id.slice(0, 6)}</p>
@@ -956,7 +1224,7 @@ const ui = {
         ui.showModal('history-modal', `
             <h2 class="text-xl font-bold text-center mb-4">Order History</h2>
             <div class="space-y-3 max-h-60 overflow-y-auto">${historyHTML}</div>
-            <button onclick="ui.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+            <button onclick="ui.closeModal('history-modal')" class="btn btn-secondary w-full mt-6">Close</button>
         `);
     }
 };
@@ -980,8 +1248,8 @@ const GAMES = {
                         ${this.board.map((_, i) => `<div class="aspect-square bg-secondary flex items-center justify-center text-5xl sm:text-6xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}
                     </div>
                 </div>
-                <button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button>
-                <button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>
+                <button onclick="GAMES.ticTacToe.start()" class="btn btn-brand w-full mt-2">New Game</button>
+                <button onclick="ui.closeModal('ttt-modal')" class="btn btn-secondary w-full mt-2">Close</button>
             `);
         },
         play(i) {
@@ -993,9 +1261,7 @@ const GAMES = {
         },
         checkWinner() {
             const lines = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-                [0, 4, 8], [2, 4, 6]             // Diagonals
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
             ];
             for (let line of lines) {
                 const [a, b, c] = line;
@@ -1005,10 +1271,7 @@ const GAMES = {
                     return;
                 }
             }
-            if (this.board.every(cell => cell)) {
-                this.winner = "Draw";
-                sound.play("draw");
-            }
+            if (this.board.every(cell => cell)) { this.winner = "Draw"; sound.play("draw"); }
         },
         updateUI() {
             $$("#ttt-board > div").forEach((cell, i) => {
@@ -1017,11 +1280,7 @@ const GAMES = {
             });
             $("#ttt-status").textContent = this.winner ? (this.winner === "Draw" ? "It's a Draw!" : `Player ${this.winner} wins!`) : `Player ${this.currentPlayer}'s turn`;
         },
-        reset() {
-            this.board.fill(null);
-            this.currentPlayer = "X";
-            this.winner = null;
-        }
+        reset() { this.board.fill(null); this.currentPlayer = "X"; this.winner = null; }
     },
     coffeeTrivia: {
         id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your coffee knowledge!',
@@ -1040,9 +1299,9 @@ const GAMES = {
                     <h2 class="text-xl font-bold mb-2">Coffee Trivia</h2>
                     <p class="text-secondary mb-6 h-12">${item.q}</p>
                     <div id="trivia-options" class="space-y-3">
-                        ${item.o.map((opt, index) => `<button class="trivia-option w-full bg-secondary font-semibold p-3 rounded-lg text-left" onclick="GAMES.coffeeTrivia.checkAnswer(${index}, ${item.a})">${opt}</button>`).join('')}
+                        ${item.o.map((opt, index) => `<button class="trivia-option btn btn-secondary w-full" onclick="GAMES.coffeeTrivia.checkAnswer(${index}, ${item.a})">${opt}</button>`).join('')}
                     </div>
-                    <button onclick="ui.closeModal('trivia-modal')" class="w-full mt-6 bg-secondary py-3 rounded-lg">Close</button>
+                    <button onclick="ui.closeModal('trivia-modal')" class="btn btn-secondary w-full mt-6">Close</button>
                 </div>
             `);
         },
@@ -1050,21 +1309,15 @@ const GAMES = {
             const options = $$('.trivia-option');
             options.forEach((btn, index) => {
                 btn.disabled = true;
+                btn.classList.remove('btn-secondary');
                 if (index === correctIndex) {
-                    btn.classList.remove('bg-secondary');
                     btn.classList.add('bg-green-500', 'text-white');
                 } else if (index === selectedIndex) {
-                    btn.classList.remove('bg-secondary');
                     btn.classList.add('bg-red-500', 'text-white');
                 }
             });
-
-            if (selectedIndex === correctIndex) {
-                sound.play('success');
-            } else {
-                sound.play('draw');
-            }
-
+            if (selectedIndex === correctIndex) sound.play('success');
+            else sound.play('draw');
             setTimeout(() => this.start(), 2000);
         }
     },
@@ -1072,7 +1325,7 @@ const GAMES = {
         id: 'coffeeArt', title: 'Coffee Art Studio', description: 'Unleash your inner barista and create some latte art.',
         canvas: null, ctx: null, painting: false,
         start() {
-            ui.showModal('art-modal', `<div class="text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-full aspect-square mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair" id="canvas-container"><canvas id="coffee-art-canvas"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div>`);
+            ui.showModal('art-modal', `<div class="text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-full aspect-square mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair" id="canvas-container"><canvas id="coffee-art-canvas"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="btn btn-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="ui.closeModal('art-modal')" class="btn btn-secondary w-full mt-6">Done</button></div>`);
             this.initCanvas();
         },
         initCanvas() {
@@ -1115,7 +1368,10 @@ const GAMES = {
 // =================================================================================
 //  SECTION 5: APP INITIALIZATION
 // =================================================================================
-document.addEventListener('DOMContentLoaded', () => app.init());
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    app.init();
+});
 
 </script>
 </body>
