@@ -540,23 +540,36 @@ const app = {
 
     calculateCartTotal(){
         const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        // Ensure pointsToRedeem doesn't exceed subtotal or available points
         const availablePoints = this.state.customerProfile?.loyalty_points || 0;
-        const maxRedeemablePoints = Math.min(Math.floor(availablePoints * 0.8), Math.floor(subtotal));
-        const actualPointsToRedeem = Math.min(this.state.pointsToRedeem, maxRedeemablePoints);
-        const finalTotal = subtotal - actualPointsToRedeem;
 
-        // Update state if clamped
+        // 1. Calculate max discount
+        const redeemablePoints = Math.floor(availablePoints * 0.8);
+        const maxRedeemableForOrder = Math.min(redeemablePoints, Math.floor(subtotal));
+
+        // 2. Clamp current discount
+        const actualPointsToRedeem = Math.min(this.state.pointsToRedeem, maxRedeemableForOrder);
+        const discountAmount = actualPointsToRedeem;
+
+        // 3. Update state if clamped
         if (this.state.pointsToRedeem !== actualPointsToRedeem) {
             console.log("Clamping points to redeem:", actualPointsToRedeem);
             this.state.pointsToRedeem = actualPointsToRedeem;
-            // Schedule UI update if needed, but avoid infinite loop
-            // requestAnimationFrame(() => ui.updateCartSummary());
         }
+        
+        // 4. Calculate final totals WITH GST
+        const discountedSubtotal = subtotal - discountAmount;
+        const gst = discountedSubtotal * 0.05; // 5% GST
+        const finalTotal = discountedSubtotal + gst;
 
-        return { subtotal, finalTotal: Math.max(0, finalTotal) };
+        return { 
+            subtotal, 
+            discountAmount, 
+            discountedSubtotal, 
+            gst, 
+            finalTotal: Math.max(0, finalTotal),
+            maxRedeemableForOrder // Pass this to the cart renderer
+        };
     },
-
 
     updatePointsToRedeem(points) {
         this.state.pointsToRedeem = parseInt(points);
@@ -582,9 +595,8 @@ const app = {
         btnElement.innerHTML = `<span class="flex items-center justify-center"><div class="spinner mr-2"></div> Processing...</span>`;
 
         // Recalculate just before placing order to ensure points are valid
-        const { subtotal, finalTotal } = this.calculateCartTotal();
-        const pointsToRedeem = this.state.pointsToRedeem; // Use potentially clamped value
-        const discountAmount = pointsToRedeem; // Discount is 1:1 with points redeemed
+        const { subtotal, discountAmount, gst, finalTotal, maxRedeemableForOrder } = this.calculateCartTotal();
+        const pointsToRedeem = this.state.pointsToRedeem; // This is the discountAmount
 
         let orderData;
 
@@ -600,13 +612,22 @@ const app = {
                 }
             }
 
+            // Calculate effective discount percentage for admin panel consistency
+            const effectiveDiscountPercent = (subtotal > 0) ? (discountAmount / subtotal) * 100 : 0;
+
             const orderPayload = {
                 customer_id: this.state.customerProfile.id,
                 table_id: tableData.id,
-                total_amount: subtotal,
+                
+                // --- MODIFIED FIELDS for Consistency ---
+                total_amount: finalTotal, // Admin panel expects final total here
+                discount_percentage: effectiveDiscountPercent, // Admin panel uses this
+                
+                // --- Fields for this app's logic ---
                 discount_points_redeemed: pointsToRedeem,
                 discount_amount: discountAmount,
-                final_amount: finalTotal,
+                final_amount: finalTotal, // This app uses this (now matches total_amount)
+
                 payment_method: paymentMethod,
                 special_instructions: $('#special-instructions')?.value || '',
                 feedback_submitted: false
@@ -1156,14 +1177,13 @@ const ui = {
     },
 
     renderCart(container){
-        const { subtotal } = app.calculateCartTotal();
+        // MODIFICATION: Use new calculateTotals function
+        const { subtotal, discountAmount, gst, finalTotal, maxRedeemableForOrder } = app.calculateCartTotal();
         const loyaltyPoints = app.state.customerProfile?.loyalty_points || 0;
-        const redeemablePoints = Math.floor(loyaltyPoints * 0.8);
-        const maxRedeemableForOrder = Math.min(redeemablePoints, Math.floor(subtotal));
+        
         // Clamp pointsToRedeem on initial render as well
         app.state.pointsToRedeem = Math.min(app.state.pointsToRedeem, maxRedeemableForOrder);
-        const currentDiscount = app.state.pointsToRedeem;
-        const finalTotal = subtotal - currentDiscount;
+        const currentDiscount = app.state.pointsToRedeem; // This is the discountAmount
 
         let hamperMessage = '';
         if (subtotal > 0 && subtotal < 799) {
@@ -1225,12 +1245,12 @@ const ui = {
 
     updateCartSummary() {
         // Recalculate here as well to ensure consistency
-        const { subtotal, finalTotal } = app.calculateCartTotal();
-        const currentDiscount = app.state.pointsToRedeem; // Use the potentially clamped value
+        const { subtotal, discountAmount, gst, finalTotal } = app.calculateCartTotal();
+        const currentDiscount = discountAmount; // Use the value from the function
 
         const pointsDisplay = $('#points-to-redeem-display');
         const discountDisplay = $('#discount-amount-display');
-        if(pointsDisplay) pointsDisplay.textContent = currentDiscount;
+        if(pointsDisplay) pointsDisplay.textContent = currentDiscount.toFixed(0); // Points are integers
         if(discountDisplay) discountDisplay.textContent = currentDiscount.toFixed(2);
 
         const summaryDiv = $('#cart-summary');
@@ -1243,6 +1263,10 @@ const ui = {
                 <div class="flex justify-between items-center text-md text-green-600 ${currentDiscount > 0 ? '' : 'hidden'}">
                     <span>Loyalty Discount</span>
                     <span>- ₹${currentDiscount.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between items-center text-md ${gst > 0 ? '' : 'hidden'}">
+                    <span>GST (5%)</span>
+                    <span>₹${gst.toFixed(2)}</span>
                 </div>
                 <div class="flex justify-between items-center text-xl font-bold pt-1 border-t border-custom">
                     <span>To Pay</span>
@@ -1363,7 +1387,7 @@ const ui = {
             <h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2>
             <div class="space-y-3">
                 <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
-                <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button>
+                <!-- <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button> -->
             </div>
             <button onclick="ui.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
         `);
@@ -1606,7 +1630,7 @@ const GAMES = {
                     </div>
                     <div class="flex justify-center items-center space-x-2">
                         <button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button>
-                        <button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button>
+                        <button onclick="GAGES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button>
                         <button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button>
                     </div>
                     <button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button>
