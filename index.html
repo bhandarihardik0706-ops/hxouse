@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Poppins:wght@300;400;500;600;700;800&display.swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* --- THEMES & STYLES --- */
@@ -22,7 +22,7 @@
         [data-theme="dark"] { --bg-primary: var(--bg-primary-dark); --bg-secondary: var(--bg-secondary-dark); --text-primary: var(--text-primary-dark); --text-secondary: var(--text-secondary-dark); --border-color: var(--border-dark); --brand-primary: var(--brand-primary-dark); }
         [data-theme="sunset"] { --bg-primary: var(--bg-primary-sunset); --bg-secondary: var(--bg-secondary-sunset); --text-primary: var(--text-primary-sunset); --text-secondary: var(--text-secondary-sunset); --border-color: var(--border-sunset); --brand-primary: var(--brand-primary-sunset); }
         [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
-
+        
         html, body { height: 100%; overflow: hidden; }
         body { font-family: 'Poppins', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .app-container { background-color: var(--bg-primary); transition: background-color 0.5s ease; height: var(--app-height); }
@@ -31,33 +31,33 @@
         .border-custom { border-color: var(--border-color); } .brand-text { color: var(--brand-primary); }
         .brand-bg { background-color: var(--brand-primary); color: var(--bg-primary); }
         .brand-border { border-color: var(--brand-primary); }
-
+        
         .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .fade-out { animation: fadeOut 0.5s ease-in-out forwards; } @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-
+        
         .toast { animation: toast-in 0.5s ease, toast-out 0.5s ease forwards; }
         @keyframes toast-in { from { bottom: -100px; opacity: 0; } to { bottom: 80px; opacity: 1; } }
         @keyframes toast-out { from { opacity: 1; } to { opacity: 0; display: none; } }
-
+        
         .modal-overlay { animation: fadeIn 0.3s ease; }
-        .modal-content {
+        .modal-content { 
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             max-height: 85vh; /* Mobile compatibility fix */
             overflow-y: auto;   /* Mobile compatibility fix */
         }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
+        
         #splash-screen img { animation: pulse 2s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
+        
         .horizontal-scroll::-webkit-scrollbar { display: none; }
         .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-
+        
         .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
         .tracker-line-container { position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background-color: var(--border-color); border-radius: 2px; }
         .tracker-progress { height: 100%; background-color: var(--brand-primary); border-radius: 2px; transition: width 0.5s ease-in-out; }
         .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 80px; position: relative; z-index: 1; }
-        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 20px; }
+        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 20px; } /* MOD: Reduced emoji size */
         .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
         .tracker-label { margin-top: 8px; font-size: 10px; font-weight: 600; transition: color 0.3s ease; }
         .tracker-step.active .tracker-label { color: var(--brand-primary); }
@@ -72,8 +72,8 @@
             font-family: 'Playfair Display', serif;
             font-style: italic;
             font-weight: 600;
-            font-size: 1.5em;
-            vertical-align: -0.2em;
+            font-size: 1.5em; /* Adjusted size */
+            vertical-align: -0.2em; /* Re-aligned for balance */
         }
         .spinner {
             border: 2px solid var(--bg-primary);
@@ -85,49 +85,85 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Minimum Clicks Styles */
-        .add-to-cart-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); color: var(--brand-primary); border: 2px solid var(--border-color); font-size: 24px; font-weight: 600; line-height: 1; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-        .add-to-cart-btn:hover { transform: scale(1.1); background-color: var(--brand-primary); color: var(--bg-primary); border-color: var(--brand-primary); }
-        .quantity-control { display: flex; align-items: center; justify-content: space-between; background-color: var(--brand-primary); color: var(--bg-primary); border-radius: 9999px; font-weight: 600; overflow: hidden; width: 100px; height: 40px; user-select: none; }
-        .quantity-control button { width: 34px; height: 100%; font-size: 20px; line-height: 1; transition: background-color 0.2s ease; }
-        .quantity-control button:hover { background-color: rgba(0,0,0,0.1); }
-        .quantity-control span { font-size: 16px; }
+        /* --- REDESIGN: MINIMUM CLICKS STYLES --- */
+        .add-to-cart-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background-color: var(--bg-primary);
+            color: var(--brand-primary);
+            border: 2px solid var(--border-color);
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .add-to-cart-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--brand-primary);
+            color: var(--bg-primary);
+            border-color: var(--brand-primary);
+        }
 
-        /* Loyalty Slider Style */
-        #loyalty-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--bg-secondary); outline: none; opacity: 0.7; transition: opacity .2s; border-radius: 4px; }
-        #loyalty-slider:hover { opacity: 1; }
-        #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--brand-primary); cursor: pointer; border-radius: 50%; }
-        #loyalty-slider::-moz-range-thumb { width: 20px; height: 20px; background: var(--brand-primary); cursor: pointer; border-radius: 50%; border: none; }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--brand-primary);
+            color: var(--bg-primary);
+            border-radius: 9999px;
+            font-weight: 600;
+            overflow: hidden;
+            width: 100px;
+            height: 40px;
+            user-select: none;
+        }
+        .quantity-control button {
+            width: 34px;
+            height: 100%;
+            font-size: 20px;
+            line-height: 1;
+            transition: background-color 0.2s ease;
+        }
+        .quantity-control button:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        .quantity-control span {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body data-theme="matcha">
 
-    <!-- Splash Screen -->
+    <!-- Splash Screen: Shown during initial auth and data load -->
     <div id="splash-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-[100]">
         <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full">
     </div>
 
-    <!-- Main App Container -->
+    <!-- Main Application Container -->
     <div id="app" class="app-container max-w-lg mx-auto shadow-2xl flex flex-col hidden">
         <main class="flex-grow overflow-y-auto">
             <div id="main-interface" class="hidden">
                 <header id="page-header" class="sticky top-0 bg-primary z-20 h-16 px-4 flex justify-between items-center border-b border-custom"></header>
                 <div id="page-content"></div>
             </div>
-            <div class="h-20 flex-shrink-0"></div> <!-- Spacer -->
+            <!-- Spacer to ensure content scrolls above the bottom nav bar -->
+            <div class="h-20 flex-shrink-0"></div>
         </main>
         <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-16 z-30 hidden"></nav>
     </div>
 
-    <!-- Global Containers -->
+    <!-- Global Containers for Modals & Toasts -->
     <div id="modal-container"></div>
     <div id="toast" class="hidden fixed right-4 brand-bg py-3 px-5 rounded-lg shadow-xl z-50">
         <p id="toast-message"></p>
     </div>
-
+    
 <script>
 // =================================================================================
-// SECTION 1: SETUP & CONFIGURATION
+//  SECTION 1: SETUP & CONFIGURATION
 // =================================================================================
 
 const $ = (selector) => document.querySelector(selector);
@@ -143,26 +179,47 @@ const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
 const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// MOD: Added 'cowork' to PAGES
-const PAGES = ['home', 'order', 'cart', 'social', 'cowork', 'more'];
+const PAGES = ['home', 'order', 'cart', 'social', 'more'];
 
 const STATIC_DATA = {
-    bestSellers: [10, 39, 61, 93],
-    captionIdeas: { /* ... captions ... */ } // Omitted for brevity
+    bestSellers: [10, 39, 61, 93], // IDs for Lotus Biscoff Cappuccino, Nutella Shake, Crispy Paneer Burger, Tandoori Paneer Pizza
+    captionIdeas: {
+        student: [ "Fueling my study session with @hxousecoffeeco ☕️📚 #StudentLife", "Caffeine and concentration, courtesy of @hxousecoffeeco." ],
+        office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ],
+        couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffeeco", "Love is in the air, and it smells like coffee from @hxousecoffeeco." ],
+        friends: [ "Good times and great coffee with the best crew! @hxousecoffeeco #Friends", "A perfect blend of friendship and coffee at @hxousecoffeeco!" ]
+    }
 };
-STATIC_DATA.captionIdeas = {
-    student: [ "Fueling my study session with @hxousecoffeeco ☕️📚 #StudentLife", "Caffeine and concentration, courtesy of @hxousecoffeeco." ], office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ], couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffeeco", "Love is in the air, and it smells like coffee from @hxousecoffeeco." ], friends: [ "Good times and great coffee with the best crew! @hxousecoffeeco #Friends", "A perfect blend of friendship and coffee at @hxousecoffeeco!" ]
+
+const sound = {
+    audioContext: null,
+    init() {
+        if (this.audioContext) return;
+        try { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); } 
+        catch (e) { console.error("Web Audio API is not supported in this browser."); }
+    },
+    play(type) {
+        if (!this.audioContext) return;
+        const o = this.audioContext.createOscillator(), g = this.audioContext.createGain();
+        o.connect(g); g.connect(this.audioContext.destination); g.gain.setValueAtTime(0, this.audioContext.currentTime);
+        const sounds = {
+            click: { type: 'sine', freq: 600, gain: 0.2, len: 0.1 },
+            add_to_cart: { type: 'triangle', freq: 440, gain: 0.3, len: 0.2 },
+            success: { type: 'sine', freq: 523.25, gain: 0.3, len: 0.3, secondFreq: 659.25 },
+            win: { type: 'sine', freq: 587.33, gain: 0.4, len: 0.3, secondFreq: 880 },
+            draw: { type: 'sawtooth', freq: 220, gain: 0.2, len: 0.2, secondFreq: 180 },
+        };
+        const s = sounds[type]; if (!s) return;
+        o.type = s.type; o.frequency.setValueAtTime(s.freq, this.audioContext.currentTime);
+        g.gain.linearRampToValueAtTime(s.gain, this.audioContext.currentTime + 0.01);
+        if (s.secondFreq) { o.frequency.setValueAtTime(s.secondFreq, this.audioContext.currentTime + (s.len / 2)); }
+        g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + s.len);
+        o.start(this.audioContext.currentTime); o.stop(this.audioContext.currentTime + s.len);
+    }
 };
-
-
-const sound = { /* ... sound logic ... */ }; // Omitted for brevity
-sound.audioContext = null;
-sound.init = function() { if (this.audioContext) return; try { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { console.error("Web Audio API is not supported."); } };
-sound.play = function(type) { if (!this.audioContext) return; const o = this.audioContext.createOscillator(), g = this.audioContext.createGain(); o.connect(g); g.connect(this.audioContext.destination); g.gain.setValueAtTime(0, this.audioContext.currentTime); const sounds = { click: { type: 'sine', freq: 600, gain: 0.2, len: 0.1 }, add_to_cart: { type: 'triangle', freq: 440, gain: 0.3, len: 0.2 }, success: { type: 'sine', freq: 523.25, gain: 0.3, len: 0.3, secondFreq: 659.25 }, win: { type: 'sine', freq: 587.33, gain: 0.4, len: 0.3, secondFreq: 880 }, draw: { type: 'sawtooth', freq: 220, gain: 0.2, len: 0.2, secondFreq: 180 }, }; const s = sounds[type]; if (!s) return; o.type = s.type; o.frequency.setValueAtTime(s.freq, this.audioContext.currentTime); g.gain.linearRampToValueAtTime(s.gain, this.audioContext.currentTime + 0.01); if (s.secondFreq) { o.frequency.setValueAtTime(s.secondFreq, this.audioContext.currentTime + (s.len / 2)); } g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + s.len); o.start(this.audioContext.currentTime); o.stop(this.audioContext.currentTime + s.len); };
-
 
 // =================================================================================
-// SECTION 2: CORE APPLICATION LOGIC
+//  SECTION 2: CORE APPLICATION LOGIC
 // =================================================================================
 const app = {
     state: {
@@ -171,30 +228,30 @@ const app = {
         activeOrder: null,
         tableNumber: null,
         user: null,
-        customerProfile: null, // Includes loyalty_points
+        customerProfile: null,
         theme: 'matcha',
         menuData: [],
-        allMenuItems: [],
+        allMenuItems: [], // Flattened list for search
         appSettings: {},
         orderSubscription: null,
         currentMenuCategory: null,
         searchQuery: '',
         searchResults: [],
-        pointsToRedeem: 0,
     },
-
+    
     async init() {
         document.body.addEventListener('click', () => sound.init(), { once: true });
-
+        
+        // Back Button Logic
         const initialHash = location.hash.substring(1);
         if (PAGES.includes(initialHash)) {
-             this.state.currentPage = initialHash;
+            app.navigateTo(initialHash, false); // Navigate without pushing to history
         } else {
-             this.state.currentPage = 'home';
-             location.hash = 'home';
+            location.hash = 'home';
+            app.navigateTo('home', false);
         }
-        window.addEventListener('popstate', this.handleHardwareBack.bind(this));
-
+        window.addEventListener('popstate', app.handleHardwareBack);
+        
         this.startAppFlow();
     },
 
@@ -202,7 +259,7 @@ const app = {
         this.applyTheme();
         $('#splash-screen').classList.remove('hidden');
         this.getTableNumberFromURL();
-
+        
         try {
             const { data: { session } } = await supabase.auth.getSession();
             this.state.user = session?.user;
@@ -211,17 +268,15 @@ const app = {
                 if (error) throw new Error(`Anonymous sign-in failed: ${error.message}`);
                 this.state.user = signInData.user;
             }
-
-            await this.fetchCustomerProfile();
-            await Promise.all([ this.fetchMenuData(), this.fetchAppSettings() ]);
+            
+            await Promise.all([ this.fetchCustomerProfile(), this.fetchMenuData(), this.fetchAppSettings() ]);
 
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             $('#app').classList.add('flex');
 
-            // Onboarding check based on profile name/phone
-            if (!this.state.customerProfile || !this.state.customerProfile.name || !this.state.customerProfile.whatsapp_number) {
-                 this.showOnboardingModal();
+            if (!this.state.customerProfile) {
+                this.showOnboardingModal();
             } else if (this.state.tableNumber) {
                 this.startSession();
             } else {
@@ -230,324 +285,384 @@ const app = {
 
         } catch (error) {
             console.error("CRITICAL: Initialization failed.", error);
-            $('#splash-screen').innerHTML = `<div class="text-primary text-center p-4">Could not load. Please check connection.</div>`;
+            $('#splash-screen').innerHTML = `<div class="text-primary text-center p-4">Could not load the app. Please check your connection and try again.</div>`;
         }
     },
 
-    getTableNumberFromURL() { /* ... unchanged ... */
+    getTableNumberFromURL() {
         const params = new URLSearchParams(window.location.search);
         const tableNum = params.get('table');
         if (tableNum && !isNaN(parseInt(tableNum))) this.state.tableNumber = parseInt(tableNum);
     },
 
-    async fetchCustomerProfile() { /* ... updated to fetch loyalty_points ... */
+    async fetchCustomerProfile() { 
         if (!this.state.user) return;
         try {
-            // Fetch loyalty points along with other profile data
-            const { data, error } = await supabase.from('customers')
-                .select('*, loyalty_points') // Explicitly select loyalty_points
-                .eq('id', this.state.user.id)
-                .single();
+            const { data, error } = await supabase.from('customers').select('*').eq('id', this.state.user.id).single();
+            if (error && error.code !== 'PGRST116') throw error;
+            if (data) this.state.customerProfile = data;
+        } catch (error) { console.error('Error fetching profile:', error); ui.showToast('Could not fetch your profile.'); }
+    },
 
-            if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
+    async fetchMenuData() {
+        try {
+            const { data, error } = await supabase.from('products').select('*').order('id');
+            if (error) throw error;
+            
+            this.state.allMenuItems = data.filter(i => i.is_available);
 
-            if (data) {
-                data.loyalty_points = data.loyalty_points || 0; // Ensure it's a number
-                this.state.customerProfile = data;
-            } else {
-                 // Profile doesn't exist yet, init locally
-                 this.state.customerProfile = { id: this.state.user.id, name: null, loyalty_points: 0, whatsapp_number: null };
-            }
+            const groupedMenu = data.reduce((acc, item) => {
+                if (!item.is_available) return acc; // Only show available items
+                let category = acc.find(c => c.category === item.category);
+                if (!category) {
+                    category = { category: item.category, items: [] };
+                    acc.push(category);
+                }
+                category.items.push(item);
+                return acc;
+            }, []);
+
+            this.state.menuData = groupedMenu;
+
         } catch (error) {
-            console.error('Error fetching profile:', error);
-            ui.showToast('Could not fetch your profile.');
-             // Provide a default structure if fetch fails completely
-            this.state.customerProfile = { id: this.state.user?.id || 'unknown', name: 'Guest', loyalty_points: 0, whatsapp_number: null };
+            console.error('Error fetching menu data:', error);
+            ui.showToast('Could not load the menu.');
+            this.state.menuData = [];
+            this.state.allMenuItems = [];
         }
     },
-
-    async fetchMenuData() { /* ... unchanged ... */
-        try { const { data, error } = await supabase.from('products').select('*').order('id'); if (error) throw error; this.state.allMenuItems = data.filter(i => i.is_available); const groupedMenu = data.reduce((acc, item) => { if (!item.is_available) return acc; let category = acc.find(c => c.category === item.category); if (!category) { category = { category: item.category, items: [] }; acc.push(category); } category.items.push(item); return acc; }, []); this.state.menuData = groupedMenu; } catch (error) { console.error('Error fetching menu data:', error); ui.showToast('Could not load menu.'); this.state.menuData = []; this.state.allMenuItems = []; }
+    
+    async fetchAppSettings() {
+        try {
+            const { data, error } = await supabase.from('app_settings').select('key, value');
+            if (error) throw error;
+            this.state.appSettings = data.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {});
+        } catch (error) { console.error('Error fetching app settings:', error); }
     },
-    async fetchAppSettings() { /* ... unchanged ... */
-        try { const { data, error } = await supabase.from('app_settings').select('key, value'); if (error) throw error; this.state.appSettings = data.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}); } catch (error) { console.error('Error fetching app settings:', error); }
-    },
-
-    showOnboardingModal(){ /* ... updated placeholder for phone number ... */
-        const tableInputHTML = !this.state.tableNumber
+    
+    showOnboardingModal(){
+        const tableInputHTML = !this.state.tableNumber 
             ? `<input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>`
             : '';
         ui.showModal('onboarding-modal', `
             <h2 class="text-2xl font-bold text-primary mb-2">Welcome to H<span class="classy-x">X</span>OUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p>
             <div class="space-y-4">
                 <input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Name" required>
-                 <!-- MOD: Made phone number required for loyalty -->
-                <input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Mobile Number (for Loyalty Points)" required>
                 ${tableInputHTML}
+                <input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Mobile Number (Optional)">
             </div>
             <button onclick="app.completeOnboarding()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Let's Go</button>
         `);
     },
-
-    async completeOnboarding(){ /* ... updated phone validation and customer lookup logic ... */
+    
+    async completeOnboarding(){
         const name = $('#user-name-input').value.trim();
-        const phone = $('#mobile-number-input').value.trim();
         let tableNumber = this.state.tableNumber;
-
-        if (!tableNumber) { /* ... unchanged ... */
-             const tableInput = $('#table-number-input'); if (!tableInput || !tableInput.value) return ui.showToast("Please enter table number."); tableNumber = parseInt(tableInput.value);
+        if (!tableNumber) {
+            const tableInput = $('#table-number-input');
+            if (!tableInput || !tableInput.value) return ui.showToast("Please enter your table number.");
+            tableNumber = parseInt(tableInput.value);
         }
         if (!name) return ui.showToast("Please enter your name.");
-        // MOD: Stricter phone validation
-        if (!phone || !/^\d{10}$/.test(phone.replace(/\D/g,''))) return ui.showToast("Please enter a valid 10-digit mobile number for loyalty points.");
-        const cleanPhone = phone.replace(/\D/g,''); // Use cleaned phone number
-
-        let existingCustomer = null;
-        try {
-            // Prioritize checking by phone number
-            const { data: existingByPhone, error: errorByPhone } = await supabase.from('customers').select('*, loyalty_points').eq('whatsapp_number', cleanPhone).maybeSingle();
-            if (existingByPhone) {
-                 existingCustomer = existingByPhone;
-                 // Link the current auth user ID to this existing phone number if different
-                 if (existingCustomer.id !== this.state.user.id) {
-                      console.log(`Linking user ${this.state.user.id} to existing phone ${cleanPhone}`);
-                      const { error: updateIdError } = await supabase.from('customers')
-                          .update({ id: this.state.user.id, name: name }) // Update name too
-                          .eq('whatsapp_number', cleanPhone);
-                     if (updateIdError) console.warn("Error linking ID:", updateIdError);
-                     else existingCustomer.id = this.state.user.id; // Update local copy
-                 }
-                 // Also update name if it changed
-                 if (existingCustomer.name !== name) {
-                      const { error: updateNameError } = await supabase.from('customers')
-                          .update({ name: name })
-                          .eq('whatsapp_number', cleanPhone);
-                     if (updateNameError) console.warn("Error updating name:", updateNameError);
-                     else existingCustomer.name = name;
-                 }
-
-            } else {
-                 // If not found by phone, check if the current anonymous ID has an old record
-                 const { data: existingById, error: errorById } = await supabase.from('customers').select('*, loyalty_points').eq('id', this.state.user.id).maybeSingle();
-                 if (existingById) {
-                      existingCustomer = existingById;
-                      // Update phone and name on this existing record
-                      const { error: updateDetailsError } = await supabase.from('customers')
-                          .update({ whatsapp_number: cleanPhone, name: name })
-                          .eq('id', this.state.user.id);
-                      if (updateDetailsError) console.warn("Error updating details:", updateDetailsError);
-                      else {
-                          existingCustomer.whatsapp_number = cleanPhone;
-                          existingCustomer.name = name;
-                      }
-                 }
-            }
-        } catch(e) { console.error("Error checking existing customer:", e); }
-
-        let finalProfileData;
-        if (existingCustomer) {
-            finalProfileData = existingCustomer; // Use the found/updated data
-            console.log("Using existing customer profile:", finalProfileData);
-        } else {
-            // Insert new customer
-            console.log("Inserting new customer profile.");
-            const { data, error } = await supabase.from('customers').insert({
-                id: this.state.user.id,
-                name,
-                whatsapp_number: cleanPhone,
-                loyalty_points: 0 // Initialize points
-            }).select('*, loyalty_points').single();
-            if (error) {
-                 console.error("Onboarding insert error:", error);
-                 if (error.message.includes('duplicate key value violates unique constraint')) {
-                     // This could happen if another device registered the number between check and insert
-                     ui.showToast('This phone number was just registered. Please try again.');
-                 } else {
-                     ui.showToast('Could not save profile. Please try again.');
-                 }
-                 return;
-            }
-            finalProfileData = data;
-        }
-
-        this.state.customerProfile = finalProfileData;
-        this.state.customerProfile.loyalty_points = this.state.customerProfile.loyalty_points || 0;
+        
+        const { data, error } = await supabase.from('customers').insert({ 
+            id: this.state.user.id, name, 
+            whatsapp_number: $('#mobile-number-input').value.trim() 
+        }).select().single();
+        if (error) return ui.showToast('Could not save profile. Please try again.');
+        
+        this.state.customerProfile = data;
         this.state.tableNumber = tableNumber;
         ui.closeModal('onboarding-modal');
         this.startSession();
     },
-
-    showTableNumberModal() { /* ... unchanged ... */
-        ui.showModal('table-number-modal', `...`);
-        ui.showModal('table-number-modal', `<h2 class="text-2xl font-bold text-primary mb-2">Welcome back, ${this.state.customerProfile.name}!</h2> <p class="text-secondary mb-6">Please enter your table number for today's visit.</p> <input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required> <button onclick="app.completeTableNumberEntry()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Continue</button>`);
+    
+    showTableNumberModal() {
+        ui.showModal('table-number-modal', `
+            <h2 class="text-2xl font-bold text-primary mb-2">Welcome back, ${this.state.customerProfile.name}!</h2>
+            <p class="text-secondary mb-6">Please enter your table number for today's visit.</p>
+            <input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>
+            <button onclick="app.completeTableNumberEntry()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Continue</button>
+        `);
     },
-    completeTableNumberEntry() { /* ... unchanged ... */
-         const tableNumber = $('#table-number-input').value; if (!tableNumber) return ui.showToast("Please enter table number."); this.state.tableNumber = parseInt(tableNumber); ui.closeModal('table-number-modal'); this.startSession();
+
+    completeTableNumberEntry() {
+        const tableNumber = $('#table-number-input').value;
+        if (!tableNumber) return ui.showToast("Please enter your table number.");
+        this.state.tableNumber = parseInt(tableNumber);
+        ui.closeModal('table-number-modal');
+        this.startSession();
     },
 
-    async startSession() { /* ... unchanged ... */
+    async startSession() {
         await this.fetchActiveOrder();
         this.showMainInterface();
     },
-    showMainInterface(){ /* ... unchanged ... */
-        $('#main-interface').classList.remove('hidden'); $('#bottom-nav').classList.remove('hidden'); ui.renderBottomNav(); this.navigateTo(this.state.currentPage, false);
+    
+    showMainInterface(){
+        $('#main-interface').classList.remove('hidden');
+        $('#bottom-nav').classList.remove('hidden');
+        ui.renderBottomNav();
+        this.navigateTo(this.state.currentPage, false); // Load initial page without pushing history
     },
 
-    navigateTo(page, pushToHistory = true){ /* ... unchanged ... */
-         if (!this.state.customerProfile) return; sound.play('click'); if (pushToHistory && location.hash.substring(1) !== page) { location.hash = page; } else if (!pushToHistory && location.hash.substring(1) !== page) { location.hash = page; } this.state.currentPage = page; ui.renderHeader(page); ui.renderPageContent(page); ui.updateActiveNav(page);
-    },
-    handleHardwareBack(event) { /* ... unchanged ... */
-         const currentHash = location.hash.substring(1); const openModal = $('#modal-container').children[0]; if (openModal) { ui.closeModal(openModal.id); return; } if (PAGES.includes(currentHash) && currentHash !== this.state.currentPage) { this.navigateTo(currentHash, false); } else if (this.state.currentPage !== 'home') { this.navigateTo('home'); }
+    // MOD: Added pushToHistory flag for back button logic
+    navigateTo(page, pushToHistory = true){
+        if (!this.state.customerProfile) return;
+        sound.play('click');
+        
+        // MOD: Back Button Logic
+        if (pushToHistory && location.hash.substring(1) !== page) {
+            location.hash = page;
+        }
+        
+        this.state.currentPage = page;
+        ui.renderHeader(page);
+        ui.renderPageContent(page);
+        ui.updateActiveNav(page);
     },
 
-    applyTheme(){ /* ... unchanged ... */ document.body.dataset.theme = this.state.theme; },
-    toggleTheme(t){ /* ... unchanged ... */ this.state.theme = t; localStorage.setItem('hxouse-theme', t); this.applyTheme(); this.navigateTo('more'); },
+    // MOD: Back Button Logic
+    handleHardwareBack(event) {
+        const hash = location.hash.substring(1);
+        const openModal = $('#modal-container').children[0];
 
-    addOrUpdateCart(itemId, quantityChange) { /* ... updated to reset points ... */
-        sound.play('click'); const item = this.state.allMenuItems.find(i => i.id === itemId); if (!item) return; let cartItem = this.state.cart.find(i => i.id === itemId); let newQuantity = (cartItem ? cartItem.quantity : 0) + quantityChange; if (newQuantity <= 0) { this.state.cart = this.state.cart.filter(i => i.id !== itemId); } else { if (cartItem) { cartItem.quantity = newQuantity; } else { this.state.cart.push({ cartId: Date.now(), ...item, quantity: newQuantity }); } if (quantityChange > 0) sound.play('add_to_cart'); }
-        this.state.pointsToRedeem = 0; // Reset points
+        // 1. If a modal is open, the back button should just close it.
+        if (openModal) {
+            openModal.remove();
+            return;
+        }
+
+        // 2. If the hash is a valid page and not the current page, navigate to it.
+        if (PAGES.includes(hash) && hash !== app.state.currentPage) {
+            app.navigateTo(hash, false);
+        }
+        // 3. If the hash is NOT a valid page (e.g., empty, or a modal hash that's already closed)
+        //    or if it's 'home' (and we want to prevent exit), go to home.
+        else if (!PAGES.includes(hash) || hash === 'home') {
+            app.navigateTo('home', false);
+            location.hash = 'home'; // Ensure hash is correct
+        }
+    },
+
+    applyTheme(){ document.body.dataset.theme = this.state.theme; },
+    toggleTheme(t){ this.state.theme = t; localStorage.setItem('hxouse-theme', t); this.applyTheme(); this.navigateTo('more'); },
+
+    // New function for 1-click add/remove from menu
+    addOrUpdateCart(itemId, quantityChange) {
+        sound.play('click');
+        const item = this.state.allMenuItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        let cartItem = this.state.cart.find(i => i.id === itemId);
+        let newQuantity = (cartItem ? cartItem.quantity : 0) + quantityChange;
+
+        if (newQuantity <= 0) {
+            this.state.cart = this.state.cart.filter(i => i.id !== itemId);
+        } else {
+            if (cartItem) {
+                cartItem.quantity = newQuantity;
+            } else {
+                this.state.cart.push({ cartId: Date.now(), ...item, quantity: newQuantity });
+            }
+            if (quantityChange > 0) sound.play('add_to_cart');
+        }
+        this.refreshPage(); // This will re-render the menu page and update the + button
+    },
+
+    // New function for setting absolute quantity (from modal)
+    setCartItemQuantity(itemId, quantity) {
+        const item = this.state.allMenuItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        if (quantity <= 0) {
+            this.state.cart = this.state.cart.filter(i => i.id !== itemId);
+        } else {
+            let cartItem = this.state.cart.find(i => i.id === itemId);
+            if (cartItem) {
+                cartItem.quantity = quantity;
+            } else {
+                this.state.cart.push({ cartId: Date.now(), ...item, quantity: quantity });
+            }
+        }
+        
+        if(quantity > 0) {
+            sound.play('add_to_cart');
+            ui.showToast('Cart updated!');
+        }
+        ui.closeModal('item-detail-modal');
         this.refreshPage();
     },
-    setCartItemQuantity(itemId, quantity) { /* ... updated to reset points ... */
-        const item = this.state.allMenuItems.find(i => i.id === itemId); if (!item) return; if (quantity <= 0) { this.state.cart = this.state.cart.filter(i => i.id !== itemId); } else { let cartItem = this.state.cart.find(i => i.id === itemId); if (cartItem) { cartItem.quantity = quantity; } else { this.state.cart.push({ cartId: Date.now(), ...item, quantity: quantity }); } } if(quantity > 0) { sound.play('add_to_cart'); ui.showToast('Cart updated!'); }
-        this.state.pointsToRedeem = 0; // Reset points
-        ui.closeModal('item-detail-modal'); this.refreshPage();
-    },
-    performSearch(query) { /* ... unchanged ... */
-         const searchContainer = $('#search-results-container'); const menuContainer = $('#menu-items'); const tabsContainer = $('#category-tabs-container'); this.state.searchQuery = query.toLowerCase(); if (this.state.searchQuery.length > 1) { if (searchContainer) searchContainer.classList.remove('hidden'); if (menuContainer) menuContainer.classList.add('hidden'); if (tabsContainer) tabsContainer.classList.add('hidden'); this.state.searchResults = this.state.allMenuItems.filter(item => item.name.toLowerCase().includes(this.state.searchQuery) || (item.description && item.description.toLowerCase().includes(this.state.searchQuery))); ui.renderMenuItems(this.state.searchResults, 'search-results-container'); } else { if (searchContainer) searchContainer.classList.add('hidden'); if (menuContainer) menuContainer.classList.remove('hidden'); if (tabsContainer) tabsContainer.classList.remove('hidden'); this.state.searchResults = []; this.filterMenuByCategory(this.state.currentMenuCategory); }
-    },
-    calculateCartTotal(){ /* ... updated to calculate subtotal and final total ... */
-        const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const finalTotal = subtotal - this.state.pointsToRedeem;
-        return { subtotal, finalTotal: Math.max(0, finalTotal) };
-    },
-    updatePointsToRedeem(points) { /* ... new function for slider ... */
-        this.state.pointsToRedeem = parseInt(points);
-        ui.updateCartSummary();
-    },
-    refreshPage(){ /* ... unchanged ... */
-        ui.refreshCartDependentUI(); if (PAGES.includes(this.state.currentPage)) { ui.renderPageContent(this.state.currentPage); }
-    },
 
-    async placeOrder(paymentMethod, btnElement){ /* ... updated with loyalty logic ... */
-        if (this.state.cart.length === 0 || !this.state.tableNumber) return ui.showToast("Cart empty or table missing.");
+    // New search function (now renders inline)
+    performSearch(query) {
+        const searchContainer = $('#search-results-container');
+        const menuContainer = $('#menu-items');
+        const tabsContainer = $('#category-tabs-container');
 
-        btnElement.disabled = true; const originalBtnHTML = btnElement.innerHTML; btnElement.innerHTML = `<span class="flex items-center justify-center"><div class="spinner mr-2"></div> Processing...</span>`;
+        this.state.searchQuery = query.toLowerCase();
 
-        const { subtotal } = this.calculateCartTotal();
-        const pointsToRedeem = this.state.pointsToRedeem;
-        const discountAmount = pointsToRedeem;
-        const finalTotal = subtotal - discountAmount;
+        if (this.state.searchQuery.length > 1) {
+            if (searchContainer) searchContainer.classList.remove('hidden');
+            if (menuContainer) menuContainer.classList.add('hidden');
+            if (tabsContainer) tabsContainer.classList.add('hidden');
 
+            this.state.searchResults = this.state.allMenuItems.filter(item => 
+                item.name.toLowerCase().includes(this.state.searchQuery) ||
+                (item.description && item.description.toLowerCase().includes(this.state.searchQuery))
+            );
+            ui.renderMenuItems(this.state.searchResults, 'search-results-container');
+        } else {
+            // If search is cleared, show categories again
+            if (searchContainer) searchContainer.classList.add('hidden');
+            if (menuContainer) menuContainer.classList.remove('hidden');
+            if (tabsContainer) tabsContainer.classList.remove('hidden');
+            this.state.searchResults = [];
+        }
+    },
+    
+    calculateCartTotal(){ return this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0); },
+    
+    refreshPage(){
+        ui.refreshCartDependentUI();
+        // Refresh menu or cart
+        if (this.state.currentPage === 'order') {
+            ui.renderPageContent('order');
+        } else if (this.state.currentPage === 'cart') {
+            ui.renderPageContent('cart');
+        } else if (this.state.currentPage === 'home') {
+            ui.renderPageContent('home');
+        }
+    },
+    
+    async placeOrder(paymentMethod, btnElement){
+        if (this.state.cart.length === 0 || !this.state.tableNumber) return ui.showToast("Cart is empty or table number is missing.");
+        
+        btnElement.disabled = true;
+        const originalBtnHTML = btnElement.innerHTML;
+        btnElement.innerHTML = `<span class="flex items-center justify-center"><div class="spinner mr-2"></div> Processing...</span>`;
+        
         try {
             const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
-            if (tableError || !tableData) throw new Error(`Table #${this.state.tableNumber} invalid.`);
-
-            // 1. Redeem points
-            if (pointsToRedeem > 0) {
-                 if (this.state.customerProfile.loyalty_points < pointsToRedeem) throw new Error('Insufficient points.');
-                 const { error: redeemError } = await supabase.rpc('redeem_loyalty_points', { customer_id_input: this.state.user.id, points_to_redeem: pointsToRedeem });
-                 if (redeemError) throw new Error(`Redeem failed: ${redeemError.message}`);
-                 this.state.customerProfile.loyalty_points -= pointsToRedeem; // Update local state
+            if (tableError || !tableData) {
+                throw new Error(`Table #${this.state.tableNumber} is not a valid table.`);
             }
-
-            // 2. Insert order
-            const orderPayload = { customer_id: this.state.user.id, table_id: tableData.id, total_amount: subtotal, discount_points_redeemed: pointsToRedeem, discount_amount: discountAmount, final_amount: finalTotal, payment_method: paymentMethod, special_instructions: $('#special-instructions')?.value || '', feedback_submitted: false };
+            
+            const orderPayload = {
+                customer_id: this.state.user.id,
+                table_id: tableData.id,
+                total_amount: this.calculateCartTotal(),
+                payment_method: paymentMethod,
+                special_instructions: $('#special-instructions')?.value || '',
+            };
+            
             const { data: orderData, error: orderError } = await supabase.from('orders').insert(orderPayload).select().single();
             if (orderError) throw orderError;
+            
+            const orderItems = this.state.cart.map(i => ({
+                order_id: orderData.id,
+                product_id: i.id,
+                quantity: i.quantity,
+                price_at_time_of_order: i.price
+            }));
 
-            // 3. Insert order items
-            const orderItems = this.state.cart.map(i => ({ order_id: orderData.id, product_id: i.id, quantity: i.quantity, price_at_time_of_order: i.price }));
             const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-            if (itemsError) { await supabase.from('orders').delete().eq('id', orderData.id); /* TODO: Refund points */ throw itemsError; }
-
-            // 4. Award points
-            const pointsEarned = Math.floor(subtotal / 500) * 50;
-            if (pointsEarned > 0) {
-                 const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.user.id, points_to_add: pointsEarned });
-                 if (incrementError) console.error("Award points failed:", incrementError);
-                 else this.state.customerProfile.loyalty_points += pointsEarned;
+            if (itemsError) {
+                await supabase.from('orders').delete().eq('id', orderData.id);
+                throw itemsError;
             }
 
-            // 5. Success
-            ui.closeModal('payment-modal'); await this.fetchActiveOrder(); this.state.cart = []; this.state.pointsToRedeem = 0; this.refreshPage(); sound.play('success'); this.navigateTo('cart');
+            ui.closeModal('payment-modal');
+            await this.fetchActiveOrder();
+            this.state.cart = [];
+            this.refreshPage();
+            sound.play('success');
+            this.navigateTo('cart');
 
         } catch (error) {
-            console.error("Order failed:", error); ui.showToast(`Order failed: ${error.message}`);
-            if (error.message.includes('points')) { await this.fetchCustomerProfile(); this.refreshPage(); } // Refresh UI on points error
-            btnElement.disabled = false; btnElement.innerHTML = originalBtnHTML; const otherBtn = [...$$('.payment-btn')].find(b => b !== btnElement); if(otherBtn) otherBtn.disabled = false;
+            console.error("Order failed:", error);
+            ui.showToast(`Order failed: ${error.message}`);
+            btnElement.disabled = false;
+            btnElement.innerHTML = originalBtnHTML;
+            const otherBtn = [...$$('.payment-btn')].find(b => b !== btnElement);
+            if(otherBtn) otherBtn.disabled = false;
         }
     },
-
-
-    async fetchActiveOrder(){ /* ... updated to fetch feedback_submitted ... */
+    
+    async fetchActiveOrder(){
         if (!this.state.user) return;
-        const { data, error } = await supabase.from('orders').select(`*, order_items(*, products(name)), feedback_submitted`).eq('customer_id', this.state.user.id).in('status', ['received', 'preparing']).order('created_at', { ascending: false }).limit(1).single();
+        const { data, error } = await supabase.from('orders').select(`*, order_items(*, products(name))`).eq('customer_id', this.state.user.id).in('status', ['received', 'preparing']).order('created_at', { ascending: false }).limit(1).single();
         if (error && error.code !== 'PGRST116') console.error('Fetch active order error:', error);
+        
         this.state.activeOrder = data || null;
-        if (this.state.activeOrder) { this.listenToOrderUpdates(this.state.activeOrder.id); }
+        if (this.state.activeOrder) {
+            this.listenToOrderUpdates(this.state.activeOrder.id);
+        }
     },
-
-    listenToOrderUpdates(orderId){ /* ... updated to handle feedback_submitted flag ... */
-        if (this.state.orderSubscription) { supabase.removeChannel(this.state.orderSubscription); this.state.orderSubscription = null; }
-        console.log(`Listening order: ${orderId}`);
+    
+    listenToOrderUpdates(orderId){
+        if (this.state.orderSubscription) supabase.removeChannel(this.state.orderSubscription);
         this.state.orderSubscription = supabase.channel(`public:orders:id=eq.${orderId}`)
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` }, payload => {
-                if (!this.state.activeOrder || this.state.activeOrder.id !== payload.new.id) return;
-                const updatedOrder = payload.new; let statusChanged = false;
-                if (updatedOrder.status !== this.state.activeOrder.status) { ui.showToast(`Order is: ${updatedOrder.status}`); this.state.activeOrder.status = updatedOrder.status; statusChanged = true; }
-                if ('feedback_submitted' in updatedOrder && updatedOrder.feedback_submitted !== this.state.activeOrder.feedback_submitted) { this.state.activeOrder.feedback_submitted = updatedOrder.feedback_submitted; statusChanged = true; }
+                if (!this.state.activeOrder) return;
+                const updatedOrder = payload.new;
+                
+                if (updatedOrder.status !== this.state.activeOrder.status) {
+                    ui.showToast(`Your order is now: ${updatedOrder.status}`);
+                    this.state.activeOrder.status = updatedOrder.status;
+                }
 
                 if (['delivered', 'cancelled'].includes(updatedOrder.status)) {
-                    supabase.removeChannel(this.state.orderSubscription); this.state.orderSubscription = null; console.log("Order finished, unsubscribed.");
-                    // Show feedback modal ONLY if delivered AND feedback not submitted
-                    if (updatedOrder.status === 'delivered' && !updatedOrder.feedback_submitted) {
-                        ui.showModal('review-modal', `...`); // Modal HTML omitted
-                         ui.showModal('review-modal', `<div class="text-center"><span class="text-3xl">⭐</span> <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2> <p class="text-secondary my-2">How was your experience? <br/>(+10 Loyalty Points for feedback!)</p> <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="3" placeholder="Tell us more..."></textarea> <button onclick="app.submitFeedback('${orderId}')" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Submit Feedback</button> <button onclick="ui.closeModal('review-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Maybe Later</button> </div>`);
-                    } else if (updatedOrder.status === 'cancelled') { ui.showToast('Order cancelled.'); }
-                    this.state.activeOrder = null; statusChanged = true;
+                    supabase.removeChannel(this.state.orderSubscription);
+                    this.state.orderSubscription = null;
+                    if (updatedOrder.status === 'delivered') {
+                        ui.showModal('review-modal', `
+                            <div class="text-center"><span class="text-3xl">⭐</span>
+                            <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2>
+                            <p class="text-secondary my-2">How was your experience?</p>
+                            <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="3" placeholder="Tell us more..."></textarea>
+                            <button onclick="app.submitFeedback('${orderId}')" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Submit Feedback</button>
+                            <button onclick="ui.closeModal('review-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Maybe Later</button>
+                            </div>
+                        `);
+                    } else {
+                        ui.showToast('Your order has been cancelled.');
+                    }
+                    this.state.activeOrder = null;
                 }
-                if(statusChanged) this.refreshPage();
-            }).subscribe((status, err) => { /* ... subscribe logging ... */
-                if (status === 'SUBSCRIBED') { console.log(`Subscribed to order ${orderId}`); } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { console.error(`Subscription failed:`, status, err); }
-            });
+                this.refreshPage();
+            }).subscribe();
     },
 
+    async submitFeedback(orderId){
+        const content = $('#feedback-text').value.trim();
+        if (!content) return ui.showToast("Please enter your feedback.");
+        const { error } = await supabase.from('feedback').insert({ order_id: orderId, customer_id: this.state.user.id, content: content });
+        if (error) return ui.showToast(`Could not submit feedback: ${error.message}`);
+        ui.closeModal('review-modal');
+        ui.showToast("Thank you for your feedback!");
+    },
+    
+    async sendStaffCall(callType = 'assistance') {
+        if (!this.state.tableNumber) return ui.showToast('Table number not set.');
+        const { data: tableData } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
+        if (!tableData) return ui.showToast('Invalid table number.');
 
-    async submitFeedback(orderId){ /* ... updated with feedback flag and points award ... */
-        const content = $('#feedback-text').value.trim(); if (!content) return ui.showToast("Please enter feedback.");
-        const submitBtn = $('#review-modal button:first-of-type'); if (submitBtn) submitBtn.disabled = true;
+        const { error } = await supabase.from('staff_calls').insert({
+            table_id: tableData.id,
+            customer_id: this.state.user.id,
+            call_type: callType
+        });
 
-        try {
-            // Verify feedback status
-            const { data: orderData, error: fetchError } = await supabase.from('orders').select('feedback_submitted').eq('id', orderId).single();
-            if (fetchError || !orderData) throw new Error("Could not verify order.");
-            if (orderData.feedback_submitted) { ui.showToast("Feedback already submitted."); ui.closeModal('review-modal'); return; }
-
-            // 1. Insert feedback
-            const { error: insertError } = await supabase.from('feedback').insert({ order_id: orderId, customer_id: this.state.user.id, content: content, rating: 5 });
-            if (insertError) throw insertError;
-
-            // 2. Mark order (best effort)
-             const { error: updateError } = await supabase.from('orders').update({ feedback_submitted: true }).eq('id', orderId);
-             if (updateError) console.warn("Could not mark feedback submitted:", updateError);
-
-            // 3. Award points
-            const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.user.id, points_to_add: 10 });
-            if (incrementError) { console.error("Feedback points failed:", incrementError); ui.showToast("Feedback sent, points award failed."); }
-            else { this.state.customerProfile.loyalty_points += 10; ui.showToast("Thank you! +10 Points added."); }
-
-            ui.closeModal('review-modal'); this.refreshPage();
-        } catch (error) {
-             console.error("Feedback error:", error); ui.showToast(`Feedback failed: ${error.message}`); if (submitBtn) submitBtn.disabled = false;
+        if (error) {
+            ui.showToast(`Error: ${error.message}`);
+        } else {
+            ui.showToast(`Staff have been notified!`, 5000);
         }
     },
 
-    async sendStaffCall(callType = 'assistance') { /* ... unchanged ... */
-        if (!this.state.tableNumber) return ui.showToast('Table number missing.'); const { data: tableData } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single(); if (!tableData) return ui.showToast('Invalid table.'); const { error } = await supabase.from('staff_calls').insert({ table_id: tableData.id, customer_id: this.state.user.id, call_type: callType }); if (error) { ui.showToast(`Error: ${error.message}`); } else { ui.showToast(`Staff notified!`, 5000); }
-    },
-    copyCaption(text) { /* ... updated to use execCommand for iframe compatibility ... */
-        const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { const successful = document.execCommand('copy'); if (successful) ui.showToast('Copied!'); else ui.showToast('Copy failed.'); } catch (err) { console.error('Fallback copy failed', err); ui.showToast('Copy failed.'); } document.body.removeChild(textArea);
+    copyCaption(text) {
+        navigator.clipboard.writeText(text).then(() => ui.showToast('Copied!'), () => ui.showToast('Copy failed.'));
     }
 };
 
@@ -555,51 +670,146 @@ const app = {
 // SECTION 3: UI COMPONENTS & RENDERERS
 // =================================================================================
 const ui = {
-    showModal(id, content) { /* ... unchanged (handles hash) ... */
-        location.hash = id; const existingModal = $(`#${id}`); if (existingModal) existingModal.remove(); const modalHTML = `<div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg">${content}</div></div>`; $('#modal-container').insertAdjacentHTML('beforeend', modalHTML);
-    },
-    closeModal(id) { /* ... unchanged (handles hash) ... */
-        const modal = $(`#${id}`); if (modal) modal.remove(); if (location.hash.substring(1) === id) { history.back(); }
-    },
-    showToast(message, duration = 3000) { /* ... unchanged ... */
-        const toast = $('#toast'), p = $('#toast-message'); p.textContent = message; toast.classList.remove('hidden'); toast.style.animation = `toast-in 0.5s ease, toast-out 0.5s ease ${duration / 1000 - 0.5}s forwards`; setTimeout(() => { toast.classList.add('hidden'); toast.style.animation = ''; }, duration);
-    },
-    renderHeader(page) { /* ... unchanged ... */
-        const header = $('#page-header'); const pageConfigs = { home: { title: 'H<span class="classy-x">X</span>OUSE'}, order: { title: 'Menu'}, cart: { title: app.state.activeOrder ? 'Track Order' : 'My Cart'}, social: { title: 'Social'}, cowork: { title: 'Cowork'}, more: { title: 'More Options'} }; const config = pageConfigs[page] || { title: 'H<span class="classy-x">X</span>OUSE' }; header.innerHTML = `<div class="flex items-center space-x-2"><h1 class="text-2xl font-bold brand-text">${config.title}</h1></div> <div class="text-right"><p class="font-semibold text-primary text-sm">${app.state.customerProfile?.name || 'Guest'}</p><p class="text-xs text-secondary">Table #${app.state.tableNumber || 'N/A'}</p></div>`;
-    },
-    renderPageContent(page) { /* ... updated to include cowork renderer ... */
-        const content = $('#page-content'); content.innerHTML = ''; const renderers = { home: this.renderHomePage, order: this.renderMenuPage, cart: this.renderCartPage, social: this.renderSocialPage, cowork: this.renderCoworkPage, more: this.renderMorePage }; content.classList.remove('fade-in'); void content.offsetWidth; content.classList.add('fade-in'); renderers[page]?.call(this);
-    },
-    renderBottomNav(){ /* ... updated for cowork tab ... */
-        const icons = {
-            home: `<svg ... >...</svg>`, order: `<svg ... >...</svg>`, cart: `<div class="relative"><svg id="cart-icon-svg" ... >...</svg><span id="cart-count" ...>0</span></div>`, social: `<svg ... >...</svg>`,
-            cowork: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`, // Laptop Icon
-            more: `<svg ... >...</svg>`
-        };
-        // Fill omitted icons
-        icons.home = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`;
-        icons.order = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`;
-        icons.cart = `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`;
-        icons.social = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`;
-        icons.more = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`;
+    showModal(id, content) {
+        // MOD: Back Button Logic
+        location.hash = id;
+        const existingModal = $(`#${id}`);
+        if (existingModal) existingModal.remove();
 
-        const labels = { home: 'Home', order: 'Menu', cart: 'Cart', social: 'Social', cowork: 'Cowork', more: 'More' };
+        const modalHTML = `<div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg">${content}</div></div>`;
+        $('#modal-container').insertAdjacentHTML('beforeend', modalHTML);
+    },
+    closeModal(id) {
+        // MOD: Back Button Logic
+        const modal = $(`#${id}`);
+        if (modal) modal.remove();
+        
+        // Go back in history to close the modal hash state
+        if (location.hash.substring(1) === id) {
+            history.back();
+        }
+    },
+    showToast(message, duration = 3000) {
+        const toast = $('#toast'), p = $('#toast-message');
+        p.textContent = message;
+        toast.classList.remove('hidden');
+        toast.style.animation = `toast-in 0.5s ease, toast-out 0.5s ease ${duration / 1000 - 0.5}s forwards`;
+        
+        setTimeout(() => {
+            toast.classList.add('hidden');
+            toast.style.animation = '';
+        }, duration);
+    },
+    
+    renderHeader(page) {
+        const header = $('#page-header');
+        const pageConfigs = {
+            home: { title: 'H<span class="classy-x">X</span>OUSE', back: false },
+            order: { title: 'Menu', back: false },
+            cart: { title: app.state.activeOrder ? 'Track Order' : 'My Cart', back: false },
+            social: { title: 'Social', back: false },
+            more: { title: 'More Options', back: false },
+        };
+        const config = pageConfigs[page] || { title: 'H<span class="classy-x">X</span>OUSE', back: false };
+        header.innerHTML = `
+            <div class="flex items-center space-x-2">
+                <h1 class="text-2xl font-bold brand-text">${config.title}</h1>
+            </div>
+            <div class="text-right">
+                <p class="font-semibold text-primary text-sm">${app.state.customerProfile.name}</p>
+                <p class="text-xs text-secondary">Table #${app.state.tableNumber || 'N/A'}</p>
+            </div>`;
+    },
+    
+    renderPageContent(page) {
+        const content = $('#page-content');
+        content.innerHTML = '';
+        const renderers = {
+            home: this.renderHomePage,
+            order: this.renderMenuPage,
+            cart: this.renderCartPage,
+            social: this.renderSocialPage,
+            more: this.renderMorePage,
+        };
+        content.classList.remove('fade-in');
+        void content.offsetWidth; 
+        content.classList.add('fade-in');
+        renderers[page]?.call(this);
+    },
+    
+    renderBottomNav(){
+        const icons = { 
+            home: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`,
+            order: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,
+            cart: `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`,
+            social: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`,
+            more: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`
+        };
+        const labels = {
+            home: 'Home',
+            order: 'Menu',
+            cart: 'Cart',
+            social: 'Social',
+            more: 'More'
+        };
+        
         $('#bottom-nav').innerHTML = PAGES.map(p => `<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${icons[p]}<span id="${p}-tab-label" class="text-xs font-bold capitalize">${labels[p]}</span></button>`).join('');
     },
-    updateActiveNav(page) { /* ... unchanged ... */
-        const cartLabel = $('#cart-tab-label'), cartIcon = $('#cart-icon-svg'); if (app.state.activeOrder) { cartLabel.textContent = 'Track'; cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`; } else { cartLabel.textContent = 'Cart'; cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`; } $$('.nav-item').forEach(item => { const isActive = item.dataset.page === page; item.classList.toggle('brand-text', isActive); item.classList.toggle('text-secondary', !isActive); item.style.transform = isActive ? 'scale(1.1)' : 'scale(1)'; }); this.refreshCartDependentUI();
+    
+    updateActiveNav(page) {
+        const cartLabel = $('#cart-tab-label'), cartIcon = $('#cart-icon-svg');
+        if (app.state.activeOrder) {
+            cartLabel.textContent = 'Track';
+            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`;
+        } else {
+            cartLabel.textContent = 'Cart';
+            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`;
+        }
+        $$('.nav-item').forEach(item => {
+            const isActive = item.dataset.page === page;
+            item.classList.toggle('brand-text', isActive);
+            item.classList.toggle('text-secondary', !isActive);
+            item.style.transform = isActive ? 'scale(1.1)' : 'scale(1)';
+        });
+        this.refreshCartDependentUI();
     },
-    refreshCartDependentUI() { /* ... unchanged ... */
-        const el = $('#cart-count'); const total = app.state.cart.reduce((s, i) => s + i.quantity, 0); if (total > 0 && !app.state.activeOrder) { el.textContent = total; el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
+
+    refreshCartDependentUI() {
+        const el = $('#cart-count');
+        const total = app.state.cart.reduce((s, i) => s + i.quantity, 0);
+        if (total > 0 && !app.state.activeOrder) {
+            el.textContent = total;
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
     },
+    
     renderHomePage(){
         const settings = app.state.appSettings;
-        const activeOrderHTML = app.state.activeOrder ? `<div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center"> <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2> <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p> <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button> </div>` : '';
+        const activeOrderHTML = app.state.activeOrder ? `
+            <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center">
+                <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2>
+                <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p>
+                <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
+            </div>` : '';
+        
         const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
-        const promoSubtitle = 'Show bill & story at counter.';
-        const bestSellerItems = STATIC_DATA.bestSellers.map(id => app.state.allMenuItems.find(item => item.id === id)).filter(Boolean);
-        const bestSellersHTML = bestSellerItems.map(item => `<div onclick="ui.showItemDetailModal(${item.id})" class="cursor-pointer flex-shrink-0 w-40 bg-secondary rounded-xl p-3 flex flex-col items-center text-center"> <div class="text-3xl mb-2">${item.image_url || '☕️'}</div> <h3 class="font-bold text-primary text-sm flex-grow">${item.name}</h3> <p class="font-semibold text-secondary text-sm mt-1">₹${item.price}</p> </div>`).join('');
+        const promoSubtitle = 'Show your bill & story at the counter to claim your gift from H<span class="classy-x">X</span>OUSE.';
+        
+        const bestSellerItems = STATIC_DATA.bestSellers.map(id => {
+            return app.state.menuData.flatMap(c => c.items).find(item => item.id === id);
+        }).filter(Boolean);
 
+        const bestSellersHTML = bestSellerItems.map(item => `
+            <div onclick="ui.showItemDetailModal(${item.id})" class="cursor-pointer flex-shrink-0 w-40 bg-secondary rounded-xl p-3 flex flex-col items-center text-center">
+                <!-- MOD: Replaced large emoji with text emoji -->
+                <div class="text-5xl mb-2">${item.image_url || '☕️'}</div>
+                <h3 class="font-bold text-primary text-sm flex-grow">${item.name}</h3>
+                <p class="font-semibold text-secondary text-sm mt-1">₹${item.price}</p>
+            </div>
+        `).join('');
+            
         $('#page-content').innerHTML = `
             <div class="space-y-6">
                 <div class="relative h-48 overflow-hidden rounded-b-2xl">
@@ -611,177 +821,558 @@ const ui = {
                 </div>
                 <div class="p-4 space-y-8">
                     ${activeOrderHTML ? `<div class="mb-6">${activeOrderHTML}</div>` : ''}
+                    
                     <div>
                         <h2 class="text-2xl font-bold text-primary mb-4 px-1">Our Best Sellers</h2>
-                        <div class="horizontal-scroll flex space-x-4 overflow-x-auto pb-2">${bestSellersHTML}</div>
+                        <div class="horizontal-scroll flex space-x-4 overflow-x-auto pb-2">
+                            ${bestSellersHTML}
+                        </div>
                     </div>
-                    <button onclick="app.navigateTo('order')" class="w-full brand-bg font-semibold py-4 px-6 rounded-lg text-lg"> View Full Menu </button>
+
+                    <!-- MOD: Added "View Full Menu" button -->
+                    <button onclick="app.navigateTo('order')" class="w-full brand-bg font-semibold py-4 px-6 rounded-lg text-lg">
+                        View Full Menu
+                    </button>
+
                     <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
                         <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
                         <p class="mt-1 text-secondary">${promoSubtitle}</p>
                         <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Learn More &rarr;</button>
                     </div>
                     <div class="grid grid-cols-1 gap-4">
+                         <!-- MOD: Replaced large emoji with text emoji -->
                         <button onclick="app.sendStaffCall()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button>
                     </div>
                 </div>
             </div>`;
     },
-    renderMenuPage(){ /* ... unchanged ... */
-        const content = $('#page-content'); if (app.state.menuData.length === 0 && app.state.allMenuItems.length === 0) { content.innerHTML = `<div class="p-4 text-center text-secondary">Loading menu...</div>`; return; } if (!app.state.currentMenuCategory && app.state.menuData.length > 0) { app.state.currentMenuCategory = app.state.menuData[0].category; } else if (!app.state.currentMenuCategory) { app.state.currentMenuCategory = 'All Items'; } const allCategories = [{ category: 'All Items' }, ...app.state.menuData]; content.innerHTML = `<div id="active-order-banner" class="p-4 hidden"></div> <div class="p-4"><input type="text" id="menu-search-input" placeholder="Search..." class="w-full p-3 border-2 border-custom rounded-lg bg-secondary text-primary text-lg" oninput="app.performSearch(this.value)" value="${app.state.searchQuery}"></div> <div id="category-tabs-container" class="horizontal-scroll sticky top-16 bg-primary z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">${allCategories.map(c => `<button class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${app.state.currentMenuCategory === c.category ? 'brand-text border-b-2 border-current' : 'text-secondary'}" data-category="${c.category}" onclick="ui.filterMenuByCategory('${c.category}', this)">${c.category}</button>`).join('')}</div> <div id="menu-items" class="p-4 grid grid-cols-1 gap-4"></div> <div id="search-results-container" class="p-4 grid grid-cols-1 gap-4 hidden"></div>`; if (app.state.activeOrder) { $('#active-order-banner').classList.remove('hidden'); $('#active-order-banner').innerHTML = `<div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center"> <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2> <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p> <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button> </div>`; } if (app.state.searchQuery.length > 1) { app.performSearch(app.state.searchQuery); } else { const validCategory = allCategories.some(c => c.category === app.state.currentMenuCategory) ? app.state.currentMenuCategory : 'All Items'; this.filterMenuByCategory(validCategory, $(`.category-tab[data-category="${validCategory}"]`)); }
+
+    renderMenuPage() {
+        const content = $('#page-content');
+        if (app.state.menuData.length === 0) {
+            content.innerHTML = `<div class="p-4 text-center text-secondary">Loading menu...</div>`; return;
+        }
+        
+        if (!app.state.currentMenuCategory) {
+            app.state.currentMenuCategory = app.state.menuData[0].category;
+        }
+        
+        const allCategories = [{ category: 'All Items' }, ...app.state.menuData];
+
+        content.innerHTML = `
+            <div id="active-order-banner" class="p-4 hidden"></div>
+
+            <div class="p-4">
+                <input 
+                    type="text" 
+                    id="menu-search-input"
+                    placeholder="Search for items..." 
+                    class="w-full p-3 border-2 border-custom rounded-lg bg-secondary text-primary text-lg"
+                    oninput="app.performSearch(this.value)"
+                    value="${app.state.searchQuery}"
+                >
+            </div>
+
+            <div id="category-tabs-container" class="horizontal-scroll sticky top-16 bg-primary z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
+                ${allCategories.map(c => `<button 
+                    class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${app.state.currentMenuCategory === c.category ? 'brand-text border-b-2 border-current' : 'text-secondary'}" 
+                    data-category="${c.category}" 
+                    onclick="ui.filterMenuByCategory('${c.category}', this)">
+                    ${c.category}
+                </button>`).join('')}
+            </div>
+            
+            <div id="menu-items" class="p-4 grid grid-cols-1 gap-4"></div>
+            <div id="search-results-container" class="p-4 grid grid-cols-1 gap-4 hidden"></div>
+        `;
+        
+        if (app.state.activeOrder) {
+            $('#active-order-banner').classList.remove('hidden');
+            $('#active-order-banner').innerHTML = `
+                <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center">
+                    <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2>
+                    <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p>
+                    <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
+                </div>`;
+        }
+
+        if (app.state.searchQuery.length > 1) {
+            app.performSearch(app.state.searchQuery);
+        } else {
+            this.filterMenuByCategory(app.state.currentMenuCategory);
+        }
     },
-    filterMenuByCategory(category, tabElement) { /* ... unchanged ... */
-        app.state.currentMenuCategory = category; app.state.searchQuery = ''; const searchInput = $('#menu-search-input'); if (searchInput) searchInput.value = ''; $('#search-results-container')?.classList.add('hidden'); $('#menu-items')?.classList.remove('hidden'); $('#category-tabs-container')?.classList.remove('hidden'); if (tabElement) { $$('.category-tab').forEach(tab => { tab.classList.remove('brand-text', 'border-b-2', 'border-current'); tab.classList.add('text-secondary'); }); tabElement.classList.add('brand-text', 'border-b-2', 'border-current'); } let itemsToShow = []; if (category === 'All Items') { itemsToShow = app.state.allMenuItems; } else { const data = app.state.menuData.find(d => d.category === category); itemsToShow = data ? data.items : []; } this.renderMenuItems(itemsToShow, 'menu-items');
+
+    filterMenuByCategory(category, tabElement) {
+        app.state.currentMenuCategory = category;
+        app.state.searchQuery = '';
+        
+        const searchInput = $('#menu-search-input');
+        if (searchInput) searchInput.value = '';
+
+        $('#search-results-container')?.classList.add('hidden');
+        $('#menu-items')?.classList.remove('hidden');
+        $('#category-tabs-container')?.classList.remove('hidden');
+
+        if (tabElement) {
+            $$('.category-tab').forEach(tab => {
+                tab.classList.remove('brand-text', 'border-b-2', 'border-current');
+                tab.classList.add('text-secondary');
+            });
+            tabElement.classList.add('brand-text', 'border-b-2', 'border-current');
+        }
+        
+        let itemsToShow = [];
+        if (category === 'All Items') {
+            itemsToShow = app.state.allMenuItems;
+        } else {
+            const data = app.state.menuData.find(d => d.category === category);
+            itemsToShow = data ? data.items : [];
+        }
+        
+        this.renderMenuItems(itemsToShow, 'menu-items');
     },
-    renderMenuItems(items, containerId) { /* ... unchanged ... */
-        const container = $(`#${containerId}`); if (!container) return; if (!items || items.length === 0) { container.innerHTML = `<p class="text-secondary text-center col-span-full mt-8">No items found.</p>`; return; } container.innerHTML = items.map(item => { const cartItem = app.state.cart.find(ci => ci.id === item.id); const actionButtonHTML = cartItem ? `<div class="quantity-control" onclick="event.stopPropagation();"> <button onclick="app.addOrUpdateCart(${item.id}, -1)">-</button> <span>${cartItem.quantity}</span> <button onclick="app.addOrUpdateCart(${item.id}, 1)">+</button> </div>` : `<button class="add-to-cart-btn" onclick="event.stopPropagation(); app.addOrUpdateCart(${item.id}, 1)"> + </button>`; return `<div class="bg-secondary rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="ui.showItemDetailModal(${item.id})"> <div class="p-3 flex items-center justify-between"> <div class="flex-1 pr-4"> <h3 class="font-semibold text-base truncate text-primary">${item.name}</h3> <p class="font-bold text-sm text-secondary mt-1">₹${item.price}</p> </div> <div class="flex-shrink-0"> ${actionButtonHTML} </div> </div> </div>`; }).join('');
+
+    renderMenuItems(items, containerId) {
+        const container = $(`#${containerId}`);
+        if (!container) return;
+
+        if (!items || items.length === 0) {
+            container.innerHTML = `<p class="text-secondary text-center col-span-full mt-8">No items found.</p>`;
+            return;
+        }
+
+        container.innerHTML = items.map(item => {
+            const cartItem = app.state.cart.find(ci => ci.id === item.id);
+            
+            const actionButtonHTML = cartItem
+                ? ` <div class="quantity-control" onclick="event.stopPropagation();">
+                        <button onclick="app.addOrUpdateCart(${item.id}, -1)">-</button>
+                        <span>${cartItem.quantity}</span>
+                        <button onclick="app.addOrUpdateCart(${item.id}, 1)">+</button>
+                    </div>`
+                : ` <button class="add-to-cart-btn" onclick="event.stopPropagation(); app.addOrUpdateCart(${item.id}, 1)">
+                        +
+                    </button>`;
+
+            return `<div class="bg-secondary rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="ui.showItemDetailModal(${item.id})">
+                        <div class="p-3 flex items-center justify-between">
+                            <div class="flex-1 pr-4">
+                                <h3 class="font-semibold text-base truncate text-primary">${item.name}</h3>
+                                <p class="font-bold text-sm text-secondary mt-1">₹${item.price}</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                ${actionButtonHTML}
+                            </div>
+                        </div>
+                    </div>`;
+        }).join('');
     },
-    renderCartPage() { /* ... updated to call renderCart ... */
+    
+    renderCartPage() {
         const content = $('#page-content');
         if (app.state.activeOrder) this.renderOrderTracking(content);
         else if (app.state.cart.length > 0) this.renderCart(content);
-        else content.innerHTML = `<div class="text-center p-10"><h2 class="text-2xl font-bold text-primary">Cart empty</h2><p class="text-secondary mt-2">Add items from menu.</p><button onclick="app.navigateTo('order')" class="mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">View Menu</button></div>`;
+        else content.innerHTML = `<div class="text-center p-10"><h2 class="text-2xl font-bold text-primary">Your cart is empty</h2><p class="text-secondary mt-2">Add items from the menu to get started.</p><button onclick="app.navigateTo('order')" class="mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">View Menu</button></div>`;
     },
-    renderCart(container){ /* ... updated with loyalty slider and summary ... */
-        const { subtotal } = app.calculateCartTotal();
-        const loyaltyPoints = app.state.customerProfile?.loyalty_points || 0;
-        const redeemablePoints = Math.floor(loyaltyPoints * 0.8);
-        const maxRedeemableForOrder = Math.min(redeemablePoints, Math.floor(subtotal));
-        app.state.pointsToRedeem = Math.min(app.state.pointsToRedeem, maxRedeemableForOrder); // Clamp
-        const currentDiscount = app.state.pointsToRedeem;
-        const finalTotal = subtotal - currentDiscount;
 
-        let hamperMessage = ''; /* ... unchanged ... */
-        if (subtotal > 0 && subtotal < 799) { const amountNeeded = 799 - subtotal; hamperMessage = `<div class="p-4"><div class="bg-yellow-100 border border-yellow-200 text-yellow-800 p-3 rounded-lg text-center font-bold">🛒 Order ₹${amountNeeded.toFixed(2)} more for free hamper!</div></div>`; } else if (subtotal >= 799) { hamperMessage = `<div class="p-4"><div class="bg-green-100 border border-green-200 text-green-800 p-3 rounded-lg text-center font-bold">🎉 Eligible for free hamper! Post a story.</div></div>`; }
-
-
-        let loyaltySectionHTML = '';
-        if (loyaltyPoints > 0 && maxRedeemableForOrder > 0) {
-            loyaltySectionHTML = `
-                <div class="p-4 border-t border-b border-custom">
-                    <h3 class="font-bold text-lg mb-2 text-primary">Redeem Loyalty Points</h3>
-                    <p class="text-sm text-secondary mb-1">Available: ${loyaltyPoints} points</p>
-                    <p class="text-sm text-secondary mb-3">Redeemable (max ₹${maxRedeemableForOrder}):</p>
-                    <input type="range" id="loyalty-slider" min="0" max="${maxRedeemableForOrder}" value="${app.state.pointsToRedeem}"
-                           oninput="app.updatePointsToRedeem(this.value)" class="w-full h-2 rounded-lg cursor-pointer">
-                    <div class="flex justify-between text-sm font-semibold mt-2">
-                        <span>Redeem: <span id="points-to-redeem-display">${app.state.pointsToRedeem}</span> pts</span>
-                        <span>Discount: - ₹<span id="discount-amount-display">${currentDiscount.toFixed(2)}</span></span>
-                    </div>
-                </div>`;
-        } else if (loyaltyPoints > 0) {
-             loyaltySectionHTML = `<div class="p-4 border-t border-b border-custom"><p class="text-sm text-secondary text-center">You have ${loyaltyPoints} points. Earn more/increase order to redeem.</p></div>`;
+    renderCart(container){
+        const total = app.calculateCartTotal();
+        let hamperMessage = '';
+        if (total > 0 && total < 799) {
+            const amountNeeded = 799 - total;
+            hamperMessage = `<div class="p-4"><div class="bg-yellow-100 border border-yellow-200 text-yellow-800 p-3 rounded-lg text-center font-bold">🛒 Order for ₹${amountNeeded.toFixed(2)} more to get a free hamper!</div></div>`;
+        } else if (total >= 799) {
+            hamperMessage = `<div class="p-4"><div class="bg-green-100 border border-green-200 text-green-800 p-3 rounded-lg text-center font-bold">🎉 You're eligible for a free hamper! Don't forget to post a story.</div></div>`;
         }
 
         container.innerHTML = `
-            <div class="p-4 space-y-3">${app.state.cart.map(i => `...`).join('')}</div>
+            <div class="p-4 space-y-3">${app.state.cart.map(i => `
+                <div class="bg-secondary p-3 rounded-xl flex items-center justify-between">
+                    <div>
+                        <p class="font-bold text-primary">${i.name}</p>
+                        <p class="font-semibold text-secondary text-sm">₹${(i.price * i.quantity).toFixed(2)}</p>
+                    </div>
+                    <div class="quantity-control" style="background-color: var(--bg-primary); color: var(--brand-primary); border: 1px solid var(--border-color);">
+                        <button onclick="app.addOrUpdateCart(${i.id}, -1)">-</button>
+                        <span>${i.quantity}</span>
+                        <button onclick="app.addOrUpdateCart(${i.id}, 1)">+</button>
+                    </div>
+                </div>`).join('')}
+            </div>
             ${hamperMessage}
-            ${loyaltySectionHTML}
-            <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Special instructions..."></textarea></div>
+            <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div>
             <div class="p-4 bg-primary border-t-custom sticky bottom-16">
-                 <div id="cart-summary" class="mb-4 space-y-1 text-primary"></div>
+                <div class="flex justify-between items-center mb-4"><span class="text-xl font-bold text-primary">Total</span><span class="text-xl font-bold">₹${total.toFixed(2)}</span></div>
                 <button id="place-order-btn" onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
             </div>`;
-        // Omitted cart items HTML generation for brevity
-        container.querySelector('.p-4.space-y-3').innerHTML = app.state.cart.map(i => `<div class="bg-secondary p-3 rounded-xl flex items-center justify-between"> <div> <p class="font-bold text-primary">${i.name}</p> <p class="font-semibold text-secondary text-sm">₹${(i.price * i.quantity).toFixed(2)}</p> </div> <div class="quantity-control" style="background-color: var(--bg-primary); color: var(--brand-primary); border: 1px solid var(--border-color);"> <button onclick="app.addOrUpdateCart(${i.id}, -1)">-</button> <span>${i.quantity}</span> <button onclick="app.addOrUpdateCart(${i.id}, 1)">+</button> </div> </div>`).join('');
-        this.updateCartSummary(); // Initial summary render
     },
-    updateCartSummary() { /* ... new function for updating totals ... */
-        const { subtotal, finalTotal } = app.calculateCartTotal();
-        const currentDiscount = app.state.pointsToRedeem;
-        const pointsDisplay = $('#points-to-redeem-display'); const discountDisplay = $('#discount-amount-display');
-        if(pointsDisplay) pointsDisplay.textContent = currentDiscount; if(discountDisplay) discountDisplay.textContent = currentDiscount.toFixed(2);
-        const summaryDiv = $('#cart-summary');
-        if (summaryDiv) { summaryDiv.innerHTML = `<div class="flex justify-between items-center text-md"> <span>Subtotal</span> <span>₹${subtotal.toFixed(2)}</span> </div> <div class="flex justify-between items-center text-md text-green-600 ${currentDiscount > 0 ? '' : 'hidden'}"> <span>Loyalty Discount</span> <span>- ₹${currentDiscount.toFixed(2)}</span> </div> <div class="flex justify-between items-center text-xl font-bold pt-1 border-t border-custom"> <span>To Pay</span> <span>₹${finalTotal.toFixed(2)}</span> </div>`; }
-    },
-    renderOrderTracking(container) { /* ... unchanged ... */
-        const order = app.state.activeOrder; if (!order) { container.innerHTML = ''; return; } const statuses = ['received', 'preparing', 'delivered']; const icons = { received: '📝', preparing: '🍳', delivered: '😊' }; const currentIndex = statuses.indexOf(order.status); const progressPercentage = currentIndex > 0 ? (currentIndex / (statuses.length - 1)) * 100 : 0; container.innerHTML = `<div class="p-6 flex flex-col items-center justify-center h-full"> <h2 class="text-3xl font-bold text-center capitalize">Order is ${order.status}</h2> <p class="text-secondary text-center mb-10">ID: #${order.id.slice(0,6)}</p> <div class="tracker-container my-12 w-full max-w-sm"> <div class="tracker-line-container"><div class="tracker-progress" style="width: ${progressPercentage}%"></div></div> ${statuses.map((status, index) => `<div class="tracker-step ${index <= currentIndex ? 'active' : ''}"> <div class="tracker-icon-container">${icons[status]}</div> <span class="tracker-label capitalize">${status}</span> </div>`).join('')} </div> <div class="mt-auto pt-10 text-center"> <p class="text-secondary mb-4">While you wait...</p> <button onclick="ui.showGamesModal()" class="brand-bg font-semibold py-3 px-8 rounded-lg">Play Games</button> </div> </div>`;
-    },
-    renderSocialPage(){ /* ... unchanged ... */
-        const promoTitle = 'Order ₹799+ & post story for <span class="instagram-card">Free Hamper!</span>'; const promoSubtitle = 'Show bill & story at counter.'; $('#page-content').innerHTML = `<div class="p-4 space-y-6 text-center"> <div class="bg-secondary p-6 rounded-xl shadow-sm"> <h2 class="text-2xl font-bold text-primary">Join Community!</h2> <p class="text-secondary mt-1">Follow us on Instagram</p> <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="instagram-card text-2xl font-bold my-4 block">@hxousecoffeeco</a> <div class="flex justify-center"> <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://instagram.com/hxousecoffeeco" alt="QR Code" class="rounded-lg bg-white p-2"> </div> <p class="text-xs text-secondary mt-2">Scan to follow!</p> </div> <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left"> <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2> <p class="mt-1 text-secondary">${promoSubtitle}</p> <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Get Captions &rarr;</button> </div> </div>`;
-    },
-    // MOD: New page renderer for Cowork
-    renderCoworkPage() {
-        $('#page-content').innerHTML = `
-            <div class="p-6 space-y-6 text-center">
-                 <div class="bg-secondary p-8 rounded-xl shadow-lg border border-custom">
-                    <span class="text-5xl mb-4 block">🏢</span>
-                    <h2 class="text-3xl font-bold text-primary mb-2">Work & Caffeinate!</h2>
-                    <p class="text-lg text-secondary mb-6">Did you know HXOUSE offers a dedicated coworking space?</p>
-                    <ul class="text-left space-y-2 mb-8 list-disc list-inside text-secondary">
-                        <li>High-speed Wi-Fi included</li>
-                        <li>Comfortable seating & power outlets</li>
-                        <li>Quiet, productive environment</li>
-                        <li>Perfect for students, freelancers & teams</li>
-                        <li>Exclusive cafe discounts for members</li>
-                    </ul>
-                    <p class="text-primary font-semibold mb-4">Ask our staff at the counter for details on daily passes and monthly memberships!</p>
 
-                    <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="inline-block brand-bg font-semibold py-3 px-6 rounded-lg transition hover:opacity-90">
-                        Follow <span class="instagram-card" style="background: none; -webkit-text-fill-color: inherit; font-weight: bold;">@hxousecoffeeco</span> for updates
-                    </a>
+    renderOrderTracking(container) {
+        const order = app.state.activeOrder;
+        if (!order) { container.innerHTML = ''; return; }
+        
+        const statuses = ['received', 'preparing', 'delivered'];
+        const icons = { received: '📝', preparing: '🍳', delivered: '😊' }; // MOD: Kept standard emojis
+        const currentIndex = statuses.indexOf(order.status);
+        const progressPercentage = currentIndex > 0 ? (currentIndex / (statuses.length - 1)) * 100 : 0;
+        
+        container.innerHTML = `
+            <div class="p-6 flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl font-bold text-center capitalize">Your Order is ${order.status}</h2>
+                <p class="text-secondary text-center mb-10">Order ID: #${order.id.slice(0,6)}</p>
+                
+                <div class="tracker-container my-12 w-full max-w-sm">
+                    <div class="tracker-line-container">
+                        <div class="tracker-progress" style="width: ${progressPercentage}%"></div>
+                    </div>
+                    ${statuses.map((status, index) => `
+                        <div class="tracker-step ${index <= currentIndex ? 'active' : ''}">
+                            <div class="tracker-icon-container">${icons[status]}</div>
+                            <span class="tracker-label capitalize">${status}</span>
+                        </div>`).join('')}
+                </div>
+
+                <div class="mt-auto pt-10 text-center">
+                    <p class="text-secondary mb-4">While you wait, why not play a game?</p>
+                    <button onclick="ui.showGamesModal()" class="brand-bg font-semibold py-3 px-8 rounded-lg">Play Games</button>
+                </div>
+            </div>`;
+    },
+    
+    renderSocialPage(){
+        const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
+        const promoSubtitle = 'Show your bill & story at the counter to claim your gift from H<span class="classy-x">X</span>OUSE.';
+        
+        $('#page-content').innerHTML = `
+            <div class="p-4 space-y-6 text-center">
+                 <div class="bg-secondary p-6 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold text-primary">Join Our Community!</h2>
+                    <p class="text-secondary mt-1">Follow us on Instagram for updates, offers, and good vibes.</p>
+                    <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="instagram-card text-2xl font-bold my-4 block">@hxousecoffeeco</a>
+                    <div class="flex justify-center">
+                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://instagram.com/hxousecoffeeco" alt="Instagram QR Code" class="rounded-lg bg-white p-2">
+                    </div>
+                    <p class="text-xs text-secondary mt-2">Scan to follow!</p>
+                </div>
+
+                <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left">
+                     <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
+                    <p class="mt-1 text-secondary">${promoSubtitle}</p>
+                    <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Get Caption Ideas &rarr;</button>
                 </div>
             </div>
         `;
     },
-    renderMorePage(){ /* ... updated to show loyalty points ... */
-        const loyaltyPoints = app.state.customerProfile?.loyalty_points ?? 0; // Use nullish coalescing
+
+    renderMorePage(){
+        // MOD: Replaced large emojis with text emojis
         const options = [
-            { icon: "🪙", text: `Loyalty Points: ${loyaltyPoints}`, action: "" }, // Display points
             { icon: "🛎", text: "Call Staff", action: "app.sendStaffCall()" },
             { icon: "🎨", text: "Change Theme", action: "ui.showThemeModal()" },
             { icon: "🎮", text: "Play Games", action: "ui.showGamesModal()" },
             { icon: "📶", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
             { icon: "📜", text: "Order History", action: "ui.showOrderHistoryModal()" },
         ];
-        $('#page-content').innerHTML = `<div class="p-4 space-y-3">${options.map(opt => opt.action ? `<button onclick="${opt.action}" class="w-full flex items-center justify-between bg-secondary p-4 rounded-xl text-left"><div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div><span class="text-secondary">&rarr;</span></button>` : `<div class="w-full flex items-center bg-secondary p-4 rounded-xl text-left"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>`).join("")}</div>`;
+        $('#page-content').innerHTML = `
+            <div class="p-4 space-y-3">${options.map(opt => `
+                <button onclick="${opt.action}" class="w-full flex items-center justify-between bg-secondary p-4 rounded-xl text-left">
+                    <div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>
+                    <span class="text-secondary">&rarr;</span>
+                </button>`).join("")}
+            </div>`;
     },
 
     // --- MODAL RENDERERS ---
-    showPaymentModal(){ /* ... unchanged ... */
-         ui.showModal('payment-modal', `<h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2> <div class="space-y-3"> <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button> <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button> </div> <button onclick="ui.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>`);
+    showPaymentModal(){
+         ui.showModal('payment-modal', `
+            <h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2>
+            <div class="space-y-3">
+                 <!-- MOD: Replaced large emojis with text emojis -->
+                <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
+                <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button>
+            </div>
+            <button onclick="ui.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+        `);
     },
-    showItemDetailModal(itemId){ /* ... unchanged ... */
-        const item = app.state.allMenuItems.find(i => i.id === itemId); if (!item) return; const cartItem = app.state.cart.find(ci => ci.id === itemId); const currentQuantity = cartItem ? cartItem.quantity : 1; let optionsHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${i + 1 === currentQuantity ? 'selected' : ''}>${i + 1}</option>`).join(''); optionsHTML = `<option value="0" ${!cartItem ? 'selected' : ''}>0 (Remove)</option>` + optionsHTML; ui.showModal('item-detail-modal', `<div class="flex justify-between items-start"> <div> <h2 class="text-2xl font-bold text-primary">${item.name}</h2> <p class="text-xl font-semibold text-secondary">₹${item.price}</p> </div> <div class="text-5xl">${item.image_url || '☕️'}</div> </div> <p class="text-secondary mt-2">${item.description || 'Delicious.'}</p> <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-lg"> <label for="modal-quantity-select" class="font-semibold text-primary">Quantity:</label> <select id="modal-quantity-select" class="bg-primary border border-custom text-primary font-semibold rounded-lg p-2">${optionsHTML}</select> </div> <div class="mt-6 grid grid-cols-2 gap-4"> <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button> <button onclick="app.setCartItemQuantity(${item.id}, parseInt($('#modal-quantity-select').value))" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button> </div>`);
+    
+    showItemDetailModal(itemId){
+        const item = app.state.allMenuItems.find(i => i.id === itemId); if (!item) return;
+        const cartItem = app.state.cart.find(ci => ci.id === itemId);
+        const currentQuantity = cartItem ? cartItem.quantity : 1;
+        let optionsHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${i + 1 === currentQuantity ? 'selected' : ''}>${i + 1}</option>`).join('');
+        optionsHTML = `<option value="0" ${!cartItem ? 'selected' : ''}>0 (Remove)</option>` + optionsHTML;
+
+
+        ui.showModal('item-detail-modal', `
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary">${item.name}</h2>
+                    <p class="text-xl font-semibold text-secondary">₹${item.price}</p>
+                </div>
+                 <!-- MOD: Replaced large emoji with text emoji -->
+                <div class="text-5xl">${item.image_url || '☕️'}</div>
+            </div>
+            <p class="text-secondary mt-2">${item.description || 'A delicious choice.'}</p>
+            <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-lg">
+                <label for="modal-quantity-select" class="font-semibold text-primary">Quantity:</label>
+                <select id="modal-quantity-select" class="bg-primary border border-custom text-primary font-semibold rounded-lg p-2">${optionsHTML}</select>
+            </div>
+            <div class="mt-6 grid grid-cols-2 gap-4">
+                <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button>
+                <button onclick="app.setCartItemQuantity(${item.id}, parseInt($('#modal-quantity-select').value))" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
+            </div>`);
     },
-    showInstagramPromo(){ /* ... unchanged ... */
-        const vibes = Object.entries(STATIC_DATA.captionIdeas).map(([key, _]) => ({ name: key, icon: { student: '🎓', office: '💼', couple: '❤️', friends: '🎉' }[key] })); ui.showModal('insta-modal', `<h2 class="text-2xl font-bold">Post for Free Hamper!</h2> <p class="text-secondary mt-1 mb-6">Order ₹799+, post story tagging us, show both at counter!</p> <div class="grid grid-cols-2 gap-4">${vibes.map(v => `<button onclick="ui.showCaptionIdeas('${v.name}')" class="bg-secondary p-4 rounded-xl text-center"> <span class="text-3xl">${v.icon}</span><p class="font-semibold mt-2 capitalize">${v.name}</p> </button>`).join('')}</div> <button onclick="ui.closeModal('insta-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>`);
+
+    showInstagramPromo(){
+        const vibes = Object.entries(STATIC_DATA.captionIdeas).map(([key, _]) => ({
+            name: key, icon: { student: '🎓', office: '💼', couple: '❤️', friends: '🎉' }[key]
+        }));
+        ui.showModal('insta-modal', `
+            <h2 class="text-2xl font-bold">Post for a Free Hamper!</h2>
+            <p class="text-secondary mt-1 mb-6">If your order is over ₹799, post a story tagging us, and show both at the counter!</p>
+            <div class="grid grid-cols-2 gap-4">${vibes.map(v => `
+                <button onclick="ui.showCaptionIdeas('${v.name}')" class="bg-secondary p-4 rounded-xl text-center">
+                    <span class="text-3xl">${v.icon}</span><p class="font-semibold mt-2 capitalize">${v.name}</p>
+                </button>`).join('')}
+            </div>
+            <button onclick="ui.closeModal('insta-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
+        `);
     },
-    showCaptionIdeas(category){ /* ... unchanged ... */
-        ui.closeModal('insta-modal'); const captions = STATIC_DATA.captionIdeas[category]; ui.showModal('caption-modal', `<h2 class="text-2xl font-bold">Caption Ideas</h2> <p class="text-secondary mt-1 mb-4">Tap to copy. Tag <span class="font-bold brand-text">@hxousecoffeeco</span>!</p> <div class="space-y-2 max-h-48 overflow-y-auto">${captions.map(c => `<div onclick="app.copyCaption('${c.replace(/'/g, "\\'")}')" class="bg-secondary p-3 rounded-lg text-sm font-medium cursor-pointer flex justify-between items-center"> <span>${c}</span><span class="text-xs font-bold brand-text">COPY</span> </div>`).join('')}</div> <a href="instagram://story-camera" class="block w-full text-center mt-6 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white font-semibold py-3 rounded-lg">Open IG Story</a> <button onclick="ui.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button>`);
+
+    showCaptionIdeas(category){
+        ui.closeModal('insta-modal');
+        const captions = STATIC_DATA.captionIdeas[category];
+        ui.showModal('caption-modal', `
+            <h2 class="text-2xl font-bold">Caption Ideas</h2>
+            <p class="text-secondary mt-1 mb-4">Tap to copy. Tag us <span class="font-bold brand-text">@hxousecoffeeco</span>!</p>
+            <div class="space-y-2 max-h-48 overflow-y-auto">${captions.map(c => `
+                <div onclick="app.copyCaption('${c.replace(/'/g, "\\'")}')" class="bg-secondary p-3 rounded-lg text-sm font-medium cursor-pointer flex justify-between items-center">
+                    <span>${c}</span><span class="text-xs font-bold brand-text">COPY</span>
+                </div>`).join('')}
+            </div>
+            <a href="instagram://story-camera" class="block w-full text-center mt-6 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white font-semibold py-3 rounded-lg">Open Instagram Story</a>
+            <button onclick="ui.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+        `);
     },
-    showGamesModal() { /* ... unchanged ... */
-        ui.showModal('games-modal', `<h2 class="text-xl font-bold text-center mb-4">Entertainment</h2> <div class="space-y-3"> ${Object.values(GAMES).map(game => `<div class="bg-secondary p-4 rounded-xl"> <h3 class="text-lg font-bold text-primary mb-1">${game.title}</h3> <p class="text-secondary text-sm mb-3">${game.description}</p> <button onclick="GAMES['${game.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg text-sm">Play</button> </div>`).join("")} </div> <button onclick="ui.closeModal('games-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>`);
+    
+    showGamesModal() {
+        ui.showModal('games-modal', `
+            <h2 class="text-xl font-bold text-center mb-4">Entertainment</h2>
+            <div class="space-y-3">
+                ${Object.values(GAMES).map(game => `
+                    <div class="bg-secondary p-4 rounded-xl">
+                        <h3 class="text-lg font-bold text-primary mb-1">${game.title}</h3>
+                        <p class="text-secondary text-sm mb-3">${game.description}</p>
+                        <button onclick="GAMES['${game.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg text-sm">Play</button>
+                    </div>`).join("")}
+            </div>
+            <button onclick="ui.closeModal('games-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+        `);
     },
-    showThemeModal() { /* ... unchanged ... */
-        const themes = [ { n: 'light', i: '☀️' }, { n: 'dark', i: '🌙' }, { n: 'sunset', i: '🌆' }, { n: 'matcha', i: '🍵' }]; ui.showModal('theme-modal', `<h2 class="text-xl font-bold mb-4">Choose Theme</h2> <div class="grid grid-cols-2 gap-4">${themes.map(t => `<button onclick="app.toggleTheme('${t.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${t.i}</span><p class="font-semibold mt-1 capitalize">${t.n}</p></button>`).join('')}</div> <button onclick="ui.closeModal('theme-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>`);
+
+    showThemeModal() {
+        const themes = [ { n: 'light', i: '☀️' }, { n: 'dark', i: '🌙' }, { n: 'sunset', i: '🌆' }, { n: 'matcha', i: '🍵' }];
+        ui.showModal('theme-modal', `
+            <h2 class="text-xl font-bold mb-4">Choose Theme</h2>
+            <div class="grid grid-cols-2 gap-4">${themes.map(t => `<button onclick="app.toggleTheme('${t.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${t.i}</span><p class="font-semibold mt-1 capitalize">${t.n}</p></button>`).join('')}</div>
+            <button onclick="ui.closeModal('theme-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+        `);
     },
-    showWifiModal() { /* ... unchanged ... */
-        ui.showModal('wifi-modal', `<div class="text-center"> <h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2> <p class="text-secondary mb-4">Connect & enjoy!</p> <div class="bg-secondary p-4 rounded-lg"> <p class="text-xs">Network</p><p class="font-bold text-lg">THE CO-WORK HUB</p> <hr class="border-custom my-3"> <p class="text-xs">Password</p><p class="font-bold text-lg">95462418</p> </div> <button onclick="ui.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button> </div>`);
+    
+    showWifiModal() {
+        ui.showModal('wifi-modal', `
+            <div class="text-center">
+                <h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2>
+                <p class="text-secondary mb-4">Connect and enjoy!</p>
+                <div class="bg-secondary p-4 rounded-lg">
+                    <p class="text-xs">Network Name</p><p class="font-bold text-lg">THE CO-WORK HUB</p>
+                    <hr class="border-custom my-3">
+                    <p class="text-xs">Password</p><p class="font-bold text-lg">95462418</p>
+                </div>
+                <button onclick="ui.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+            </div>
+        `);
     },
-    async showOrderHistoryModal() { /* ... updated to show discount ... */
-        const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity), discount_amount, discount_points_redeemed`).eq('customer_id', app.state.user.id).order('created_at', { ascending: false });
-        const historyHTML = data?.length > 0 ? data.map(o => ` <div class="bg-secondary p-3 rounded-lg"> <div class="flex justify-between"> <div> <p class="font-bold">Order #${o.id.slice(0, 6)}</p> <p class="text-xs text-secondary">${new Date(o.created_at).toLocaleString()}</p> </div> <p class="font-semibold">₹${(o.final_amount ?? o.total_amount).toFixed(2)}</p> </div> <div class="text-sm text-secondary mt-2">${o.order_items.map(i => `${i.products.name} (x${i.quantity})`).join(', ')}</div> ${o.discount_amount > 0 ? `<p class="text-xs text-green-600 mt-1">Discount: -₹${o.discount_amount.toFixed(2)} (${o.discount_points_redeemed} points)</p>` : ''} </div>`).join('') : '<p class="text-secondary text-center">No past orders.</p>';
-        ui.showModal('history-modal', `<h2 class="text-xl font-bold text-center mb-4">Order History</h2> <div class="space-y-3 max-h-60 overflow-y-auto">${historyHTML}</div> <button onclick="ui.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>`);
+    
+    async showOrderHistoryModal() {
+        const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity)`).eq('customer_id', app.state.user.id).order('created_at', { ascending: false });
+        const historyHTML = data?.length > 0 ? data.map(o => `
+            <div class="bg-secondary p-3 rounded-lg">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="font-bold">Order #${o.id.slice(0, 6)}</p>
+                        <p class="text-xs text-secondary">${new Date(o.created_at).toLocaleString()}</p>
+                    </div>
+                    <p class="font-semibold">₹${o.total_amount}</p>
+                </div>
+                <div class="text-sm text-secondary mt-2">${o.order_items.map(i => `${i.products.name} (x${i.quantity})`).join(', ')}</div>
+            </div>`).join('') : '<p class="text-secondary text-center">No past orders found.</p>';
+        
+        ui.showModal('history-modal', `
+            <h2 class="text-xl font-bold text-center mb-4">Order History</h2>
+            <div class="space-y-3 max-h-60 overflow-y-auto">${historyHTML}</div>
+            <button onclick="ui.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+        `);
     }
 };
 
 // =================================================================================
-// SECTION 4: GAMES & INTERACTIVE MODULES
+//  SECTION 4: GAMES & INTERACTIVE MODULES
 // =================================================================================
-const GAMES = { /* ... unchanged game logic objects ... */ };
-// Full game logic omitted here for brevity, assume unchanged from previous version.
-GAMES.ticTacToe = { id: 'ticTacToe', title: 'Tic-Tac-Toe', description: 'Classic 2-player game.', board: Array(9).fill(null), currentPlayer: "X", winner: null, start: function() { this.reset(); ui.showModal('ttt-modal', `<h2 class="text-2xl font-bold mb-2 text-center">Tic-Tac-Toe</h2> <p id="ttt-status" class="font-semibold text-secondary mb-4 text-center">Player X's turn</p> <div class="w-full max-w-[250px] mx-auto"> <div id="ttt-board" class="grid grid-cols-3 gap-2 my-4"> ${this.board.map((_, i) => `<div class="aspect-square bg-secondary flex items-center justify-center text-5xl sm:text-6xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")} </div> </div> <button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button> <button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>`); }, play: function(i) { if (this.board[i] || this.winner) return; this.board[i] = this.currentPlayer; this.checkWinner(); this.currentPlayer = this.currentPlayer === "X" ? "O" : "X"; this.updateUI(); }, checkWinner: function() { const lines = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ]; for (let line of lines) { const [a, b, c] = line; if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) { this.winner = this.board[a]; sound.play("win"); return; } } if (this.board.every(cell => cell)) { this.winner = "Draw"; sound.play("draw"); } }, updateUI: function() { $$("#ttt-board > div").forEach((cell, i) => { cell.textContent = this.board[i]; cell.style.color = this.board[i] === "X" ? "#3b82f6" : "#ef4444"; }); $("#ttt-status").textContent = this.winner ? (this.winner === "Draw" ? "It's a Draw!" : `Player ${this.winner} wins!`) : `Player ${this.currentPlayer}'s turn`; }, reset: function() { this.board.fill(null); this.currentPlayer = "X"; this.winner = null; } };
-GAMES.coffeeTrivia = { id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your knowledge!', currentQuestion: null, trivia: [{ q: "Where was coffee first discovered?", o: ["Brazil", "Ethiopia", "Colombia", "Vietnam"], a: 1 }, { q: "What does 'espresso' mean in Italian?", o: ["Fast Coffee", "Dark Coffee", "Expressed or Forced Out", "Morning Ritual"], a: 2 }, { q: "What is the most expensive coffee in the world, often involving an animal?", o: ["Blue Mountain", "Geisha", "Kopi Luwak", "Bourbon"], a: 2 }, { q: "Which country is the largest producer of coffee?", o: ["Brazil", "Vietnam", "Indonesia", "India"], a: 0 }], start: function() { this.currentQuestion = this.trivia[Math.floor(Math.random() * this.trivia.length)]; const item = this.currentQuestion; ui.showModal('trivia-modal', `<div class="text-center"> <h2 class="text-xl font-bold mb-2">Coffee Trivia</h2> <p class="text-secondary mb-6 h-12">${item.q}</p> <div id="trivia-options" class="space-y-3"> ${item.o.map((opt, index) => `<button class="trivia-option w-full bg-secondary font-semibold p-3 rounded-lg text-left" onclick="GAMES.coffeeTrivia.checkAnswer(${index}, ${item.a})">${opt}</button>`).join('')} </div> <button onclick="ui.closeModal('trivia-modal')" class="w-full mt-6 bg-secondary py-3 rounded-lg">Close</button> </div>`); }, checkAnswer: function(selectedIndex, correctIndex) { const options = $$('.trivia-option'); options.forEach((btn, index) => { btn.disabled = true; if (index === correctIndex) { btn.classList.remove('bg-secondary'); btn.classList.add('bg-green-500', 'text-white'); } else if (index === selectedIndex) { btn.classList.remove('bg-secondary'); btn.classList.add('bg-red-500', 'text-white'); } }); if (selectedIndex === correctIndex) { sound.play('success'); } else { sound.play('draw'); } setTimeout(() => this.start(), 2000); } };
-GAMES.coffeeArt = { id: 'coffeeArt', title: 'Coffee Art Studio', description: 'Create latte art.', canvas: null, ctx: null, painting: false, start: function() { ui.showModal('art-modal', `<div class="text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-full aspect-square mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair" id="canvas-container"><canvas id="coffee-art-canvas"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div>`); this.initCanvas(); }, initCanvas: function() { this.canvas = $("#coffee-art-canvas"); const container = $('#canvas-container'); if (!this.canvas || !container) return; this.ctx = this.canvas.getContext("2d"); const size = container.clientWidth; this.canvas.width = size; this.canvas.height = size; this.ctx.strokeStyle = "#ffffff"; this.ctx.lineWidth = 5; this.ctx.lineCap = "round"; this.canvas.addEventListener("pointerdown", this.startPosition.bind(this)); this.canvas.addEventListener("pointerup", this.finishedPosition.bind(this)); this.canvas.addEventListener("pointermove", this.draw.bind(this)); this.canvas.addEventListener("touchstart", this.startPosition.bind(this), { passive: false }); this.canvas.addEventListener("touchend", this.finishedPosition.bind(this)); this.canvas.addEventListener("touchmove", this.draw.bind(this), { passive: false }); }, getEventPosition: function(e) { const rect = this.canvas.getBoundingClientRect(); if (e.touches && e.touches.length > 0) { return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }; } return { x: e.clientX - rect.left, y: e.clientY - rect.top }; }, startPosition: function(e) { this.painting = true; this.draw(e); }, finishedPosition: function() { this.painting = false; this.ctx.beginPath(); }, draw: function(e) { if (!this.painting) return; e.preventDefault(); const { x, y } = this.getEventPosition(e); this.ctx.lineTo(x, y); this.ctx.stroke(); this.ctx.beginPath(); this.ctx.moveTo(x, y); }, changeColor: function(c) { if(this.ctx) this.ctx.strokeStyle = c; }, clearCanvas: function() { if(this.ctx) this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); } };
+const GAMES = {
+    ticTacToe: {
+        id: 'ticTacToe', title: 'Tic-Tac-Toe', description: 'Classic 2-player game for your table.',
+        board: Array(9).fill(null),
+        currentPlayer: "X",
+        winner: null,
+        start() {
+            this.reset();
+            ui.showModal('ttt-modal', `
+                <h2 class="text-2xl font-bold mb-2 text-center">Tic-Tac-Toe</h2>
+                <p id="ttt-status" class="font-semibold text-secondary mb-4 text-center">Player X's turn</p>
+                <div class="w-full max-w-[250px] mx-auto">
+                    <div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">
+                        ${this.board.map((_, i) => `<div class="aspect-square bg-secondary flex items-center justify-center text-5xl sm:text-6xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}
+                    </div>
+                </div>
+                <button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button>
+                <button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>
+            `);
+        },
+        play(i) {
+            if (this.board[i] || this.winner) return;
+            this.board[i] = this.currentPlayer;
+            this.checkWinner();
+            this.currentPlayer = this.currentPlayer === "X" ? "O" : "X";
+            this.updateUI();
+        },
+        checkWinner() {
+            const lines = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                [0, 4, 8], [2, 4, 6]             // Diagonals
+            ];
+            for (let line of lines) {
+                const [a, b, c] = line;
+                if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
+                    this.winner = this.board[a];
+                    sound.play("win");
+                    return;
+                }
+            }
+            if (this.board.every(cell => cell)) {
+                this.winner = "Draw";
+                sound.play("draw");
+            }
+        },
+        updateUI() {
+            $$("#ttt-board > div").forEach((cell, i) => {
+                cell.textContent = this.board[i];
+                cell.style.color = this.board[i] === "X" ? "#3b82f6" : "#ef4444";
+            });
+            $("#ttt-status").textContent = this.winner ? (this.winner === "Draw" ? "It's a Draw!" : `Player ${this.winner} wins!`) : `Player ${this.currentPlayer}'s turn`;
+        },
+        reset() {
+            this.board.fill(null);
+            this.currentPlayer = "X";
+            this.winner = null;
+        }
+    },
+    coffeeTrivia: {
+        id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your coffee knowledge!',
+        currentQuestion: null,
+        trivia: [
+            { q: "Where was coffee first discovered?", o: ["Brazil", "Ethiopia", "Colombia", "Vietnam"], a: 1 },
+            { q: "What does 'espresso' mean in Italian?", o: ["Fast Coffee", "Dark Coffee", "Expressed or Forced Out", "Morning Ritual"], a: 2 },
+            { q: "What is the most expensive coffee in the world, often involving an animal?", o: ["Blue Mountain", "Geisha", "Kopi Luwak", "Bourbon"], a: 2 },
+            { q: "Which country is the largest producer of coffee?", o: ["Brazil", "Vietnam", "Indonesia", "India"], a: 0 }
+        ],
+        start() {
+            this.currentQuestion = this.trivia[Math.floor(Math.random() * this.trivia.length)];
+            const item = this.currentQuestion;
+            ui.showModal('trivia-modal', `
+                <div class="text-center">
+                    <h2 class="text-xl font-bold mb-2">Coffee Trivia</h2>
+                    <p class="text-secondary mb-6 h-12">${item.q}</p>
+                    <div id="trivia-options" class="space-y-3">
+                        ${item.o.map((opt, index) => `<button class="trivia-option w-full bg-secondary font-semibold p-3 rounded-lg text-left" onclick="GAMES.coffeeTrivia.checkAnswer(${index}, ${item.a})">${opt}</button>`).join('')}
+                    </div>
+                    <button onclick="ui.closeModal('trivia-modal')" class="w-full mt-6 bg-secondary py-3 rounded-lg">Close</button>
+                </div>
+            `);
+        },
+        checkAnswer(selectedIndex, correctIndex) {
+            const options = $$('.trivia-option');
+            options.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === correctIndex) {
+                    btn.classList.remove('bg-secondary');
+                    btn.classList.add('bg-green-500', 'text-white');
+                } else if (index === selectedIndex) {
+                    btn.classList.remove('bg-secondary');
+                    btn.classList.add('bg-red-500', 'text-white');
+                }
+            });
 
+            if (selectedIndex === correctIndex) {
+                sound.play('success');
+            } else {
+                sound.play('draw');
+            }
+
+            setTimeout(() => this.start(), 2000);
+        }
+    },
+    coffeeArt: {
+        id: 'coffeeArt', title: 'Coffee Art Studio', description: 'Unleash your inner barista and create some latte art.',
+        canvas: null, ctx: null, painting: false,
+        start() {
+            ui.showModal('art-modal', `<div class="text-center"><h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2><div class="relative w-full aspect-square mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair" id="canvas-container"><canvas id="coffee-art-canvas"></canvas></div><div class="flex justify-center items-center space-x-2"><button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button><button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button><button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button></div><button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button></div>`);
+            this.initCanvas();
+        },
+        initCanvas() {
+            this.canvas = $("#coffee-art-canvas");
+            const container = $('#canvas-container');
+            if (!this.canvas || !container) return;
+            this.ctx = this.canvas.getContext("2d");
+            const size = container.clientWidth;
+            this.canvas.width = size;
+            this.canvas.height = size;
+            this.ctx.strokeStyle = "#ffffff"; this.ctx.lineWidth = 5; this.ctx.lineCap = "round";
+            this.canvas.addEventListener("pointerdown", this.startPosition.bind(this));
+            this.canvas.addEventListener("pointerup", this.finishedPosition.bind(this));
+            this.canvas.addEventListener("pointermove", this.draw.bind(this));
+            this.canvas.addEventListener("touchstart", this.startPosition.bind(this), { passive: false });
+            this.canvas.addEventListener("touchend", this.finishedPosition.bind(this));
+            this.canvas.addEventListener("touchmove", this.draw.bind(this), { passive: false });
+        },
+        getEventPosition(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+            }
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        },
+        startPosition(e) { this.painting = true; this.draw(e); },
+        finishedPosition() { this.painting = false; this.ctx.beginPath(); },
+        draw(e) {
+            if (!this.painting) return; 
+            e.preventDefault();
+            const { x, y } = this.getEventPosition(e);
+            this.ctx.lineTo(x, y); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.moveTo(x, y);
+        },
+        changeColor(c) { if(this.ctx) this.ctx.strokeStyle = c; },
+        clearCanvas() { if(this.ctx) this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); }
+    },
+};
 
 // =================================================================================
-// SECTION 5: APP INITIALIZATION
+//  SECTION 5: APP INITIALIZATION
 // =================================================================================
 document.addEventListener('DOMContentLoaded', () => app.init());
 
 </script>
 </body>
 </html>
-
