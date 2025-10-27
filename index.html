@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400..900&family=Poppins:wght@300;400;500;600;700;800&display.swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* --- THEMES & STYLES --- */
@@ -57,7 +57,7 @@
         .tracker-line-container { position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background-color: var(--border-color); border-radius: 2px; }
         .tracker-progress { height: 100%; background-color: var(--brand-primary); border-radius: 2px; transition: width 0.5s ease-in-out; }
         .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 80px; position: relative; z-index: 1; }
-        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 20px; } /* MOD: Reduced emoji size */
         .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
         .tracker-label { margin-top: 8px; font-size: 10px; font-weight: 600; transition: color 0.3s ease; }
         .tracker-step.active .tracker-label { color: var(--brand-primary); }
@@ -84,6 +84,55 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- REDESIGN: MINIMUM CLICKS STYLES --- */
+        .add-to-cart-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background-color: var(--bg-primary);
+            color: var(--brand-primary);
+            border: 2px solid var(--border-color);
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .add-to-cart-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--brand-primary);
+            color: var(--bg-primary);
+            border-color: var(--brand-primary);
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--brand-primary);
+            color: var(--bg-primary);
+            border-radius: 9999px;
+            font-weight: 600;
+            overflow: hidden;
+            width: 100px;
+            height: 40px;
+            user-select: none;
+        }
+        .quantity-control button {
+            width: 34px;
+            height: 100%;
+            font-size: 20px;
+            line-height: 1;
+            transition: background-color 0.2s ease;
+        }
+        .quantity-control button:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        .quantity-control span {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body data-theme="matcha">
@@ -129,6 +178,8 @@ setAppHeight();
 const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
 const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const PAGES = ['home', 'order', 'cart', 'social', 'more'];
 
 const STATIC_DATA = {
     bestSellers: [10, 39, 61, 93], // IDs for Lotus Biscoff Cappuccino, Nutella Shake, Crispy Paneer Burger, Tandoori Paneer Pizza
@@ -180,13 +231,27 @@ const app = {
         customerProfile: null,
         theme: 'matcha',
         menuData: [],
+        allMenuItems: [], // Flattened list for search
         appSettings: {},
         orderSubscription: null,
-        currentMenuCategory: null, 
+        currentMenuCategory: null,
+        searchQuery: '',
+        searchResults: [],
     },
     
     async init() {
         document.body.addEventListener('click', () => sound.init(), { once: true });
+        
+        // Back Button Logic
+        const initialHash = location.hash.substring(1);
+        if (PAGES.includes(initialHash)) {
+            app.navigateTo(initialHash, false); // Navigate without pushing to history
+        } else {
+            location.hash = 'home';
+            app.navigateTo('home', false);
+        }
+        window.addEventListener('popstate', app.handleHardwareBack);
+        
         this.startAppFlow();
     },
 
@@ -244,7 +309,10 @@ const app = {
             const { data, error } = await supabase.from('products').select('*').order('id');
             if (error) throw error;
             
+            this.state.allMenuItems = data.filter(i => i.is_available);
+
             const groupedMenu = data.reduce((acc, item) => {
+                if (!item.is_available) return acc; // Only show available items
                 let category = acc.find(c => c.category === item.category);
                 if (!category) {
                     category = { category: item.category, items: [] };
@@ -260,6 +328,7 @@ const app = {
             console.error('Error fetching menu data:', error);
             ui.showToast('Could not load the menu.');
             this.state.menuData = [];
+            this.state.allMenuItems = [];
         }
     },
     
@@ -334,44 +403,136 @@ const app = {
         $('#main-interface').classList.remove('hidden');
         $('#bottom-nav').classList.remove('hidden');
         ui.renderBottomNav();
-        this.navigateTo('home');
+        this.navigateTo(this.state.currentPage, false); // Load initial page without pushing history
     },
 
-    navigateTo(page){
+    // MOD: Added pushToHistory flag for back button logic
+    navigateTo(page, pushToHistory = true){
         if (!this.state.customerProfile) return;
         sound.play('click');
+        
+        // MOD: Back Button Logic
+        if (pushToHistory && location.hash.substring(1) !== page) {
+            location.hash = page;
+        }
+        
         this.state.currentPage = page;
         ui.renderHeader(page);
         ui.renderPageContent(page);
         ui.updateActiveNav(page);
     },
 
+    // MOD: Back Button Logic
+    handleHardwareBack(event) {
+        const hash = location.hash.substring(1);
+        const openModal = $('#modal-container').children[0];
+
+        // 1. If a modal is open, the back button should just close it.
+        if (openModal) {
+            openModal.remove();
+            return;
+        }
+
+        // 2. If the hash is a valid page and not the current page, navigate to it.
+        if (PAGES.includes(hash) && hash !== app.state.currentPage) {
+            app.navigateTo(hash, false);
+        }
+        // 3. If the hash is NOT a valid page (e.g., empty, or a modal hash that's already closed)
+        //    or if it's 'home' (and we want to prevent exit), go to home.
+        else if (!PAGES.includes(hash) || hash === 'home') {
+            app.navigateTo('home', false);
+            location.hash = 'home'; // Ensure hash is correct
+        }
+    },
+
     applyTheme(){ document.body.dataset.theme = this.state.theme; },
     toggleTheme(t){ this.state.theme = t; localStorage.setItem('hxouse-theme', t); this.applyTheme(); this.navigateTo('more'); },
 
-    addOrUpdateCartFromModal(itemId) {
-        const quantity = parseInt($('#modal-quantity-select').value);
-        const cartItem = this.state.cart.find(i => i.id === itemId);
+    // New function for 1-click add/remove from menu
+    addOrUpdateCart(itemId, quantityChange) {
+        sound.play('click');
+        const item = this.state.allMenuItems.find(i => i.id === itemId);
+        if (!item) return;
 
-        if (cartItem) {
-            cartItem.quantity = quantity;
+        let cartItem = this.state.cart.find(i => i.id === itemId);
+        let newQuantity = (cartItem ? cartItem.quantity : 0) + quantityChange;
+
+        if (newQuantity <= 0) {
+            this.state.cart = this.state.cart.filter(i => i.id !== itemId);
         } else {
-            const item = this.state.menuData.flatMap(c => c.items).find(i => i.id === itemId);
-            if (!item) return;
-            this.state.cart.push({ cartId: Date.now(), ...item, quantity: quantity });
+            if (cartItem) {
+                cartItem.quantity = newQuantity;
+            } else {
+                this.state.cart.push({ cartId: Date.now(), ...item, quantity: newQuantity });
+            }
+            if (quantityChange > 0) sound.play('add_to_cart');
         }
+        this.refreshPage(); // This will re-render the menu page and update the + button
+    },
 
-        ui.showToast('Cart updated!');
-        sound.play('add_to_cart');
+    // New function for setting absolute quantity (from modal)
+    setCartItemQuantity(itemId, quantity) {
+        const item = this.state.allMenuItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        if (quantity <= 0) {
+            this.state.cart = this.state.cart.filter(i => i.id !== itemId);
+        } else {
+            let cartItem = this.state.cart.find(i => i.id === itemId);
+            if (cartItem) {
+                cartItem.quantity = quantity;
+            } else {
+                this.state.cart.push({ cartId: Date.now(), ...item, quantity: quantity });
+            }
+        }
+        
+        if(quantity > 0) {
+            sound.play('add_to_cart');
+            ui.showToast('Cart updated!');
+        }
         ui.closeModal('item-detail-modal');
         this.refreshPage();
+    },
+
+    // New search function (now renders inline)
+    performSearch(query) {
+        const searchContainer = $('#search-results-container');
+        const menuContainer = $('#menu-items');
+        const tabsContainer = $('#category-tabs-container');
+
+        this.state.searchQuery = query.toLowerCase();
+
+        if (this.state.searchQuery.length > 1) {
+            if (searchContainer) searchContainer.classList.remove('hidden');
+            if (menuContainer) menuContainer.classList.add('hidden');
+            if (tabsContainer) tabsContainer.classList.add('hidden');
+
+            this.state.searchResults = this.state.allMenuItems.filter(item => 
+                item.name.toLowerCase().includes(this.state.searchQuery) ||
+                (item.description && item.description.toLowerCase().includes(this.state.searchQuery))
+            );
+            ui.renderMenuItems(this.state.searchResults, 'search-results-container');
+        } else {
+            // If search is cleared, show categories again
+            if (searchContainer) searchContainer.classList.add('hidden');
+            if (menuContainer) menuContainer.classList.remove('hidden');
+            if (tabsContainer) tabsContainer.classList.remove('hidden');
+            this.state.searchResults = [];
+        }
     },
     
     calculateCartTotal(){ return this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0); },
     
     refreshPage(){
         ui.refreshCartDependentUI();
-        ui.renderPageContent(this.state.currentPage);
+        // Refresh menu or cart
+        if (this.state.currentPage === 'order') {
+            ui.renderPageContent('order');
+        } else if (this.state.currentPage === 'cart') {
+            ui.renderPageContent('cart');
+        } else if (this.state.currentPage === 'home') {
+            ui.renderPageContent('home');
+        }
     },
     
     async placeOrder(paymentMethod, btnElement){
@@ -456,7 +617,7 @@ const app = {
                     this.state.orderSubscription = null;
                     if (updatedOrder.status === 'delivered') {
                         ui.showModal('review-modal', `
-                            <div class="text-center"><span class="text-4xl">⭐</span>
+                            <div class="text-center"><span class="text-3xl">⭐</span>
                             <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2>
                             <p class="text-secondary my-2">How was your experience?</p>
                             <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="3" placeholder="Tell us more..."></textarea>
@@ -510,13 +671,24 @@ const app = {
 // =================================================================================
 const ui = {
     showModal(id, content) {
+        // MOD: Back Button Logic
+        location.hash = id;
         const existingModal = $(`#${id}`);
         if (existingModal) existingModal.remove();
 
         const modalHTML = `<div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4"><div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg">${content}</div></div>`;
         $('#modal-container').insertAdjacentHTML('beforeend', modalHTML);
     },
-    closeModal(id) { $(`#${id}`)?.remove(); },
+    closeModal(id) {
+        // MOD: Back Button Logic
+        const modal = $(`#${id}`);
+        if (modal) modal.remove();
+        
+        // Go back in history to close the modal hash state
+        if (location.hash.substring(1) === id) {
+            history.back();
+        }
+    },
     showToast(message, duration = 3000) {
         const toast = $('#toast'), p = $('#toast-message');
         p.textContent = message;
@@ -566,15 +738,22 @@ const ui = {
     },
     
     renderBottomNav(){
-        const icons = { home: `...`, order: `...`, cart: `...`, social: `...`, more: `...` };
-        icons.home = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`;
-        icons.order = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`;
-        icons.cart = `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`;
-        icons.social = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`;
-        icons.more = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`;
+        const icons = { 
+            home: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`,
+            order: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,
+            cart: `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`,
+            social: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`,
+            more: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`
+        };
+        const labels = {
+            home: 'Home',
+            order: 'Menu',
+            cart: 'Cart',
+            social: 'Social',
+            more: 'More'
+        };
         
-        const pages = ['home', 'order', 'cart', 'social', 'more'];
-        $('#bottom-nav').innerHTML = pages.map(p => `<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${icons[p]}<span id="${p}-tab-label" class="text-xs font-bold capitalize">${p}</span></button>`).join('');
+        $('#bottom-nav').innerHTML = PAGES.map(p => `<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${icons[p]}<span id="${p}-tab-label" class="text-xs font-bold capitalize">${labels[p]}</span></button>`).join('');
     },
     
     updateActiveNav(page) {
@@ -605,7 +784,7 @@ const ui = {
             el.classList.add('hidden');
         }
     },
-
+    
     renderHomePage(){
         const settings = app.state.appSettings;
         const activeOrderHTML = app.state.activeOrder ? `
@@ -624,7 +803,8 @@ const ui = {
 
         const bestSellersHTML = bestSellerItems.map(item => `
             <div onclick="ui.showItemDetailModal(${item.id})" class="cursor-pointer flex-shrink-0 w-40 bg-secondary rounded-xl p-3 flex flex-col items-center text-center">
-                <div class="text-5xl mb-2">${item.image_url || '🍴'}</div>
+                <!-- MOD: Replaced large emoji with text emoji -->
+                <div class="text-5xl mb-2">${item.image_url || '☕️'}</div>
                 <h3 class="font-bold text-primary text-sm flex-grow">${item.name}</h3>
                 <p class="font-semibold text-secondary text-sm mt-1">₹${item.price}</p>
             </div>
@@ -649,44 +829,90 @@ const ui = {
                         </div>
                     </div>
 
+                    <!-- MOD: Added "View Full Menu" button -->
+                    <button onclick="app.navigateTo('order')" class="w-full brand-bg font-semibold py-4 px-6 rounded-lg text-lg">
+                        View Full Menu
+                    </button>
+
                     <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
                         <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
                         <p class="mt-1 text-secondary">${promoSubtitle}</p>
                         <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Learn More &rarr;</button>
                     </div>
                     <div class="grid grid-cols-1 gap-4">
-                        <button onclick="app.sendStaffCall()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎️</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button>
+                         <!-- MOD: Replaced large emoji with text emoji -->
+                        <button onclick="app.sendStaffCall()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button>
                     </div>
                 </div>
             </div>`;
     },
-    
+
     renderMenuPage() {
         const content = $('#page-content');
         if (app.state.menuData.length === 0) {
             content.innerHTML = `<div class="p-4 text-center text-secondary">Loading menu...</div>`; return;
         }
-
+        
         if (!app.state.currentMenuCategory) {
             app.state.currentMenuCategory = app.state.menuData[0].category;
         }
+        
+        const allCategories = [{ category: 'All Items' }, ...app.state.menuData];
 
         content.innerHTML = `
-            <div class="horizontal-scroll sticky top-16 bg-primary z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
-                ${app.state.menuData.map(c => `<button 
+            <div id="active-order-banner" class="p-4 hidden"></div>
+
+            <div class="p-4">
+                <input 
+                    type="text" 
+                    id="menu-search-input"
+                    placeholder="Search for items..." 
+                    class="w-full p-3 border-2 border-custom rounded-lg bg-secondary text-primary text-lg"
+                    oninput="app.performSearch(this.value)"
+                    value="${app.state.searchQuery}"
+                >
+            </div>
+
+            <div id="category-tabs-container" class="horizontal-scroll sticky top-16 bg-primary z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
+                ${allCategories.map(c => `<button 
                     class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${app.state.currentMenuCategory === c.category ? 'brand-text border-b-2 border-current' : 'text-secondary'}" 
                     data-category="${c.category}" 
                     onclick="ui.filterMenuByCategory('${c.category}', this)">
                     ${c.category}
                 </button>`).join('')}
             </div>
-            <div id="menu-items" class="p-4 grid grid-cols-2 gap-4"></div>`;
+            
+            <div id="menu-items" class="p-4 grid grid-cols-1 gap-4"></div>
+            <div id="search-results-container" class="p-4 grid grid-cols-1 gap-4 hidden"></div>
+        `;
+        
+        if (app.state.activeOrder) {
+            $('#active-order-banner').classList.remove('hidden');
+            $('#active-order-banner').innerHTML = `
+                <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center">
+                    <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2>
+                    <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p>
+                    <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
+                </div>`;
+        }
 
-        this.filterMenuByCategory(app.state.currentMenuCategory);
+        if (app.state.searchQuery.length > 1) {
+            app.performSearch(app.state.searchQuery);
+        } else {
+            this.filterMenuByCategory(app.state.currentMenuCategory);
+        }
     },
 
     filterMenuByCategory(category, tabElement) {
-        app.state.currentMenuCategory = category; 
+        app.state.currentMenuCategory = category;
+        app.state.searchQuery = '';
+        
+        const searchInput = $('#menu-search-input');
+        if (searchInput) searchInput.value = '';
+
+        $('#search-results-container')?.classList.add('hidden');
+        $('#menu-items')?.classList.remove('hidden');
+        $('#category-tabs-container')?.classList.remove('hidden');
 
         if (tabElement) {
             $$('.category-tab').forEach(tab => {
@@ -695,29 +921,52 @@ const ui = {
             });
             tabElement.classList.add('brand-text', 'border-b-2', 'border-current');
         }
-        const data = app.state.menuData.find(d => d.category === category);
-        this.renderMenuItems(data ? data.items.filter(i => i.is_available) : []);
+        
+        let itemsToShow = [];
+        if (category === 'All Items') {
+            itemsToShow = app.state.allMenuItems;
+        } else {
+            const data = app.state.menuData.find(d => d.category === category);
+            itemsToShow = data ? data.items : [];
+        }
+        
+        this.renderMenuItems(itemsToShow, 'menu-items');
     },
 
-    renderMenuItems(items) {
-        const container = $('#menu-items');
-        container.innerHTML = !items || items.length === 0 ? `<p class="text-secondary text-center">No items found.</p>` :
-            items.map(item => {
-                const cartItem = app.state.cart.find(ci => ci.id === item.id);
-                const quantityBadge = cartItem ? `<div class="absolute top-2 right-2 brand-bg text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold shadow-lg">${cartItem.quantity}</div>` : '';
-                
-                return `<div class="bg-secondary rounded-lg shadow-sm overflow-hidden cursor-pointer relative" onclick="ui.showItemDetailModal(${item.id})">
-                            ${quantityBadge}
-                            <div class="w-full h-32 flex items-center justify-center text-5xl bg-primary">${item.image_url || '🍴'}</div>
-                            <div class="p-3">
-                                <h3 class="font-semibold text-sm truncate text-primary">${item.name}</h3>
-                                <div class="flex justify-between items-center mt-2">
-                                    <p class="font-bold text-secondary">₹${item.price}</p>
-                                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xl font-bold brand-text">+</div>
-                                </div>
+    renderMenuItems(items, containerId) {
+        const container = $(`#${containerId}`);
+        if (!container) return;
+
+        if (!items || items.length === 0) {
+            container.innerHTML = `<p class="text-secondary text-center col-span-full mt-8">No items found.</p>`;
+            return;
+        }
+
+        container.innerHTML = items.map(item => {
+            const cartItem = app.state.cart.find(ci => ci.id === item.id);
+            
+            const actionButtonHTML = cartItem
+                ? ` <div class="quantity-control" onclick="event.stopPropagation();">
+                        <button onclick="app.addOrUpdateCart(${item.id}, -1)">-</button>
+                        <span>${cartItem.quantity}</span>
+                        <button onclick="app.addOrUpdateCart(${item.id}, 1)">+</button>
+                    </div>`
+                : ` <button class="add-to-cart-btn" onclick="event.stopPropagation(); app.addOrUpdateCart(${item.id}, 1)">
+                        +
+                    </button>`;
+
+            return `<div class="bg-secondary rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="ui.showItemDetailModal(${item.id})">
+                        <div class="p-3 flex items-center justify-between">
+                            <div class="flex-1 pr-4">
+                                <h3 class="font-semibold text-base truncate text-primary">${item.name}</h3>
+                                <p class="font-bold text-sm text-secondary mt-1">₹${item.price}</p>
                             </div>
-                        </div>`;
-            }).join('');
+                            <div class="flex-shrink-0">
+                                ${actionButtonHTML}
+                            </div>
+                        </div>
+                    </div>`;
+        }).join('');
     },
     
     renderCartPage() {
@@ -739,14 +988,15 @@ const ui = {
 
         container.innerHTML = `
             <div class="p-4 space-y-3">${app.state.cart.map(i => `
-                <div class="bg-secondary p-3 rounded-xl">
-                    <div class="flex justify-between items-start">
+                <div class="bg-secondary p-3 rounded-xl flex items-center justify-between">
+                    <div>
                         <p class="font-bold text-primary">${i.name}</p>
-                        <p class="font-semibold text-primary">₹${(i.price * i.quantity).toFixed(2)}</p>
+                        <p class="font-semibold text-secondary text-sm">₹${(i.price * i.quantity).toFixed(2)}</p>
                     </div>
-                    <div class="flex justify-between items-center mt-2">
-                        <button onclick="app.state.cart = app.state.cart.filter(ci => ci.cartId !== ${i.cartId}); app.refreshPage();" class="text-red-500 font-semibold text-xs">Remove</button>
-                        <p class="text-sm text-secondary">Quantity: ${i.quantity}</p>
+                    <div class="quantity-control" style="background-color: var(--bg-primary); color: var(--brand-primary); border: 1px solid var(--border-color);">
+                        <button onclick="app.addOrUpdateCart(${i.id}, -1)">-</button>
+                        <span>${i.quantity}</span>
+                        <button onclick="app.addOrUpdateCart(${i.id}, 1)">+</button>
                     </div>
                 </div>`).join('')}
             </div>
@@ -763,7 +1013,7 @@ const ui = {
         if (!order) { container.innerHTML = ''; return; }
         
         const statuses = ['received', 'preparing', 'delivered'];
-        const icons = { received: '📝', preparing: '🍳', delivered: '😊' };
+        const icons = { received: '📝', preparing: '🍳', delivered: '😊' }; // MOD: Kept standard emojis
         const currentIndex = statuses.indexOf(order.status);
         const progressPercentage = currentIndex > 0 ? (currentIndex / (statuses.length - 1)) * 100 : 0;
         
@@ -816,7 +1066,9 @@ const ui = {
     },
 
     renderMorePage(){
+        // MOD: Replaced large emojis with text emojis
         const options = [
+            { icon: "🛎", text: "Call Staff", action: "app.sendStaffCall()" },
             { icon: "🎨", text: "Change Theme", action: "ui.showThemeModal()" },
             { icon: "🎮", text: "Play Games", action: "ui.showGamesModal()" },
             { icon: "📶", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
@@ -836,6 +1088,7 @@ const ui = {
          ui.showModal('payment-modal', `
             <h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2>
             <div class="space-y-3">
+                 <!-- MOD: Replaced large emojis with text emojis -->
                 <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
                 <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button>
             </div>
@@ -844,10 +1097,12 @@ const ui = {
     },
     
     showItemDetailModal(itemId){
-        const item = app.state.menuData.flatMap(c => c.items).find(i => i.id === itemId); if (!item) return;
+        const item = app.state.allMenuItems.find(i => i.id === itemId); if (!item) return;
         const cartItem = app.state.cart.find(ci => ci.id === itemId);
         const currentQuantity = cartItem ? cartItem.quantity : 1;
         let optionsHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${i + 1 === currentQuantity ? 'selected' : ''}>${i + 1}</option>`).join('');
+        optionsHTML = `<option value="0" ${!cartItem ? 'selected' : ''}>0 (Remove)</option>` + optionsHTML;
+
 
         ui.showModal('item-detail-modal', `
             <div class="flex justify-between items-start">
@@ -855,7 +1110,8 @@ const ui = {
                     <h2 class="text-2xl font-bold text-primary">${item.name}</h2>
                     <p class="text-xl font-semibold text-secondary">₹${item.price}</p>
                 </div>
-                <div class="text-5xl">${item.image_url || '🍴'}</div>
+                 <!-- MOD: Replaced large emoji with text emoji -->
+                <div class="text-5xl">${item.image_url || '☕️'}</div>
             </div>
             <p class="text-secondary mt-2">${item.description || 'A delicious choice.'}</p>
             <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-lg">
@@ -864,7 +1120,7 @@ const ui = {
             </div>
             <div class="mt-6 grid grid-cols-2 gap-4">
                 <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button>
-                <button onclick="app.addOrUpdateCartFromModal(${item.id})" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
+                <button onclick="app.setCartItemQuantity(${item.id}, parseInt($('#modal-quantity-select').value))" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
             </div>`);
     },
 
@@ -1120,3 +1376,4 @@ document.addEventListener('DOMContentLoaded', () => app.init());
 </script>
 </body>
 </html>
+
