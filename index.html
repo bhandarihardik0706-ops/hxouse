@@ -335,73 +335,67 @@ const app = {
         if (!phone || !/^\d{10}$/.test(phone.replace(/\D/g,''))) return ui.showToast("Please enter a valid 10-digit mobile number for loyalty points.");
         const cleanPhone = phone.replace(/\D/g,'');
 
-        let existingCustomer = null;
+        let finalProfileData;
         try {
             const { data: existingByPhone, error: errorByPhone } = await supabase.from('customers').select('*, loyalty_points').eq('whatsapp_number', cleanPhone).maybeSingle();
-            if (existingByPhone) {
-                 existingCustomer = existingByPhone;
-                 if (existingCustomer.id !== this.state.user.id) {
-                      console.log(`Linking user ${this.state.user.id} to existing phone ${cleanPhone}`);
-                      const { error: updateIdError } = await supabase.from('customers')
-                          .update({ id: this.state.user.id, name: name })
-                          .eq('whatsapp_number', cleanPhone);
-                     if (updateIdError) console.warn("Error linking ID:", updateIdError);
-                     else existingCustomer.id = this.state.user.id;
-                 }
-                 if (existingCustomer.name !== name) {
-                      const { error: updateNameError } = await supabase.from('customers')
-                          .update({ name: name })
-                          .eq('whatsapp_number', cleanPhone);
-                     if (updateNameError) console.warn("Error updating name:", updateNameError);
-                     else existingCustomer.name = name;
-                 }
 
+            if (existingByPhone) {
+                 finalProfileData = existingByPhone;
+                 console.log(`Found existing customer by phone: ${finalProfileData.id}`);
+                 if (finalProfileData.name !== name || finalProfileData.id !== this.state.user.id) {
+                    const { error: updateError } = await supabase.from('customers')
+                        .update({ name: name, id: this.state.user.id })
+                        .eq('whatsapp_number', cleanPhone);
+                    if (updateError) {
+                        console.warn("Could not link user ID or update name:", updateError);
+                        finalProfileData.name = name; // Update local copy even if DB fails
+                    } else {
+                        finalProfileData.id = this.state.user.id;
+                        finalProfileData.name = name;
+                    }
+                 }
             } else {
                  const { data: existingById, error: errorById } = await supabase.from('customers').select('*, loyalty_points').eq('id', this.state.user.id).maybeSingle();
                  if (existingById) {
-                      existingCustomer = existingById;
-                      const { error: updateDetailsError } = await supabase.from('customers')
-                          .update({ whatsapp_number: cleanPhone, name: name })
-                          .eq('id', this.state.user.id);
-                      if (updateDetailsError) console.warn("Error updating details:", updateDetailsError);
-                      else {
-                          existingCustomer.whatsapp_number = cleanPhone;
-                          existingCustomer.name = name;
-                      }
-                 }
-            }
-        } catch(e) { console.error("Error checking existing customer:", e); }
-
-        let finalProfileData;
-        if (existingCustomer) {
-            finalProfileData = existingCustomer;
-            console.log("Using existing customer profile:", finalProfileData);
-        } else {
-            console.log("Inserting new customer profile.");
-            const { data, error } = await supabase.from('customers').insert({
-                id: this.state.user.id,
-                name,
-                whatsapp_number: cleanPhone,
-                loyalty_points: 0
-            }).select('*, loyalty_points').single();
-            if (error) {
-                 console.error("Onboarding insert error:", error);
-                 if (error.message.includes('duplicate key value violates unique constraint')) {
-                     ui.showToast('This phone number was just registered. Please try again.');
+                     const { data: updatedData, error: updateDetailsError } = await supabase.from('customers')
+                        .update({ whatsapp_number: cleanPhone, name: name })
+                        .eq('id', this.state.user.id)
+                        .select('*, loyalty_points')
+                        .single();
+                     if (updateDetailsError) throw updateDetailsError;
+                     finalProfileData = updatedData;
+                     console.log(`Updated existing customer ${finalProfileData.id} with phone and name.`);
                  } else {
-                     ui.showToast('Could not save profile. Please try again.');
+                     console.log("Inserting new customer profile.");
+                     const { data: insertedData, error: insertError } = await supabase.from('customers').insert({
+                         id: this.state.user.id,
+                         name,
+                         whatsapp_number: cleanPhone,
+                         loyalty_points: 0
+                     }).select('*, loyalty_points').single();
+                     if (insertError) throw insertError;
+                     finalProfileData = insertedData;
                  }
-                 return;
             }
-            finalProfileData = data;
-        }
 
-        this.state.customerProfile = finalProfileData;
-        this.state.customerProfile.loyalty_points = this.state.customerProfile.loyalty_points || 0;
-        this.state.tableNumber = tableNumber;
-        ui.closeModal('onboarding-modal');
-        this.startSession();
+            this.state.customerProfile = finalProfileData;
+            this.state.customerProfile.loyalty_points = this.state.customerProfile.loyalty_points || 0;
+            this.state.tableNumber = tableNumber;
+            ui.closeModal('onboarding-modal');
+            this.startSession();
+
+        } catch (error) {
+            console.error("Onboarding/Linking Error:", error);
+            if (error.message.includes('duplicate key value violates unique constraint')) {
+                ui.showToast('This phone number might be linked to another session. Please retry.');
+            } else if (error.message.includes('violates row-level security policy for table')) {
+                 ui.showToast('Could not save profile due to security policy. Please contact support.');
+            } else {
+                 ui.showToast(`Could not save profile: ${error.message}`);
+            }
+        }
     },
+
 
     showTableNumberModal() {
         ui.showModal('table-number-modal', `
@@ -453,16 +447,22 @@ const app = {
          if (openModal) {
             ui.closeModal(openModal.id);
             event.preventDefault();
+            // Ensure the hash reflects the current page after closing modal
             history.pushState(null, '', '#' + this.state.currentPage);
             return;
          }
 
+         // If the current hash doesn't match the state (e.g., user used browser back/forward)
          if (PAGES.includes(currentHash) && currentHash !== this.state.currentPage) {
-            this.navigateTo(currentHash, false);
-         } else if (this.state.currentPage !== 'home') {
-             event.preventDefault();
+            this.navigateTo(currentHash, false); // Sync state to the hash
+         }
+         // If on a page other than home, navigate back to home
+         else if (this.state.currentPage !== 'home') {
+             event.preventDefault(); // Prevent default back behavior (like closing app)
              this.navigateTo('home');
          }
+         // If already on home, let the default back behavior happen (or do nothing to prevent closing)
+         // To prevent closing entirely, you might add: else { event.preventDefault(); }
     },
 
     applyTheme(){ document.body.dataset.theme = this.state.theme; },
@@ -486,7 +486,7 @@ const app = {
             }
             if (quantityChange > 0) sound.play('add_to_cart');
         }
-        this.state.pointsToRedeem = 0;
+        this.state.pointsToRedeem = 0; // Reset points on cart change
         this.refreshPage();
     },
 
@@ -508,7 +508,7 @@ const app = {
             sound.play('add_to_cart');
             ui.showToast('Cart updated!');
         }
-        this.state.pointsToRedeem = 0;
+        this.state.pointsToRedeem = 0; // Reset points on quantity change
         ui.closeModal('item-detail-modal');
         this.refreshPage();
     },
@@ -533,23 +533,39 @@ const app = {
             if (menuContainer) menuContainer.classList.remove('hidden');
             if (tabsContainer) tabsContainer.classList.remove('hidden');
             this.state.searchResults = [];
-            this.filterMenuByCategory(this.state.currentMenuCategory);
+            // Go back to the currently selected category when search is cleared
+            this.filterMenuByCategory(this.state.currentMenuCategory, $(`.category-tab[data-category="${this.state.currentMenuCategory}"]`));
          }
     },
 
     calculateCartTotal(){
         const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const finalTotal = subtotal - this.state.pointsToRedeem;
+        // Ensure pointsToRedeem doesn't exceed subtotal or available points
+        const availablePoints = this.state.customerProfile?.loyalty_points || 0;
+        const maxRedeemablePoints = Math.min(Math.floor(availablePoints * 0.8), Math.floor(subtotal));
+        const actualPointsToRedeem = Math.min(this.state.pointsToRedeem, maxRedeemablePoints);
+        const finalTotal = subtotal - actualPointsToRedeem;
+
+        // Update state if clamped
+        if (this.state.pointsToRedeem !== actualPointsToRedeem) {
+            console.log("Clamping points to redeem:", actualPointsToRedeem);
+            this.state.pointsToRedeem = actualPointsToRedeem;
+            // Schedule UI update if needed, but avoid infinite loop
+            // requestAnimationFrame(() => ui.updateCartSummary());
+        }
+
         return { subtotal, finalTotal: Math.max(0, finalTotal) };
     },
 
+
     updatePointsToRedeem(points) {
         this.state.pointsToRedeem = parseInt(points);
-        ui.updateCartSummary();
+        ui.updateCartSummary(); // Re-render cart summary with new discount
     },
 
     refreshPage(){
         ui.refreshCartDependentUI();
+        // Re-render the content of the current page
         if (PAGES.includes(this.state.currentPage)) {
             ui.renderPageContent(this.state.currentPage);
         }
@@ -557,14 +573,18 @@ const app = {
 
     async placeOrder(paymentMethod, btnElement){
         if (this.state.cart.length === 0 || !this.state.tableNumber) return ui.showToast("Cart empty or table missing.");
+        if (!this.state.customerProfile || !this.state.customerProfile.id) {
+            console.error("Critical Error: Customer profile ID is missing.", this.state.customerProfile);
+            return ui.showToast("Error: Your profile is not loaded correctly. Please refresh.");
+        }
 
         btnElement.disabled = true; const originalBtnHTML = btnElement.innerHTML;
         btnElement.innerHTML = `<span class="flex items-center justify-center"><div class="spinner mr-2"></div> Processing...</span>`;
 
-        const { subtotal } = this.calculateCartTotal();
-        const pointsToRedeem = this.state.pointsToRedeem;
-        let discountAmount = 0;
-        let finalTotal = subtotal;
+        // Recalculate just before placing order to ensure points are valid
+        const { subtotal, finalTotal } = this.calculateCartTotal();
+        const pointsToRedeem = this.state.pointsToRedeem; // Use potentially clamped value
+        const discountAmount = pointsToRedeem; // Discount is 1:1 with points redeemed
 
         let orderData;
 
@@ -572,16 +592,16 @@ const app = {
             const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
             if (tableError || !tableData) throw new Error(`Table #${this.state.tableNumber} invalid.`);
 
+            // Check points again right before RPC call for safety
             if (pointsToRedeem > 0) {
-                if (this.state.customerProfile.loyalty_points < pointsToRedeem) {
-                    throw new Error('Insufficient points. Adjusting cart.');
+                const { data: currentProfile, error: profileError } = await supabase.from('customers').select('loyalty_points').eq('id', this.state.customerProfile.id).single();
+                if (profileError || !currentProfile || currentProfile.loyalty_points < pointsToRedeem) {
+                     throw new Error('Insufficient points. Please refresh cart.');
                 }
-                discountAmount = pointsToRedeem;
-                finalTotal = subtotal - discountAmount;
             }
 
             const orderPayload = {
-                customer_id: this.state.user.id,
+                customer_id: this.state.customerProfile.id,
                 table_id: tableData.id,
                 total_amount: subtotal,
                 discount_points_redeemed: pointsToRedeem,
@@ -594,7 +614,7 @@ const app = {
             const { data: insertedOrder, error: orderError } = await supabase.from('orders').insert(orderPayload).select().single();
             if (orderError) {
                 console.error("Order Insert Error:", orderError);
-                throw new Error(`Order placement failed. (Hint: Check RLS policies for 'orders' table)`);
+                throw new Error(`Order placement failed. (Hint: Check RLS policies for 'orders' table. Customer ID: ${this.state.customerProfile.id})`);
             }
             orderData = insertedOrder;
 
@@ -607,45 +627,57 @@ const app = {
             const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
             if (itemsError) {
                 console.error("Order Items Insert Error:", itemsError);
+                // Attempt to delete the failed order header
                 await supabase.from('orders').delete().eq('id', orderData.id);
                 throw new Error(`Order items failed. (Hint: Check RLS policies for 'order_items' table)`);
             }
 
+            // Points transactions *after* successful order and items insert
             try {
                 if (pointsToRedeem > 0) {
-                     const { error: redeemError } = await supabase.rpc('redeem_loyalty_points', { customer_id_input: this.state.user.id, points_to_redeem: pointsToRedeem });
+                     const { error: redeemError } = await supabase.rpc('redeem_loyalty_points', { customer_id_input: this.state.customerProfile.id, points_to_redeem: pointsToRedeem });
                      if (redeemError) throw new Error(`Redeem failed: ${redeemError.message}`);
+                     // Update local state *after* successful RPC
                      this.state.customerProfile.loyalty_points -= pointsToRedeem;
                 }
 
                 const pointsEarned = Math.floor(subtotal / 500) * 50;
                 if (pointsEarned > 0) {
-                     const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.user.id, points_to_add: pointsEarned });
+                     const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.customerProfile.id, points_to_add: pointsEarned });
                      if (incrementError) console.error("Award points failed:", incrementError);
-                     else this.state.customerProfile.loyalty_points += pointsEarned;
+                     else {
+                         // Update local state *after* successful RPC
+                         this.state.customerProfile.loyalty_points += pointsEarned;
+                     }
                 }
             } catch (pointsError) {
+                // Log warning but don't fail the entire order process
                 console.warn("Points transaction failed after order success:", pointsError.message);
                 ui.showToast("Order placed, but points update failed.");
+                // Fetch latest profile to ensure UI consistency eventually
+                await this.fetchCustomerProfile();
             }
 
+            // Success flow
             ui.closeModal('payment-modal');
-            this.state.activeOrder = orderData;
-            this.listenToOrderUpdates(orderData.id);
+            this.state.activeOrder = orderData; // Set active order locally
+            this.listenToOrderUpdates(orderData.id); // Start listening
             this.state.cart = [];
             this.state.pointsToRedeem = 0;
-            this.refreshPage();
+            this.refreshPage(); // Refresh UI (will show tracking page now)
             sound.play('success');
-            this.navigateTo('cart');
+            this.navigateTo('cart'); // Navigate to cart/tracking
 
         } catch (error) {
             console.error("Place Order Failed:", error);
             ui.showToast(`Order failed: ${error.message}`);
-            if (error.message.includes('points')) {
-                await this.fetchCustomerProfile();
-                this.state.pointsToRedeem = 0;
-                this.refreshPage();
+            // If the error was points-related, refresh points display
+            if (error.message.includes('points') || error.message.includes('profile')) {
+                await this.fetchCustomerProfile(); // Get latest points count
+                this.state.pointsToRedeem = 0; // Reset slider
+                this.refreshPage(); // Update cart UI
             }
+            // Reset button state
             btnElement.disabled = false;
             btnElement.innerHTML = originalBtnHTML;
             const otherBtn = [...$$('.payment-btn')].find(b => b !== btnElement);
@@ -655,10 +687,10 @@ const app = {
 
 
     async fetchActiveOrder(){
-        if (!this.state.user) return;
+        if (!this.state.user || !this.state.customerProfile?.id) return;
         const { data, error } = await supabase.from('orders')
             .select(`*, order_items(*, products(name)), feedback_submitted`)
-            .eq('customer_id', this.state.user.id)
+            .eq('customer_id', this.state.customerProfile.id)
             .in('status', ['received', 'preparing'])
             .order('created_at', { ascending: false })
             .limit(1).single();
@@ -681,16 +713,16 @@ const app = {
                 if (!this.state.activeOrder || this.state.activeOrder.id !== payload.new.id) return;
 
                 const updatedOrder = payload.new;
-                let statusChanged = false;
+                let uiNeedsRefresh = false;
 
                 if (updatedOrder.status !== this.state.activeOrder.status) {
                     ui.showToast(`Your order is now: ${updatedOrder.status}`);
                     this.state.activeOrder.status = updatedOrder.status;
-                    statusChanged = true;
+                    uiNeedsRefresh = true;
                 }
                 if ('feedback_submitted' in updatedOrder && updatedOrder.feedback_submitted !== this.state.activeOrder.feedback_submitted) {
                     this.state.activeOrder.feedback_submitted = updatedOrder.feedback_submitted;
-                    statusChanged = true;
+                    uiNeedsRefresh = true;
                 }
 
                 if (['delivered', 'cancelled'].includes(updatedOrder.status)) {
@@ -698,6 +730,7 @@ const app = {
                     this.state.orderSubscription = null;
                     console.log("Order finished, unsubscribed.");
 
+                    // Show feedback modal ONLY if delivered AND feedback not submitted
                     if (updatedOrder.status === 'delivered' && !updatedOrder.feedback_submitted) {
                          ui.showModal('review-modal', `
                             <div class="text-center">
@@ -711,21 +744,28 @@ const app = {
                     } else if (updatedOrder.status === 'cancelled') {
                         ui.showToast('Your order has been cancelled.');
                     }
-                    this.state.activeOrder = null;
-                    statusChanged = true;
+                    this.state.activeOrder = null; // Clear active order
+                    uiNeedsRefresh = true;
                 }
-                if(statusChanged) this.refreshPage();
+                // Refresh UI only if relevant changes occurred
+                if(uiNeedsRefresh && this.state.currentPage === 'cart') {
+                     this.refreshPage();
+                } else if (uiNeedsRefresh && this.state.currentPage === 'home') {
+                    this.refreshPage(); // Refresh home to remove active order banner if needed
+                }
             }).subscribe((status, err) => {
                 if (status === 'SUBSCRIBED') {
                     console.log(`Subscribed to order ${orderId}`);
                 } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
                     console.error(`Subscription failed:`, status, err);
+                    // Optionally attempt to resubscribe or notify user
                 }
             });
     },
 
 
     async submitFeedback(orderId){
+        if (!this.state.customerProfile || !this.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
         const content = $('#feedback-text').value.trim();
         if (!content) return ui.showToast("Please enter your feedback.");
 
@@ -733,61 +773,69 @@ const app = {
         if (submitBtn) submitBtn.disabled = true;
 
         try {
+            // Verify feedback status again right before submitting
             const { data: orderData, error: fetchError } = await supabase.from('orders').select('feedback_submitted').eq('id', orderId).single();
-            if (fetchError || !orderData) throw new Error("Could not verify order.");
+            if (fetchError || !orderData) throw new Error("Could not verify order status.");
             if (orderData.feedback_submitted) {
                 ui.showToast("Feedback already submitted for this order.");
                 ui.closeModal('review-modal');
-                return;
+                return; // Exit if already submitted
             }
 
+            // 1. Insert feedback
             const { error: insertError } = await supabase.from('feedback').insert({
                 order_id: orderId,
-                customer_id: this.state.user.id,
+                customer_id: this.state.customerProfile.id,
                 content: content,
-                rating: 5
+                rating: 5 // Defaulting rating to 5 as there's no UI for it
             });
             if (insertError) throw insertError;
 
+            // 2. Mark order as feedback submitted (best effort)
              const { error: updateError } = await supabase.from('orders')
                  .update({ feedback_submitted: true })
                  .eq('id', orderId);
              if (updateError) console.warn("Could not mark order as feedback submitted:", updateError);
 
-            const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.user.id, points_to_add: 10 });
+            // 3. Award loyalty points
+            const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.customerProfile.id, points_to_add: 10 });
             if (incrementError) {
                 console.error("Feedback points award failed:", incrementError);
                 ui.showToast("Feedback submitted, but points award failed.");
             }
             else {
+                 // Update local state *after* successful RPC
                  this.state.customerProfile.loyalty_points += 10;
                  ui.showToast("Thank you for your feedback! +10 Points added.");
             }
 
+            // Close modal and refresh relevant UI parts
             ui.closeModal('review-modal');
-            this.refreshPage();
+            this.refreshPage(); // This will re-render the current page, updating points display if on 'More' page
+
         } catch (error) {
              console.error("Feedback submission error:", error);
              ui.showToast(`Feedback failed: ${error.message}`);
-             if (submitBtn) submitBtn.disabled = false;
+             if (submitBtn) submitBtn.disabled = false; // Re-enable button on error
         }
     },
 
     async sendStaffCall(callType = 'assistance') {
         if (!this.state.tableNumber) return ui.showToast('Table number not set.');
+        if (!this.state.customerProfile || !this.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
         const { data: tableData } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
         if (!tableData) return ui.showToast('Invalid table number.');
 
         const { error } = await supabase.from('staff_calls').insert({
             table_id: tableData.id,
-            customer_id: this.state.user.id,
+            customer_id: this.state.customerProfile.id,
             call_type: callType
         });
 
         if (error) {
-            ui.showToast(`Error: ${error.message}`);
+            ui.showToast(`Error calling staff: ${error.message}`);
         } else {
-            ui.showToast(`Staff have been notified!`, 5000);
+            ui.showToast(`Staff have been notified! They'll be right over.`, 5000);
         }
     },
 
@@ -814,7 +862,7 @@ const app = {
 
 const ui = {
     showModal(id, content) {
-        location.hash = id;
+        location.hash = id; // Add modal ID to hash
         const existingModal = $(`#${id}`);
         if (existingModal) existingModal.remove();
 
@@ -830,8 +878,15 @@ const ui = {
     closeModal(id) {
         const modal = $(`#${id}`);
         if (modal) modal.remove();
+        // If the current hash is the modal we are closing, go back
         if (location.hash.substring(1) === id) {
-            history.back();
+            // Check history length to avoid issues on initial load
+            if (history.length > 1 && window.performance.navigation.type !== window.performance.navigation.TYPE_RELOAD) {
+                history.back();
+            } else {
+                 // If no history, replace the hash to avoid broken back button
+                 history.replaceState(null, '', location.pathname + location.search + '#' + app.state.currentPage);
+            }
         }
     },
 
@@ -869,7 +924,7 @@ const ui = {
 
     renderPageContent(page) {
         const content = $('#page-content');
-        content.innerHTML = '';
+        content.innerHTML = ''; // Clear previous content
         const renderers = {
             home: this.renderHomePage,
             order: this.renderMenuPage,
@@ -879,8 +934,9 @@ const ui = {
             more: this.renderMorePage,
         };
         content.classList.remove('fade-in');
-        void content.offsetWidth;
+        void content.offsetWidth; // Trigger reflow
         content.classList.add('fade-in');
+        // Call the appropriate render function if it exists
         renderers[page]?.call(this);
     },
 
@@ -930,6 +986,13 @@ const ui = {
     renderHomePage(){
         const settings = app.state.appSettings;
         const activeOrderHTML = app.state.activeOrder ? `<div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center"> <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2> <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p> <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button> </div>` : '';
+        const loyaltyBannerHTML = `
+            <div class="bg-yellow-100 border border-yellow-200 text-yellow-800 p-4 rounded-xl text-center shadow-sm">
+                <h2 class="font-bold text-lg">✨ Earn 10% Back! ✨</h2>
+                <p class="mt-1">Get <strong class="font-semibold">50 Loyalty Points</strong> (worth ₹50) for every ₹500 spent.</p>
+                <p class="text-xs mt-1">Redeem points in your cart! Also check out our Cowork space.</p>
+            </div>`;
+
         const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
         const promoSubtitle = 'Show bill & story at counter.';
         const bestSellerItems = STATIC_DATA.bestSellers.map(id => app.state.allMenuItems.find(item => item.id === id)).filter(Boolean);
@@ -950,8 +1013,9 @@ const ui = {
                     </div>
                 </div>
                 <div class="p-4 space-y-8">
-                    ${activeOrderHTML ? `<div class="mb-6">${activeOrderHTML}</div>` : ''}
-                    <div>
+                    ${loyaltyBannerHTML}
+                    ${activeOrderHTML ? `<div class="mt-8">${activeOrderHTML}</div>` : ''}
+                    <div class="mt-8">
                         <h2 class="text-2xl font-bold text-primary mb-4 px-1">Our Best Sellers</h2>
                         <div class="horizontal-scroll flex space-x-4 overflow-x-auto pb-2">${bestSellersHTML}</div>
                     </div>
@@ -1096,6 +1160,7 @@ const ui = {
         const loyaltyPoints = app.state.customerProfile?.loyalty_points || 0;
         const redeemablePoints = Math.floor(loyaltyPoints * 0.8);
         const maxRedeemableForOrder = Math.min(redeemablePoints, Math.floor(subtotal));
+        // Clamp pointsToRedeem on initial render as well
         app.state.pointsToRedeem = Math.min(app.state.pointsToRedeem, maxRedeemableForOrder);
         const currentDiscount = app.state.pointsToRedeem;
         const finalTotal = subtotal - currentDiscount;
@@ -1108,12 +1173,15 @@ const ui = {
             hamperMessage = `<div class="p-4"><div class="bg-green-100 border border-green-200 text-green-800 p-3 rounded-lg text-center font-bold">🎉 You're eligible for a free hamper! Don't forget to post a story.</div></div>`;
         }
 
+        const loyaltyExplanation = `<p class="text-xs text-secondary mt-1 mb-3">Earn 50 points (worth ₹50) for every ₹500 spent on subtotal. Redeemable points = 80% of balance.</p>`;
+
         let loyaltySectionHTML = '';
         if (loyaltyPoints > 0 && maxRedeemableForOrder > 0) {
             loyaltySectionHTML = `
                 <div class="p-4 border-t border-b border-custom">
                     <h3 class="font-bold text-lg mb-2 text-primary">Redeem Loyalty Points</h3>
                     <p class="text-sm text-secondary mb-1">Available: ${loyaltyPoints} points</p>
+                    ${loyaltyExplanation}
                     <p class="text-sm text-secondary mb-3">Redeemable (max ₹${maxRedeemableForOrder}):</p>
                     <input type="range" id="loyalty-slider" min="0" max="${maxRedeemableForOrder}" value="${app.state.pointsToRedeem}"
                            oninput="app.updatePointsToRedeem(this.value)" class="w-full h-2 rounded-lg cursor-pointer">
@@ -1123,8 +1191,11 @@ const ui = {
                     </div>
                 </div>`;
         } else if (loyaltyPoints > 0) {
-             loyaltySectionHTML = `<div class="p-4 border-t border-b border-custom"><p class="text-sm text-secondary text-center">You have ${loyaltyPoints} points. Earn more/increase order to redeem.</p></div>`;
+             loyaltySectionHTML = `<div class="p-4 border-t border-b border-custom"><p class="text-sm text-secondary text-center">You have ${loyaltyPoints} points. ${loyaltyExplanation} Earn more/increase order total to redeem.</p></div>`;
+        } else {
+             loyaltySectionHTML = `<div class="p-4 border-t border-b border-custom"><p class="text-sm text-secondary text-center">${loyaltyExplanation}</p></div>`;
         }
+
 
         container.innerHTML = `
             <div class="p-4 space-y-3">
@@ -1149,12 +1220,14 @@ const ui = {
                  <div id="cart-summary" class="mb-4 space-y-1 text-primary"></div>
                 <button id="place-order-btn" onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
             </div>`;
-        this.updateCartSummary();
+        this.updateCartSummary(); // Initial render of summary
     },
 
     updateCartSummary() {
+        // Recalculate here as well to ensure consistency
         const { subtotal, finalTotal } = app.calculateCartTotal();
-        const currentDiscount = app.state.pointsToRedeem;
+        const currentDiscount = app.state.pointsToRedeem; // Use the potentially clamped value
+
         const pointsDisplay = $('#points-to-redeem-display');
         const discountDisplay = $('#discount-amount-display');
         if(pointsDisplay) pointsDisplay.textContent = currentDiscount;
@@ -1177,6 +1250,7 @@ const ui = {
                 </div>`;
         }
     },
+
 
     renderOrderTracking(container) {
         const order = app.state.activeOrder;
@@ -1244,10 +1318,13 @@ const ui = {
                         <li>Perfect for students, freelancers & teams</li>
                         <li>Exclusive cafe discounts for members</li>
                     </ul>
-                    <p class="text-primary font-semibold mb-4">Ask our staff at the counter for details on daily passes and monthly memberships!</p>
+                    <p class="text-primary font-semibold mb-4">Interested? Ask our staff!</p>
+                    <button onclick="app.sendStaffCall('cowork_inquiry')" class="w-full mb-4 brand-bg font-semibold py-3 px-6 rounded-lg transition hover:opacity-90">
+                        🛎 Call Staff for Tour & Details
+                    </button>
 
-                    <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="inline-block brand-bg font-semibold py-3 px-6 rounded-lg transition hover:opacity-90">
-                        Follow <span class="instagram-card" style="background: none; -webkit-text-fill-color: inherit; font-weight: bold;">@hxousecoffeeco</span> for updates
+                    <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="inline-block bg-secondary text-primary font-semibold py-3 px-6 rounded-lg transition hover:bg-primary hover:text-secondary">
+                        Follow <span class="instagram-card" style="background: none; -webkit-text-fill-color: inherit; font-weight: bold;">@hxousecoffeeco</span>
                     </a>
                 </div>
             </div>
@@ -1256,9 +1333,10 @@ const ui = {
 
     renderMorePage(){
         const loyaltyPoints = app.state.customerProfile?.loyalty_points ?? 0;
+        const loyaltyExplanation = `<p class="text-xs text-secondary mt-1">Earn 50 pts (₹50) per ₹500 spent. 1 pt = ₹1 discount (redeem in Cart).</p>`;
         const options = [
-            { icon: "🪙", text: `Loyalty Points: ${loyaltyPoints}`, action: "" },
-            { icon: "🛎", text: "Call Staff", action: "app.sendStaffCall()" },
+            { icon: "🪙", text: `Loyalty Points: ${loyaltyPoints}`, action: "", explanation: loyaltyExplanation },
+            { icon: "🛎", text: "Call Staff (General Assistance)", action: "app.sendStaffCall('assistance')" },
             { icon: "🎨", text: "Change Theme", action: "ui.showThemeModal()" },
             { icon: "🎮", text: "Play Games", action: "ui.showGamesModal()" },
             { icon: "📶", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
@@ -1272,8 +1350,9 @@ const ui = {
                            <div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>
                            <span class="text-secondary">&rarr;</span>
                        </button>`
-                    : `<div class="w-full flex items-center bg-secondary p-4 rounded-xl text-left">
-                           <span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span>
+                    : `<div class="w-full bg-secondary p-4 rounded-xl text-left">
+                           <div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>
+                           ${opt.explanation || ''}
                        </div>`
                 ).join("")}
             </div>`;
@@ -1388,7 +1467,8 @@ const ui = {
     },
 
     async showOrderHistoryModal() {
-        const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity), discount_amount, discount_points_redeemed`).eq('customer_id', app.state.user.id).order('created_at', { ascending: false });
+        if (!app.state.customerProfile || !app.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
+        const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity), discount_amount, discount_points_redeemed`).eq('customer_id', app.state.customerProfile.id).order('created_at', { ascending: false });
         const historyHTML = data?.length > 0 ? data.map(o => `
             <div class="bg-secondary p-3 rounded-lg">
                 <div class="flex justify-between">
@@ -1398,7 +1478,7 @@ const ui = {
                     </div>
                     <p class="font-semibold">₹${(o.final_amount ?? o.total_amount).toFixed(2)}</p>
                 </div>
-                <div class="text-sm text-secondary mt-2">${o.order_items.map(i => `${i.products.name} (x${i.quantity})`).join(', ')}</div>
+                <div class="text-sm text-secondary mt-2">${o.order_items.length > 0 ? o.order_items.map(i => `${i.products.name} (x${i.quantity})`).join(', ') : 'No items found'}</div>
                 ${o.discount_amount > 0 ? `<p class="text-xs text-green-600 mt-1">Discount: -₹${o.discount_amount.toFixed(2)} (${o.discount_points_redeemed} points)</p>` : ''}
             </div>`).join('') : '<p class="text-secondary text-center">No past orders found.</p>';
 
@@ -1526,7 +1606,7 @@ const GAMES = {
                     </div>
                     <div class="flex justify-center items-center space-x-2">
                         <button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button>
-                        <button onclick="GS.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button>
+                        <button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button>
                         <button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button>
                     </div>
                     <button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button>
