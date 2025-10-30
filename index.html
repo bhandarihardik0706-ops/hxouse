@@ -249,16 +249,28 @@ const app = {
             // --- START OF FIX ---
             // This map corrects the physically mixed-up QR codes.
             // It maps the "scanned" table number to the "correct" table number.
+            
+            // Your new list:
+            // 1-6  (Scan 6 -> Show 1)
+            // 2-10 (Scan 10 -> Show 2)
+            // 3-1  (Scan 1 -> Show 3)
+            // 4-7  (Scan 7 -> Show 4)
+            // 5-5  (Correct)
+            // 6-4  (Scan 4 -> Show 6)
+            // 7-3  (Scan 3 -> Show 7)
+            // 8-2  (Scan 2 -> Show 8)
+            // 9-9  (Correct)
+            
             const qrCodeFixMap = {
                 // "scanned_table_num": "correct_table_num"
-                "6": 1,  // QR for 6 is on Table 1
-                "7": 4,  // QR for 7 is on Table 4
-                // "1": 10, // QR for 1 is on Table 10 - Ignoring as requested
-                "1": 3,  // QR for 1 is on Table 3
-                "2": 8,  // QR for 2 is on Table 8
-                "4": 6,  // QR for 4 is on Table 6
-                "3": 7   // QR for 3 is on Table 7
-                // Add any other wrong tables here
+                "6": 1,
+                "10": 2,
+                "1": 3,
+                "7": 4,
+                "4": 6,
+                "3": 7,
+                "2": 8
+                // Tables 5 and 9 are correct, so they are not in the map.
             };
     
             // Check if the scanned number is in our fix map
@@ -1778,6 +1790,7 @@ document.addEventListener('DOMContentLoaded', () => app.init());
 </script>
 </body>
 </html>
+
 
 
 
