@@ -119,8 +119,9 @@
         /* New: Fix awkward height by moving inner padding to the inner div */
         /* FIX 3: Adjusted spacing of inner list */
         .accordion-item-list {
-            padding: 1rem; /* p-4 equivalent to match outer page padding */
-            padding-top: 0; /* No padding at the top, since the list is already tight against the header */
+            padding-left: 1rem;
+            padding-right: 1rem;
+            padding-top: 0; /* Already removed in accordion-content, but keeping just in case */
             padding-bottom: 1rem; /* Space after the last item */
             gap: 0.75rem; /* space-y-3 equivalent */
             display: grid; /* Use grid for vertical spacing instead of traditional margins on item divs */
@@ -723,9 +724,8 @@ const app = {
                 // Get the scroll height of the inner content.
                 let contentHeight = innerDiv.scrollHeight; 
                 
-                // FIX 3: Increase buffer size significantly to account for potential fractional height/margin errors.
-                // Using 50px buffer is safer for dynamic content height transitions.
-                const bufferHeight = 50; 
+                // FIX 3: Increase buffer size slightly to 24px (1.5rem) to ensure the entire bottom padding is visible and the content isn't clipped.
+                const bufferHeight = 24; 
                 contentDiv.style.maxHeight = contentHeight + bufferHeight + 'px'; 
                 
                 // Get the main container before scrolling (FIX for TypeError)
