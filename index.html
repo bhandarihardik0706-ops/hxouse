@@ -56,6 +56,9 @@
             /* Use a CSS variable that will be set by JS on toggle */
             max-height: 0;
             opacity: 0;
+            /* FIX 3: Remove default padding from the content wrapper */
+            padding-top: 0;
+            padding-bottom: 0;
         }
         .accordion-content.open {
             opacity: 1;
@@ -114,19 +117,16 @@
             transform: rotate(90deg);
         }
         /* New: Fix awkward height by moving inner padding to the inner div */
-        .accordion-inner-content {
-             padding: 1rem; /* p-4 equivalent */
-             padding-top: 0;
-             padding-bottom: 0.75rem; /* pb-3 equivalent, adds spacing below items but not above */
-             
-        }
-        /* Apply vertical spacing to the items container */
+        /* FIX 3: Adjusted spacing of inner list */
         .accordion-item-list {
-            padding-bottom: 1rem; /* Apply the required padding to the bottom of the list */
-            padding-top: 0;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            
+            padding: 1rem; /* p-4 equivalent to match outer page padding */
+            padding-top: 0; /* No padding at the top, since the list is already tight against the header */
+            padding-bottom: 1rem; /* Space after the last item */
+            gap: 0.75rem; /* space-y-3 equivalent */
+            display: grid; /* Use grid for vertical spacing instead of traditional margins on item divs */
+        }
+        .accordion-item-list > div {
+             margin-bottom: 0 !important; /* Ensure Tailwind space-y doesn't double apply margin */
         }
 
     </style>
@@ -569,7 +569,7 @@ const app = {
          if (pushToHistory && location.hash.substring(1) !== page) {
             location.hash = page;
          } else if (!pushToHistory && location.hash.substring(1) !== page) {
-            history.replaceState(null, '', '#' + page);
+            history.replaceState(null, '', location.pathname + location.search + '#' + page);
          }
          this.state.currentPage = page;
          ui.renderHeader(page);
@@ -700,9 +700,21 @@ const app = {
             setTimeout(() => {
                 // FIX: Look for the inner list container, which holds the actual items
                 const innerDiv = contentDiv.querySelector('.accordion-item-list');
-                // Set max-height to inner content height + the 1rem (16px) bottom padding applied to the list
-                // We add a little extra buffer (48px) just in case, but rely mostly on scrollHeight
-                contentDiv.style.maxHeight = innerDiv.scrollHeight + 48 + 'px';
+                
+                // Get the scroll height of the inner content.
+                let contentHeight = innerDiv.scrollHeight; 
+                
+                // FIX: If the content is just the "No items found" message, we need to adjust
+                if (innerDiv.children.length === 1 && innerDiv.children[0].tagName === 'P') {
+                    // Adjust if it's the "No items found" message. 
+                    // This is less critical but good practice for empty categories.
+                    // Keep the current calculation relying on scrollHeight + buffer for simplicity 
+                    // unless a better solution is needed for a single non-item element.
+                }
+
+                // Set max-height to inner content height + a small buffer (16px) to avoid clipping.
+                // The main padding is now handled by .accordion-item-list itself.
+                contentDiv.style.maxHeight = contentHeight + 16 + 'px'; 
                 
                 // Optional: Scroll the main page content to the newly opened section
                 contentDiv.closest('main').scrollTo({
@@ -1273,7 +1285,7 @@ const ui = {
                     contentDiv.classList.add('open');
                     const innerDiv = contentDiv.querySelector('.accordion-item-list');
                     // Ensure the inner div is measured after rendering
-                    contentDiv.style.maxHeight = innerDiv.scrollHeight + 48 + 'px'; // +48 buffer
+                    contentDiv.style.maxHeight = innerDiv.scrollHeight + 16 + 'px'; // +16 buffer (1rem)
                  }
              }
         }
@@ -1309,8 +1321,8 @@ const ui = {
                 
                 <!-- Items Content (Collapsible) -->
                 <div id="items-for-${group.category.replace(/\s/g, '-')}" class="accordion-content ${openClass}" style="max-height: ${initialMaxHeight};">
-                    <!-- FIX: Removed outer p-4, added new class accordion-item-list -->
-                    <div class="accordion-item-list space-y-3"> 
+                    <!-- FIX: Using grid/gap for spacing which removes the trailing margin on the last item -->
+                    <div class="accordion-item-list"> 
                         ${group.items.length > 0 ? group.items.map(item => this.renderMenuItemCard(item)).join('') : '<p class="text-secondary text-center py-4">No items available in this category.</p>'}
                     </div>
                 </div>
