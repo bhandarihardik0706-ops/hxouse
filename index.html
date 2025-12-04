@@ -686,13 +686,12 @@ const app = {
     // Modified function to handle category expansion/collapse
     toggleCategory(categoryName) {
         sound.play('click');
-        // FIX: Use the new sanitizeId function to safely query the element
+        // FIX 1: Ensure safe ID usage
         const id = sanitizeId(categoryName);
         const contentDiv = $(`#items-for-${id}`);
 
         if (!contentDiv) {
             console.error(`Could not find content div for category: ${categoryName} (ID: #items-for-${id})`);
-            // Attempt to re-render the menu page which should recreate the missing IDs
             ui.renderMenuPage(); 
             return;
         }
@@ -705,7 +704,7 @@ const app = {
         } else {
             // Close previous, open new
             if (this.state.expandedCategory) {
-                // FIX: Use sanitizeId when looking up previous expanded category
+                // FIX 1: Ensure safe ID usage
                 const prevId = sanitizeId(this.state.expandedCategory);
                 const prevContent = $(`#items-for-${prevId}`);
                 if (prevContent) {
@@ -716,26 +715,29 @@ const app = {
 
             // Open new
             contentDiv.classList.add('open');
-            // Set max-height dynamically after content is visible
-            // We use a slight delay and scroll after the height is set
+            
             setTimeout(() => {
-                // FIX: Look for the inner list container, which holds the actual items
+                // FIX 2: Look for the inner list container, which holds the actual items
                 const innerDiv = contentDiv.querySelector('.accordion-item-list');
                 
                 // Get the scroll height of the inner content.
                 let contentHeight = innerDiv.scrollHeight; 
                 
-                // Set max-height to inner content height + a small buffer (16px) to avoid clipping.
-                // The main padding is now handled by .accordion-item-list itself.
-                contentDiv.style.maxHeight = contentHeight + 16 + 'px'; 
+                // FIX 3: Increase buffer size significantly to account for potential fractional height/margin errors.
+                // Using 50px buffer is safer for dynamic content height transitions.
+                const bufferHeight = 50; 
+                contentDiv.style.maxHeight = contentHeight + bufferHeight + 'px'; 
                 
                 // Get the main container before scrolling (FIX for TypeError)
                 const mainContainer = contentDiv.closest('main');
 
+                // FIX 4: Check if header element exists before getting offsetHeight
+                const headerHeight = $('#page-header') ? $('#page-header').offsetHeight : 0;
+                
                 if (mainContainer) {
                     // Optional: Scroll the main page content to the newly opened section
                     mainContainer.scrollTo({
-                        top: contentDiv.parentElement.offsetTop - $('#page-header').offsetHeight,
+                        top: contentDiv.parentElement.offsetTop - headerHeight,
                         behavior: 'smooth'
                     });
                 }
