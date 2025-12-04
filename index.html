@@ -206,6 +206,16 @@ const sound = {
     }
 };
 
+// Utility function to sanitize category names for use in HTML IDs/Selectors
+const sanitizeId = (categoryName) => {
+    // 1. Replace invalid characters (like /, spaces, parentheses) with a hyphen
+    // 2. Remove any hyphens at the start or end
+    return categoryName.toUpperCase()
+        .replace(/[^A-Z0-9-]/g, '-') // Replace non-alphanumeric/hyphen chars with dash
+        .replace(/-+/g, '-')          // Collapse multiple dashes
+        .replace(/^-|-$/g, '');       // Trim leading/trailing dashes
+}
+
 const app = {
     state: {
         currentPage: 'home',
@@ -676,7 +686,16 @@ const app = {
     // Modified function to handle category expansion/collapse
     toggleCategory(categoryName) {
         sound.play('click');
-        const contentDiv = $(`#items-for-${categoryName.replace(/\s/g, '-')}`);
+        // FIX: Use the new sanitizeId function to safely query the element
+        const id = sanitizeId(categoryName);
+        const contentDiv = $(`#items-for-${id}`);
+
+        if (!contentDiv) {
+            console.error(`Could not find content div for category: ${categoryName} (ID: #items-for-${id})`);
+            // Attempt to re-render the menu page which should recreate the missing IDs
+            ui.renderMenuPage(); 
+            return;
+        }
 
         if (this.state.expandedCategory === categoryName) {
             // Close
@@ -686,7 +705,9 @@ const app = {
         } else {
             // Close previous, open new
             if (this.state.expandedCategory) {
-                const prevContent = $(`#items-for-${this.state.expandedCategory.replace(/\s/g, '-')}`);
+                // FIX: Use sanitizeId when looking up previous expanded category
+                const prevId = sanitizeId(this.state.expandedCategory);
+                const prevContent = $(`#items-for-${prevId}`);
                 if (prevContent) {
                     prevContent.style.maxHeight = '0';
                     prevContent.classList.remove('open');
@@ -704,14 +725,6 @@ const app = {
                 // Get the scroll height of the inner content.
                 let contentHeight = innerDiv.scrollHeight; 
                 
-                // FIX: If the content is just the "No items found" message, we need to adjust
-                if (innerDiv.children.length === 1 && innerDiv.children[0].tagName === 'P') {
-                    // Adjust if it's the "No items found" message. 
-                    // This is less critical but good practice for empty categories.
-                    // Keep the current calculation relying on scrollHeight + buffer for simplicity 
-                    // unless a better solution is needed for a single non-item element.
-                }
-
                 // Set max-height to inner content height + a small buffer (16px) to avoid clipping.
                 // The main padding is now handled by .accordion-item-list itself.
                 contentDiv.style.maxHeight = contentHeight + 16 + 'px'; 
@@ -1280,7 +1293,9 @@ const ui = {
              // After initial render, call this to set the correct max-height for the initial open category
              const initialCategory = app.state.expandedCategory;
              if (initialCategory) {
-                 const contentDiv = $(`#items-for-${initialCategory.replace(/\s/g, '-')}`);
+                 // FIX: Use sanitizeId here as well
+                 const id = sanitizeId(initialCategory);
+                 const contentDiv = $(`#items-for-${id}`);
                  if (contentDiv) {
                     contentDiv.classList.add('open');
                     const innerDiv = contentDiv.querySelector('.accordion-item-list');
@@ -1309,6 +1324,9 @@ const ui = {
         const openClass = isExpanded ? 'open' : '';
         const rotateClass = isExpanded ? 'rotate-90' : 'rotate-0';
         
+        // FIX: Use sanitizeId when creating the ID
+        const categoryId = sanitizeId(group.category);
+
         return `
             <div class="bg-secondary rounded-xl shadow-sm overflow-hidden border border-custom">
                 <!-- Category Header (Clickable) -->
@@ -1320,7 +1338,7 @@ const ui = {
                 </button>
                 
                 <!-- Items Content (Collapsible) -->
-                <div id="items-for-${group.category.replace(/\s/g, '-')}" class="accordion-content ${openClass}" style="max-height: ${initialMaxHeight};">
+                <div id="items-for-${categoryId}" class="accordion-content ${openClass}" style="max-height: ${initialMaxHeight};">
                     <!-- FIX: Using grid/gap for spacing which removes the trailing margin on the last item -->
                     <div class="accordion-item-list"> 
                         ${group.items.length > 0 ? group.items.map(item => this.renderMenuItemCard(item)).join('') : '<p class="text-secondary text-center py-4">No items available in this category.</p>'}
