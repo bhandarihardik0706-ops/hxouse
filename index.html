@@ -49,8 +49,21 @@
         #splash-screen img { animation: pulse 2s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        .horizontal-scroll::-webkit-scrollbar { display: none; }
-        .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        /* MODIFIED: Custom height transition class for smooth accordion */
+        .accordion-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            overflow: hidden;
+            /* Use a CSS variable that will be set by JS on toggle */
+            max-height: 0;
+            opacity: 0;
+            /* FIX 3: Remove default padding from the content wrapper */
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .accordion-content.open {
+            opacity: 1;
+        }
+
 
         .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
         .tracker-line-container { position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background-color: var(--border-color); border-radius: 2px; }
@@ -95,6 +108,27 @@
         #loyalty-slider:hover { opacity: 1; }
         #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--brand-primary); cursor: pointer; border-radius: 50%; }
         #loyalty-slider::-moz-range-thumb { width: 20px; height: 20px; background: var(--brand-primary); cursor: pointer; border-radius: 50%; border: none; }
+
+        /* Custom CSS for Accordion Arrow Transition */
+        .accordion-arrow {
+            transition: transform 0.3s ease;
+        }
+        .rotate-90 {
+            transform: rotate(90deg);
+        }
+        /* New: Fix awkward height by moving inner padding to the inner div */
+        /* FIX 3: Adjusted spacing of inner list */
+        .accordion-item-list {
+            padding: 1rem; /* p-4 equivalent to match outer page padding */
+            padding-top: 0; /* No padding at the top, since the list is already tight against the header */
+            padding-bottom: 1rem; /* Space after the last item */
+            gap: 0.75rem; /* space-y-3 equivalent */
+            display: grid; /* Use grid for vertical spacing instead of traditional margins on item divs */
+        }
+        .accordion-item-list > div {
+             margin-bottom: 0 !important; /* Ensure Tailwind space-y doesn't double apply margin */
+        }
+
     </style>
 </head>
 <body data-theme="matcha">
@@ -181,11 +215,13 @@ const app = {
         user: null,
         customerProfile: null,
         theme: 'matcha',
-        menuData: [],
-        allMenuItems: [],
+        menuData: [], // Grouped menu by category
+        allMenuItems: [], // Flat list of all available items
         appSettings: {},
         orderSubscription: null,
-        currentMenuCategory: null,
+        // REMOVED: currentMenuCategory - not needed for accordion view
+        // New state for accordion menu
+        expandedCategory: null, // Tracks which category accordion is open
         searchQuery: '',
         searchResults: [],
         pointsToRedeem: 0,
@@ -223,6 +259,11 @@ const app = {
             await this.fetchCustomerProfile();
             await Promise.all([ this.fetchMenuData(), this.fetchAppSettings() ]);
 
+            // Set the first category as expanded by default on load
+            if (this.state.menuData.length > 0) {
+                this.state.expandedCategory = this.state.menuData[0].category;
+            }
+
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             $('#app').classList.add('flex');
@@ -248,18 +289,6 @@ const app = {
         if (scannedTableNum && !isNaN(parseInt(scannedTableNum))) {
             // --- START OF FIX ---
             // This map corrects the physically mixed-up QR codes.
-            // It maps the "scanned" table number to the "correct" table number.
-            
-            // Your new list:
-            // 1-6  (Scan 6 -> Show 1)
-            // 2-10 (Scan 10 -> Show 2)
-            // 3-1  (Scan 1 -> Show 3)
-            // 4-7  (Scan 7 -> Show 4)
-            // 5-5  (Correct)
-            // 6-4  (Scan 4 -> Show 6)
-            // 7-3  (Scan 3 -> Show 7)
-            // 8-2  (Scan 2 -> Show 8)
-            // 9-9  (Correct)
             
             const qrCodeFixMap = {
                 // "scanned_table_num": "correct_table_num"
@@ -275,8 +304,6 @@ const app = {
     
             // Check if the scanned number is in our fix map
             const correctTableNum = qrCodeFixMap[scannedTableNum] || scannedTableNum;
-            // If it is, use the "correct" number from the map.
-            // If not, use the "scanned" number as-is (assuming it's correct).
             
             this.state.tableNumber = parseInt(correctTableNum);
             // --- END OF FIX ---
@@ -313,41 +340,19 @@ const app = {
 
             this.state.allMenuItems = data.filter(i => i.is_available);
 
-            // FIX START: Use an ordered structure for categories instead of relying on reduce order
-            // This ensures categories like "HOT COFFEE W/O MILK" and "HOT COFFEE WITH MILK" appear in sequence
-            const categoryOrder = [
-                'HOT COFFEE W/O MILK', 'HOT COFFEE WITH MILK', 'HOT TEA', 'ICED TEA', 
-                'COLD COFFEE', 'ICED COFFEE', 'SHAKES', 'MOCKTAILS',
-                'SOUP', 'SALAD', 'ITALIAN BREADS', 'BURGER', 
-                'SNACKS', 'WRAPS', 'PIZZA', 'MINI PLATES', 
-                'PASTA', 'MOMO', 'SANDWICH', 'HEALTHY BOWLS', 
-                'ASIAN', 'FRIES & LOTS', 'MAGGIE'
-            ];
-
-            const groupedMenuMap = new Map();
-            
-            // 1. Initialize map with desired order and structure
-            categoryOrder.forEach(category => {
-                groupedMenuMap.set(category, { category: category, items: [] });
-            });
-
-            // 2. Populate items
-            this.state.allMenuItems.forEach(item => {
-                if (groupedMenuMap.has(item.category)) {
-                    groupedMenuMap.get(item.category).items.push(item);
-                } else {
-                    // Handle unexpected categories if any, though the SQL should prevent this
-                    console.warn(`Item found with unexpected category: ${item.category}`);
-                    if (!groupedMenuMap.has(item.category)) {
-                         groupedMenuMap.set(item.category, { category: item.category, items: [] });
-                    }
-                    groupedMenuMap.get(item.category).items.push(item);
+            // Grouping logic remains the same
+            const groupedMenu = data.reduce((acc, item) => {
+                if (!item.is_available) return acc;
+                let category = acc.find(c => c.category === item.category);
+                if (!category) {
+                    category = { category: item.category, items: [] };
+                    acc.push(category);
                 }
-            });
+                category.items.push(item);
+                return acc;
+            }, []);
 
-            // 3. Convert map values to an array, filtering out empty categories from the fixed list
-            this.state.menuData = Array.from(groupedMenuMap.values()).filter(group => group.items.length > 0);
-            // FIX END
+            this.state.menuData = groupedMenu;
 
         } catch (error) {
             console.error('Error fetching menu data:', error);
@@ -424,8 +429,6 @@ const app = {
 
             if (existingByPhone) {
                 // CONFLICT: This phone number is already linked to a *different* profile.
-                // This is the most likely cause of a "duplicate key" error if we tried to link them.
-                // We will stop and inform the user.
                 
                 // --- MODIFICATION: Added console.error for clarity ---
                 const errorMsg = "Phone number conflict. This phone is already linked to another account.";
@@ -566,7 +569,7 @@ const app = {
          if (pushToHistory && location.hash.substring(1) !== page) {
             location.hash = page;
          } else if (!pushToHistory && location.hash.substring(1) !== page) {
-            history.replaceState(null, '', '#' + page);
+            history.replaceState(null, '', location.pathname + location.search + '#' + page);
          }
          this.state.currentPage = page;
          ui.renderHeader(page);
@@ -649,14 +652,12 @@ const app = {
 
     performSearch(query) {
          const searchContainer = $('#search-results-container');
-         const menuContainer = $('#menu-items');
-         const tabsContainer = $('#category-tabs-container');
+         const menuSections = $('#menu-sections');
          this.state.searchQuery = query.toLowerCase();
 
          if (this.state.searchQuery.length > 1) {
             if (searchContainer) searchContainer.classList.remove('hidden');
-            if (menuContainer) menuContainer.classList.add('hidden');
-            if (tabsContainer) tabsContainer.classList.add('hidden');
+            if (menuSections) menuSections.classList.add('hidden');
             this.state.searchResults = this.state.allMenuItems.filter(item =>
                 item.name.toLowerCase().includes(this.state.searchQuery) ||
                 (item.description && item.description.toLowerCase().includes(this.state.searchQuery))
@@ -664,13 +665,69 @@ const app = {
             ui.renderMenuItems(this.state.searchResults, 'search-results-container');
          } else {
             if (searchContainer) searchContainer.classList.add('hidden');
-            if (menuContainer) menuContainer.classList.remove('hidden');
-            if (tabsContainer) tabsContainer.classList.remove('hidden');
+            if (menuSections) menuSections.classList.remove('hidden');
             this.state.searchResults = [];
-            // Go back to the currently selected category when search is cleared
-            this.filterMenuByCategory(this.state.currentMenuCategory, $(`.category-tab[data-category="${this.state.currentMenuCategory}"]`));
+            // When search is cleared, we naturally go back to the accordion view
+            // No need to explicitly filter, as the accordion view is always rendered
+            ui.renderMenuPageContent(); // Re-render the accordion view
          }
     },
+
+    // Modified function to handle category expansion/collapse
+    toggleCategory(categoryName) {
+        sound.play('click');
+        const contentDiv = $(`#items-for-${categoryName.replace(/\s/g, '-')}`);
+
+        if (this.state.expandedCategory === categoryName) {
+            // Close
+            contentDiv.style.maxHeight = '0';
+            contentDiv.classList.remove('open');
+            this.state.expandedCategory = null;
+        } else {
+            // Close previous, open new
+            if (this.state.expandedCategory) {
+                const prevContent = $(`#items-for-${this.state.expandedCategory.replace(/\s/g, '-')}`);
+                if (prevContent) {
+                    prevContent.style.maxHeight = '0';
+                    prevContent.classList.remove('open');
+                }
+            }
+
+            // Open new
+            contentDiv.classList.add('open');
+            // Set max-height dynamically after content is visible
+            // We use a slight delay and scroll after the height is set
+            setTimeout(() => {
+                // FIX: Look for the inner list container, which holds the actual items
+                const innerDiv = contentDiv.querySelector('.accordion-item-list');
+                
+                // Get the scroll height of the inner content.
+                let contentHeight = innerDiv.scrollHeight; 
+                
+                // FIX: If the content is just the "No items found" message, we need to adjust
+                if (innerDiv.children.length === 1 && innerDiv.children[0].tagName === 'P') {
+                    // Adjust if it's the "No items found" message. 
+                    // This is less critical but good practice for empty categories.
+                    // Keep the current calculation relying on scrollHeight + buffer for simplicity 
+                    // unless a better solution is needed for a single non-item element.
+                }
+
+                // Set max-height to inner content height + a small buffer (16px) to avoid clipping.
+                // The main padding is now handled by .accordion-item-list itself.
+                contentDiv.style.maxHeight = contentHeight + 16 + 'px'; 
+                
+                // Optional: Scroll the main page content to the newly opened section
+                contentDiv.closest('main').scrollTo({
+                    top: contentDiv.parentElement.offsetTop - $('#page-header').offsetHeight,
+                    behavior: 'smooth'
+                });
+            }, 50); // Small delay to allow element height calculation
+
+            this.state.expandedCategory = categoryName;
+        }
+        ui.renderMenuPageContent(); // Re-render to update arrow icon (visual consistency)
+    },
+
 
     calculateCartTotal(){
         const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
@@ -802,7 +859,7 @@ const app = {
                      if (incrementError) console.error("Award points failed:", incrementError);
                      else {
                          // Update local state *after* successful RPC
-                         this.state.customerProfile.loyalty_points += pointsEarned;
+                         this.state.customerProfile.loyalty_points += 50;
                      }
                 }
             } catch (pointsError) {
@@ -1172,10 +1229,10 @@ const ui = {
                     ${activeOrderHTML ? `<div class="mt-8">${activeOrderHTML}</div>` : ''}
                     <div class="mt-8">
                         <h2 class="text-2xl font-bold text-primary mb-4 px-1">Our Best Sellers</h2>
-                        <div class="horizontal-scroll flex space-x-4 overflow-x-auto pb-2">${bestSellersHTML}</div>
+                        <div class="flex space-x-4 overflow-x-auto pb-2">${bestSellersHTML}</div>
                     </div>
                     <button onclick="app.navigateTo('order')" class="w-full brand-bg font-semibold py-4 px-6 rounded-lg text-lg"> View Full Menu </button>
-                    <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm">
+                    <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left">
                         <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
                         <p class="mt-1 text-secondary">${promoSubtitle}</p>
                         <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Learn More &rarr;</button>
@@ -1194,27 +1251,16 @@ const ui = {
             return;
         }
 
-        // FIX START: Initialize or validate currentMenuCategory against actual fetched data
-        if (!app.state.currentMenuCategory || !app.state.menuData.some(c => c.category === app.state.currentMenuCategory)) {
-            app.state.currentMenuCategory = app.state.menuData[0]?.category || 'All Items';
-        }
-        
-        const allCategories = [{ category: 'All Items' }, ...app.state.menuData];
-
         content.innerHTML = `
             <div id="active-order-banner" class="p-4 hidden"></div>
             <div class="p-4">
                 <input type="text" id="menu-search-input" placeholder="Search menu..." class="w-full p-3 border-2 border-custom rounded-lg bg-secondary text-primary text-lg" oninput="app.performSearch(this.value)" value="${app.state.searchQuery}">
             </div>
-            <div id="category-tabs-container" class="horizontal-scroll sticky top-16 bg-primary z-10 flex space-x-4 px-4 pb-3 overflow-x-auto border-b border-custom">
-                ${allCategories.map(c => `
-                    <button class="category-tab whitespace-nowrap font-semibold py-2 px-1 ${app.state.currentMenuCategory === c.category ? 'brand-text border-b-2 border-current' : 'text-secondary'}"
-                            data-category="${c.category}"
-                            onclick="ui.filterMenuByCategory('${c.category}', this)">
-                        ${c.category}
-                    </button>`).join('')}
+            
+            <div id="menu-sections" class="p-4 space-y-3">
+                ${this.renderMenuPageContent()}
             </div>
-            <div id="menu-items" class="p-4 grid grid-cols-1 gap-4"></div>
+
             <div id="search-results-container" class="p-4 grid grid-cols-1 gap-4 hidden"></div>`;
 
         if (app.state.activeOrder) {
@@ -1226,46 +1272,92 @@ const ui = {
                     <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
                 </div>`;
         }
-
+        
+        // If there's an active search query, display search results
         if (app.state.searchQuery.length > 1) {
             app.performSearch(app.state.searchQuery);
         } else {
-            // FIX START: Ensure we select the button corresponding to the currentMenuCategory state
-            const initialCategory = app.state.currentMenuCategory;
-            const initialTab = $(`.category-tab[data-category="${initialCategory}"]`);
-            this.filterMenuByCategory(initialCategory, initialTab);
-            // FIX END
+             // After initial render, call this to set the correct max-height for the initial open category
+             const initialCategory = app.state.expandedCategory;
+             if (initialCategory) {
+                 const contentDiv = $(`#items-for-${initialCategory.replace(/\s/g, '-')}`);
+                 if (contentDiv) {
+                    contentDiv.classList.add('open');
+                    const innerDiv = contentDiv.querySelector('.accordion-item-list');
+                    // Ensure the inner div is measured after rendering
+                    contentDiv.style.maxHeight = innerDiv.scrollHeight + 16 + 'px'; // +16 buffer (1rem)
+                 }
+             }
         }
     },
 
-    filterMenuByCategory(category, tabElement) {
-        app.state.currentMenuCategory = category;
-        app.state.searchQuery = '';
-        const searchInput = $('#menu-search-input');
-        if (searchInput) searchInput.value = '';
+    // NEW FUNCTION: Renders the vertical accordion menu
+    renderMenuPageContent() {
+        const menuSections = $('#menu-sections');
+        const contentHTML = app.state.menuData.map(group => this.renderCategorySection(group)).join('');
+        if (!menuSections) return contentHTML;
+        
+        menuSections.innerHTML = contentHTML;
+    },
+    
+    // NEW FUNCTION: Renders a single expandable category section
+    renderCategorySection(group) {
+        const isExpanded = app.state.expandedCategory === group.category;
+        
+        // Initial max-height calculation for rendering purposes, actual transition logic is in app.toggleCategory
+        const initialMaxHeight = isExpanded ? '500px' : '0'; // Use a large buffer initially if expanded
+        const openClass = isExpanded ? 'open' : '';
+        const rotateClass = isExpanded ? 'rotate-90' : 'rotate-0';
+        
+        return `
+            <div class="bg-secondary rounded-xl shadow-sm overflow-hidden border border-custom">
+                <!-- Category Header (Clickable) -->
+                <button onclick="app.toggleCategory('${group.category}')" class="w-full flex items-center justify-between p-4 focus:outline-none">
+                    <h2 class="text-xl font-bold text-primary">${group.category}</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="accordion-arrow h-6 w-6 text-brand-primary ${rotateClass}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                
+                <!-- Items Content (Collapsible) -->
+                <div id="items-for-${group.category.replace(/\s/g, '-')}" class="accordion-content ${openClass}" style="max-height: ${initialMaxHeight};">
+                    <!-- FIX: Using grid/gap for spacing which removes the trailing margin on the last item -->
+                    <div class="accordion-item-list"> 
+                        ${group.items.length > 0 ? group.items.map(item => this.renderMenuItemCard(item)).join('') : '<p class="text-secondary text-center py-4">No items available in this category.</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    
+    // RENAMED/MODIFIED FUNCTION: Renders a single menu item card (for use in both accordion and search results)
+    renderMenuItemCard(item) {
+        const cartItem = app.state.cart.find(ci => ci.id === item.id);
+        const actionButtonHTML = cartItem
+            ? `<div class="quantity-control" onclick="event.stopPropagation();">
+                   <button onclick="app.addOrUpdateCart(${item.id}, -1)">-</button>
+                   <span>${cartItem.quantity}</span>
+                   <button onclick="app.addOrUpdateCart(${item.id}, 1)">+</button>
+               </div>`
+            : `<button class="add-to-cart-btn" onclick="event.stopPropagation(); app.addOrUpdateCart(${item.id}, 1)">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+               </button>`; // Added plus icon for aesthetics
 
-        $('#search-results-container')?.classList.add('hidden');
-        $('#menu-items')?.classList.remove('hidden');
-        $('#category-tabs-container')?.classList.remove('hidden');
-
-        if (tabElement) {
-            $$('.category-tab').forEach(tab => {
-                tab.classList.remove('brand-text', 'border-b-2', 'border-current');
-                tab.classList.add('text-secondary');
-            });
-            tabElement.classList.add('brand-text', 'border-b-2', 'border-current');
-        }
-
-        let itemsToShow = [];
-        if (category === 'All Items') {
-            itemsToShow = app.state.allMenuItems;
-        } else {
-            const data = app.state.menuData.find(d => d.category === category);
-            itemsToShow = data ? data.items : [];
-        }
-        this.renderMenuItems(itemsToShow, 'menu-items');
+        return `
+            <div class="bg-primary rounded-lg shadow-md overflow-hidden cursor-pointer border border-custom" onclick="ui.showItemDetailModal(${item.id})">
+                <div class="p-3 flex items-center justify-between">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-base truncate text-primary">${item.name}</h3>
+                        <p class="font-bold text-sm text-secondary mt-1">₹${item.price}</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        ${actionButtonHTML}
+                    </div>
+                </div>
+            </div>`;
     },
 
+    // ORIGINAL FUNCTION: Renders search results
     renderMenuItems(items, containerId) {
         const container = $(`#${containerId}`);
         if (!container) return;
@@ -1273,31 +1365,8 @@ const ui = {
             container.innerHTML = `<p class="text-secondary text-center col-span-full mt-8">No items found.</p>`;
             return;
         }
-        container.innerHTML = items.map(item => {
-            const cartItem = app.state.cart.find(ci => ci.id === item.id);
-            const actionButtonHTML = cartItem
-                ? `<div class="quantity-control" onclick="event.stopPropagation();">
-                       <button onclick="app.addOrUpdateCart(${item.id}, -1)">-</button>
-                       <span>${cartItem.quantity}</span>
-                       <button onclick="app.addOrUpdateCart(${item.id}, 1)">+</button>
-                   </div>`
-                : `<button class="add-to-cart-btn" onclick="event.stopPropagation(); app.addOrUpdateCart(${item.id}, 1)">
-                       +
-                   </button>`;
-
-            return `
-                <div class="bg-secondary rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="ui.showItemDetailModal(${item.id})">
-                    <div class="p-3 flex items-center justify-between">
-                        <div class="flex-1 pr-4">
-                            <h3 class="font-semibold text-base truncate text-primary">${item.name}</h3>
-                            <p class="font-bold text-sm text-secondary mt-1">₹${item.price}</p>
-                        </div>
-                        <div class="flex-shrink-0">
-                            ${actionButtonHTML}
-                        </div>
-                    </div>
-                </div>`;
-        }).join('');
+        // Use the new single card renderer
+        container.innerHTML = items.map(item => this.renderMenuItemCard(item)).join('');
     },
 
     renderCartPage() {
@@ -1627,7 +1696,7 @@ const ui = {
     },
 
     async showOrderHistoryModal() {
-        if (!this.state.customerProfile || !this.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
+        if (!app.state.customerProfile || !app.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
         const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity), discount_amount, discount_points_redeemed`).eq('customer_id', app.state.customerProfile.id).order('created_at', { ascending: false });
         const historyHTML = data?.length > 0 ? data.map(o => `
             <div class="bg-secondary p-3 rounded-lg">
