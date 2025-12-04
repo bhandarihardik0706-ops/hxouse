@@ -729,11 +729,16 @@ const app = {
                 // The main padding is now handled by .accordion-item-list itself.
                 contentDiv.style.maxHeight = contentHeight + 16 + 'px'; 
                 
-                // Optional: Scroll the main page content to the newly opened section
-                contentDiv.closest('main').scrollTo({
-                    top: contentDiv.parentElement.offsetTop - $('#page-header').offsetHeight,
-                    behavior: 'smooth'
-                });
+                // Get the main container before scrolling (FIX for TypeError)
+                const mainContainer = contentDiv.closest('main');
+
+                if (mainContainer) {
+                    // Optional: Scroll the main page content to the newly opened section
+                    mainContainer.scrollTo({
+                        top: contentDiv.parentElement.offsetTop - $('#page-header').offsetHeight,
+                        behavior: 'smooth'
+                    });
+                }
             }, 50); // Small delay to allow element height calculation
 
             this.state.expandedCategory = categoryName;
@@ -861,7 +866,7 @@ const app = {
             try {
                 if (pointsToRedeem > 0) {
                      const { error: redeemError } = await supabase.rpc('redeem_loyalty_points', { customer_id_input: this.state.customerProfile.id, points_to_redeem: pointsToRedeem });
-                     if (redeemError) throw new Error(`Redeem failed: ${redeemError.message}`);
+                     if (redeeemError) throw new Error(`Redeem failed: ${redeemError.message}`);
                      // Update local state *after* successful RPC
                      this.state.customerProfile.loyalty_points -= pointsToRedeem;
                 }
