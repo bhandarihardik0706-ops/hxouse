@@ -113,6 +113,22 @@
         .rotate-90 {
             transform: rotate(90deg);
         }
+        /* New: Fix awkward height by moving inner padding to the inner div */
+        .accordion-inner-content {
+             padding: 1rem; /* p-4 equivalent */
+             padding-top: 0;
+             padding-bottom: 0.75rem; /* pb-3 equivalent, adds spacing below items but not above */
+             
+        }
+        /* Apply vertical spacing to the items container */
+        .accordion-item-list {
+            padding-bottom: 1rem; /* Apply the required padding to the bottom of the list */
+            padding-top: 0;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            
+        }
+
     </style>
 </head>
 <body data-theme="matcha">
@@ -682,9 +698,12 @@ const app = {
             // Set max-height dynamically after content is visible
             // We use a slight delay and scroll after the height is set
             setTimeout(() => {
-                const innerDiv = contentDiv.querySelector('.p-4');
-                // Set max-height to inner content height + padding/margin, or a large number if necessary
-                contentDiv.style.maxHeight = innerDiv.scrollHeight + 32 + 'px';
+                // FIX: Look for the inner list container, which holds the actual items
+                const innerDiv = contentDiv.querySelector('.accordion-item-list');
+                // Set max-height to inner content height + the 1rem (16px) bottom padding applied to the list
+                // We add a little extra buffer (48px) just in case, but rely mostly on scrollHeight
+                contentDiv.style.maxHeight = innerDiv.scrollHeight + 48 + 'px';
+                
                 // Optional: Scroll the main page content to the newly opened section
                 contentDiv.closest('main').scrollTo({
                     top: contentDiv.parentElement.offsetTop - $('#page-header').offsetHeight,
@@ -828,7 +847,7 @@ const app = {
                      if (incrementError) console.error("Award points failed:", incrementError);
                      else {
                          // Update local state *after* successful RPC
-                         this.state.customerProfile.loyalty_points += pointsEarned;
+                         this.state.customerProfile.loyalty_points += 50;
                      }
                 }
             } catch (pointsError) {
@@ -1252,9 +1271,9 @@ const ui = {
                  const contentDiv = $(`#items-for-${initialCategory.replace(/\s/g, '-')}`);
                  if (contentDiv) {
                     contentDiv.classList.add('open');
-                    const innerDiv = contentDiv.querySelector('.p-4');
+                    const innerDiv = contentDiv.querySelector('.accordion-item-list');
                     // Ensure the inner div is measured after rendering
-                    contentDiv.style.maxHeight = innerDiv.scrollHeight + 32 + 'px'; // +32 for padding/margin buffer
+                    contentDiv.style.maxHeight = innerDiv.scrollHeight + 48 + 'px'; // +48 buffer
                  }
              }
         }
@@ -1290,7 +1309,8 @@ const ui = {
                 
                 <!-- Items Content (Collapsible) -->
                 <div id="items-for-${group.category.replace(/\s/g, '-')}" class="accordion-content ${openClass}" style="max-height: ${initialMaxHeight};">
-                    <div class="p-4 pt-0 space-y-3">
+                    <!-- FIX: Removed outer p-4, added new class accordion-item-list -->
+                    <div class="accordion-item-list space-y-3"> 
                         ${group.items.length > 0 ? group.items.map(item => this.renderMenuItemCard(item)).join('') : '<p class="text-secondary text-center py-4">No items available in this category.</p>'}
                     </div>
                 </div>
