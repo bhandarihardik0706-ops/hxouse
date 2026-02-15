@@ -13,57 +13,31 @@
         :root {
             --bg-primary-light: #FFFFFF; --bg-secondary-light: #F3F4F6; --text-primary-light: #111827; --text-secondary-light: #6B7280; --border-light: #E5E7EB; --brand-primary-light: #111827;
             --bg-primary-dark: #111111; --bg-secondary-dark: #1F2023; --text-primary-dark: #F9FAFB; --text-secondary-dark: #9CA3AF; --border-dark: #374151; --brand-primary-dark: #FFFFFF;
-            --bg-primary-sunset: #1E1E2E; --bg-secondary-sunset: #2D2D44; --text-primary-sunset: #F6F6F6; --text-secondary-sunset: #A8A8C3; --border-sunset: #4A4A6A; --brand-primary-sunset: #FFA756;
             --bg-primary-matcha: #F0FFF4; --bg-secondary-matcha: #DCF2E3; --text-primary-matcha: #2F4858; --text-secondary-matcha: #5C7A89; --border-matcha: #B8D8C0; --brand-primary-matcha: #3A8154;
             --app-height: 100vh;
         }
         [data-theme="light"] { --bg-primary: var(--bg-primary-light); --bg-secondary: var(--bg-secondary-light); --text-primary: var(--text-primary-light); --text-secondary: var(--text-secondary-light); --border-color: var(--border-light); --brand-primary: var(--brand-primary-light); }
         [data-theme="dark"] { --bg-primary: var(--bg-primary-dark); --bg-secondary: var(--bg-secondary-dark); --text-primary: var(--text-primary-dark); --text-secondary: var(--text-secondary-dark); --border-color: var(--border-dark); --brand-primary: var(--brand-primary-dark); }
-        [data-theme="sunset"] { --bg-primary: var(--bg-primary-sunset); --bg-secondary: var(--bg-secondary-sunset); --text-primary: var(--text-primary-sunset); --text-secondary: var(--text-secondary-sunset); --border-color: var(--border-sunset); --brand-primary: var(--brand-primary-sunset); }
         [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
 
-        html, body { height: 100%; overflow: hidden; }
+        html, body { height: 100%; overflow: hidden; margin: 0; }
         body { font-family: 'Poppins', sans-serif; background-color: #000000; color: var(--text-primary); -webkit-tap-highlight-color: transparent; transition: background-color 0.5s ease; }
         .app-container { background-color: var(--bg-primary); transition: background-color 0.5s ease; height: var(--app-height); }
         .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
         .bg-primary { background-color: var(--bg-primary); } .bg-secondary { background-color: var(--bg-secondary); }
         .border-custom { border-color: var(--border-color); } .brand-text { color: var(--brand-primary); }
         .brand-bg { background-color: var(--brand-primary); color: var(--bg-primary); }
-        .brand-border { border-color: var(--brand-primary); }
 
         .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .fade-out { animation: fadeOut 0.5s ease-in-out forwards; } @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; display: none; } }
-
-        .toast { animation: toast-in 0.5s ease, toast-out 0.5s ease forwards; }
-        @keyframes toast-in { from { bottom: -100px; opacity: 0; } to { bottom: 80px; opacity: 1; } }
-        @keyframes toast-out { from { opacity: 1; } to { opacity: 0; display: none; } }
-
         .modal-overlay { animation: fadeIn 0.3s ease; }
-        .modal-content {
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            max-height: 85vh;
-            overflow-y: auto;
-        }
+        .modal-content { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         #splash-screen img { animation: pulse 2s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        /* MODIFIED: Custom height transition class for smooth accordion */
-        .accordion-content {
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            overflow: hidden;
-            /* Use a CSS variable that will be set by JS on toggle */
-            max-height: 0;
-            opacity: 0;
-            /* FIX 3: Remove default padding from the content wrapper */
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-        .accordion-content.open {
-            opacity: 1;
-        }
-
+        .accordion-content { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 0; opacity: 0; }
+        .accordion-content.open { opacity: 1; }
 
         .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
         .tracker-line-container { position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background-color: var(--border-color); border-radius: 2px; }
@@ -71,71 +45,29 @@
         .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 80px; position: relative; z-index: 1; }
         .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 20px; }
         .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
-        .tracker-label { margin-top: 8px; font-size: 10px; font-weight: 600; transition: color 0.3s ease; }
-        .tracker-step.active .tracker-label { color: var(--brand-primary); }
 
-        .instagram-card {
-            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .classy-x {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-weight: 600;
-            font-size: 1.5em;
-            vertical-align: -0.2em;
-        }
-        .spinner {
-            border: 2px solid var(--bg-primary);
-            border-top: 2px solid var(--brand-primary);
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .instagram-card { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .classy-x { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 600; font-size: 1.5em; vertical-align: -0.2em; }
+        
+        .quantity-control { display: flex; align-items: center; justify-content: space-between; background-color: var(--brand-primary); color: var(--bg-primary); border-radius: 9999px; font-weight: 600; overflow: hidden; width: 100px; height: 40px; }
+        .add-to-cart-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); color: var(--brand-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        
+        #loyalty-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--bg-secondary); border-radius: 4px; }
+        #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--brand-primary); border-radius: 50%; cursor: pointer; }
 
-        .add-to-cart-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); color: var(--brand-primary); border: 2px solid var(--border-color); font-size: 24px; font-weight: 600; line-height: 1; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-        .add-to-cart-btn:hover { transform: scale(1.1); background-color: var(--brand-primary); color: var(--bg-primary); border-color: var(--brand-primary); }
-        .quantity-control { display: flex; align-items: center; justify-content: space-between; background-color: var(--brand-primary); color: var(--bg-primary); border-radius: 9999px; font-weight: 600; overflow: hidden; width: 100px; height: 40px; user-select: none; }
-        .quantity-control button { width: 34px; height: 100%; font-size: 20px; line-height: 1; transition: background-color 0.2s ease; }
-        .quantity-control button:hover { background-color: rgba(0,0,0,0.1); }
-        .quantity-control span { font-size: 16px; }
-
-        #loyalty-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--bg-secondary); outline: none; opacity: 0.7; transition: opacity .2s; border-radius: 4px; }
-        #loyalty-slider:hover { opacity: 1; }
-        #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--brand-primary); cursor: pointer; border-radius: 50%; }
-        #loyalty-slider::-moz-range-thumb { width: 20px; height: 20px; background: var(--brand-primary); cursor: pointer; border-radius: 50%; border: none; }
-
-        /* Custom CSS for Accordion Arrow Transition */
-        .accordion-arrow {
-            transition: transform 0.3s ease;
-        }
-        .rotate-90 {
-            transform: rotate(90deg);
-        }
-        /* New: Fix awkward height by moving inner padding to the inner div */
-        /* FIX 3: Adjusted spacing of inner list */
-        .accordion-item-list {
-            padding-left: 1rem;
-            padding-right: 1rem;
-            padding-top: 0; /* Already removed in accordion-content, but keeping just in case */
-            padding-bottom: 1rem; /* Space after the last item */
-            gap: 0.75rem; /* space-y-3 equivalent */
-            display: grid; /* Use grid for vertical spacing instead of traditional margins on item divs */
-        }
-        .accordion-item-list > div {
-             margin-bottom: 0 !important; /* Ensure Tailwind space-y doesn't double apply margin */
-        }
-
+        .accordion-arrow { transition: transform 0.3s ease; }
+        .rotate-90 { transform: rotate(90deg); }
+        .accordion-item-list { padding-left: 1rem; padding-right: 1rem; padding-bottom: 1rem; display: grid; gap: 0.75rem; }
     </style>
 </head>
 <body data-theme="matcha">
 
-    <div id="splash-screen" class="fixed inset-0 bg-primary flex items-center justify-center z-[100]">
-        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full">
+    <div id="splash-screen" class="fixed inset-0 bg-primary flex flex-col items-center justify-center z-[100]">
+        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full shadow-2xl">
+        <div id="splash-loading" class="mt-8 flex flex-col items-center">
+            <div class="spinner border-4 border-t-brand w-8 h-8 rounded-full animate-spin mb-4"></div>
+            <p class="text-secondary text-xs font-bold tracking-widest animate-pulse">BREWING CONNECTION...</p>
+        </div>
     </div>
 
     <div id="app" class="app-container max-w-lg mx-auto shadow-2xl flex flex-col hidden">
@@ -146,76 +78,30 @@
             </div>
             <div class="h-20 flex-shrink-0"></div>
         </main>
-        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-16 z-30 hidden"></nav>
+        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-16 z-30 hidden pb-2"></nav>
     </div>
 
     <div id="modal-container"></div>
-    <div id="toast" class="hidden fixed right-4 brand-bg py-3 px-5 rounded-lg shadow-xl z-50">
+    <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 brand-bg py-3 px-5 rounded-lg shadow-xl z-50 whitespace-nowrap text-white font-bold">
         <p id="toast-message"></p>
     </div>
 
 <script>
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => document.querySelectorAll(selector);
+/**
+ * HXOUSE COFFEE CO.
+ * STABILITY PATCH: ONBOARDING & AUTH FIX
+ */
 
-function setAppHeight() {
-  document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-}
-window.addEventListener('resize', setAppHeight);
-setAppHeight();
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
 
-const SUPABASE_URL = 'https://qaytrfhpqsajgfqedxak.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_5USOMwi_w_AUqdsKMN8oBA_09c-qQ0w';
-const supabase = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
+
+// Renamed to 'sb' to prevent global naming conflict with Supabase JS library
+const sb = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const PAGES = ['home', 'order', 'cart', 'social', 'cowork', 'more'];
-
-const STATIC_DATA = {
-    bestSellers: [10, 39, 61, 93],
-    captionIdeas: {
-        student: [ "Fueling my study session with @hxousecoffeeco ☕️📚 #StudentLife", "Caffeine and concentration, courtesy of @hxousecoffeeco." ],
-        office: [ "My real co-worker: this cup from @hxousecoffeeco 💼 #WorkFuel", "Turning coffee into code with @hxousecoffeeco." ],
-        couple: [ "Coffee dates with my favorite person ❤️ @hxousecoffeeco", "Love is in the air, and it smells like coffee from @hxousecoffeeco." ],
-        friends: [ "Good times and great coffee with the best crew! @hxousecoffeeco #Friends", "A perfect blend of friendship and coffee at @hxousecoffeeco!" ]
-    }
-};
-
-const sound = {
-    audioContext: null,
-    init() {
-        if (this.audioContext) return;
-        try { this.audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
-        catch (e) { console.error("Web Audio API is not supported."); }
-    },
-    play(type) {
-        if (!this.audioContext) return;
-        const o = this.audioContext.createOscillator(), g = this.audioContext.createGain();
-        o.connect(g); g.connect(this.audioContext.destination); g.gain.setValueAtTime(0, this.audioContext.currentTime);
-        const sounds = {
-            click: { type: 'sine', freq: 600, gain: 0.2, len: 0.1 },
-            add_to_cart: { type: 'triangle', freq: 440, gain: 0.3, len: 0.2 },
-            success: { type: 'sine', freq: 523.25, gain: 0.3, len: 0.3, secondFreq: 659.25 },
-            win: { type: 'sine', freq: 587.33, gain: 0.4, len: 0.3, secondFreq: 880 },
-            draw: { type: 'sawtooth', freq: 220, gain: 0.2, len: 0.2, secondFreq: 180 },
-        };
-        const s = sounds[type]; if (!s) return;
-        o.type = s.type; o.frequency.setValueAtTime(s.freq, this.audioContext.currentTime);
-        g.gain.linearRampToValueAtTime(s.gain, this.audioContext.currentTime + 0.01);
-        if (s.secondFreq) { o.frequency.setValueAtTime(s.secondFreq, this.audioContext.currentTime + (s.len / 2)); }
-        g.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + s.len);
-        o.start(this.audioContext.currentTime); o.stop(this.audioContext.currentTime + s.len);
-    }
-};
-
-// Utility function to sanitize category names for use in HTML IDs/Selectors
-const sanitizeId = (categoryName) => {
-    // 1. Replace invalid characters (like /, spaces, parentheses) with a hyphen
-    // 2. Remove any hyphens at the start or end
-    return categoryName.toUpperCase()
-        .replace(/[^A-Z0-9-]/g, '-') // Replace non-alphanumeric/hyphen chars with dash
-        .replace(/-+/g, '-')          // Collapse multiple dashes
-        .replace(/^-|-$/g, '');       // Trim leading/trailing dashes
-}
 
 const app = {
     state: {
@@ -226,1687 +112,594 @@ const app = {
         user: null,
         customerProfile: null,
         theme: 'matcha',
-        menuData: [], // Grouped menu by category
-        allMenuItems: [], // Flat list of all available items
-        appSettings: {},
-        orderSubscription: null,
-        // REMOVED: currentMenuCategory - not needed for accordion view
-        // New state for accordion menu
-        expandedCategory: null, // Tracks which category accordion is open
+        menuData: [],
+        allMenuItems: [],
+        expandedCategory: null,
         searchQuery: '',
-        searchResults: [],
         pointsToRedeem: 0,
     },
 
     async init() {
-        document.body.addEventListener('click', () => sound.init(), { once: true });
+        this.setHeight();
+        window.addEventListener('resize', () => this.setHeight());
+        window.addEventListener('popstate', (e) => this.handleHardwareBack(e));
 
         const initialHash = location.hash.substring(1);
-        if (PAGES.includes(initialHash)) {
-             this.state.currentPage = initialHash;
-        } else {
-             this.state.currentPage = 'home';
-             location.hash = 'home';
-        }
-        window.addEventListener('popstate', this.handleHardwareBack.bind(this));
-
-        this.startAppFlow();
+        this.state.currentPage = PAGES.includes(initialHash) ? initialHash : 'home';
+        
+        await this.startAppFlow();
     },
 
+    setHeight() { document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`); },
+
     async startAppFlow() {
-        this.applyTheme();
-        $('#splash-screen').classList.remove('hidden');
-        this.getTableNumberFromURL();
+        console.log("🚀 HXOUSE: Initialization sequence started...");
+        
+        // Safety Timeout: If loading takes > 8 seconds, show manual skip
+        const loadTimeout = setTimeout(() => {
+            console.warn("⚠️ HXOUSE: Supabase taking too long. Check Internet or dashboard settings.");
+            $('#splash-loading').innerHTML = `
+                <p class="text-red-500 font-bold mb-4">Connection slow...</p>
+                <button onclick="location.reload()" class="bg-secondary p-3 rounded-xl font-bold mb-2">Retry Connection</button>
+                <p class="text-[10px] text-secondary opacity-50 px-6 text-center">Ensure "Anonymous Auth" is enabled in Supabase Providers.</p>
+            `;
+        }, 8000);
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
+            // 1. Auth Bridge
+            const { data: { session }, error: sessionError } = await sb.auth.getSession();
+            if (sessionError) throw sessionError;
             this.state.user = session?.user;
+            
             if (!this.state.user) {
-                const { data: signInData, error } = await supabase.auth.signInAnonymously();
-                if (error) throw new Error(`Anonymous sign-in failed: ${error.message}`);
-                this.state.user = signInData.user;
+                console.log("🔐 HXOUSE: No session. Authenticating anonymously...");
+                const { data: anonData, error: anonError } = await sb.auth.signInAnonymously();
+                if (anonError) {
+                    console.error("❌ Auth Error:", anonError);
+                    throw new Error("Anonymous Auth is likely DISABLED in your dashboard.");
+                }
+                this.state.user = anonData.user;
             }
+            console.log("👤 HXOUSE: User ID established:", this.state.user.id);
 
-            await this.fetchCustomerProfile();
-            await Promise.all([ this.fetchMenuData(), this.fetchAppSettings() ]);
+            // 2. Data Sync
+            await Promise.all([
+                this.fetchCustomerProfile(),
+                this.fetchMenuData()
+            ]);
 
-            // Set the first category as expanded by default on load
-            if (this.state.menuData.length > 0) {
-                this.state.expandedCategory = this.state.menuData[0].category;
-            }
+            this.getTableNumberFromURL();
 
+            if (this.state.menuData.length > 0) this.state.expandedCategory = this.state.menuData[0].category;
+
+            // Clear timeout and Launch
+            clearTimeout(loadTimeout);
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             $('#app').classList.add('flex');
 
-            if (!this.state.customerProfile || !this.state.customerProfile.name || !this.state.customerProfile.whatsapp_number) {
-                 this.showOnboardingModal();
+            if (!this.state.customerProfile || !this.state.customerProfile.name) {
+                console.log("📝 HXOUSE: Profile needed.");
+                this.showOnboardingModal();
             } else if (this.state.tableNumber) {
+                console.log("✨ HXOUSE: Launching session.");
                 this.startSession();
             } else {
                 this.showTableNumberModal();
             }
-
-        } catch (error) {
-            console.error("CRITICAL: Initialization failed.", error);
-            $('#splash-screen').innerHTML = `<div class="text-primary text-center p-4">Could not load. Please check connection.</div>`;
-        }
-    },
-
-    getTableNumberFromURL() {
-        const params = new URLSearchParams(window.location.search);
-        const scannedTableNum = params.get('table'); // Get what the QR code *says*
-        
-        if (scannedTableNum && !isNaN(parseInt(scannedTableNum))) {
-            // --- START OF FIX ---
-            // This map corrects the physically mixed-up QR codes.
-            
-            const qrCodeFixMap = {
-                // "scanned_table_num": "correct_table_num"
-                "6": 1,
-                "10": 2, // Correct mapping: Scan 10 shows 2
-                "1": 3,
-                "7": 4,
-                "4": 6,
-                "3": 7, // Correct mapping: Scan 3 shows 7
-                "2": 8
-                // Tables 5 and 9 are correct, so they are not in the map.
-            };
-    
-            // Check if the scanned number is in our fix map
-            const correctTableNum = qrCodeFixMap[scannedTableNum] || scannedTableNum;
-            
-            this.state.tableNumber = parseInt(correctTableNum);
-            // --- END OF FIX ---
+        } catch (e) {
+            console.error("❌ HXOUSE Startup Failed:", e);
+            clearTimeout(loadTimeout);
+            $('#splash-loading').innerHTML = `
+                <p class="text-red-500 font-bold mb-2">System Error</p>
+                <p class="text-xs text-secondary px-8 mb-6">${e.message}</p>
+                <button onclick="location.reload()" class="bg-primary text-secondary px-8 py-3 rounded-full font-bold shadow-xl">Re-Init</button>
+            `;
         }
     },
 
     async fetchCustomerProfile() {
-        if (!this.state.user) return;
-        try {
-            const { data, error } = await supabase.from('customers')
-                .select('*, loyalty_points')
-                .eq('id', this.state.user.id)
-                .single();
-
-            if (error && error.code !== 'PGRST116') throw error;
-
-            if (data) {
-                data.loyalty_points = data.loyalty_points || 0;
-                this.state.customerProfile = data;
-            } else {
-                 this.state.customerProfile = { id: this.state.user.id, name: null, loyalty_points: 0, whatsapp_number: null };
-            }
-        } catch (error) {
-            console.error('Error fetching profile:', error);
-            ui.showToast('Could not fetch your profile.');
-            this.state.customerProfile = { id: this.state.user?.id || 'unknown', name: 'Guest', loyalty_points: 0, whatsapp_number: null };
-        }
+        console.log("📡 HXOUSE: Fetching profile...");
+        const { data, error } = await sb.from('customers').select('*').eq('id', this.state.user.id).maybeSingle();
+        if (error) console.warn("Profile fetch warning:", error);
+        this.state.customerProfile = data;
     },
 
     async fetchMenuData() {
-        try {
-            const { data, error } = await supabase.from('products').select('*').order('id');
-            if (error) throw error;
+        console.log("📡 HXOUSE: Fetching menu...");
+        const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
+        if (error) throw error;
+        this.state.allMenuItems = data;
+        this.state.menuData = data.reduce((acc, item) => {
+            let cat = acc.find(c => c.category === item.category);
+            if (!cat) { cat = { category: item.category, items: [] }; acc.push(cat); }
+            cat.items.push(item);
+            return acc;
+        }, []);
+    },
 
-            this.state.allMenuItems = data.filter(i => i.is_available);
-
-            // Grouping logic remains the same
-            const groupedMenu = data.reduce((acc, item) => {
-                if (!item.is_available) return acc;
-                let category = acc.find(c => c.category === item.category);
-                if (!category) {
-                    category = { category: item.category, items: [] };
-                    acc.push(category);
-                }
-                category.items.push(item);
-                return acc;
-            }, []);
-
-            this.state.menuData = groupedMenu;
-
-        } catch (error) {
-            console.error('Error fetching menu data:', error);
-            ui.showToast('Could not load the menu.');
-            this.state.menuData = [];
-            this.state.allMenuItems = [];
+    getTableNumberFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const scanned = params.get('table');
+        if (scanned) {
+            const fixMap = { "6": 1, "10": 2, "1": 3, "7": 4, "4": 6, "3": 7, "2": 8 };
+            this.state.tableNumber = parseInt(fixMap[scanned] || scanned);
         }
-    },
-
-    async fetchAppSettings() {
-        try {
-            const { data, error } = await supabase.from('app_settings').select('key, value');
-            if (error) throw error;
-            this.state.appSettings = data.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {});
-        } catch (error) { console.error('Error fetching app settings:', error); }
-    },
-
-    showOnboardingModal(){
-        const tableInputHTML = !this.state.tableNumber
-            ? `<input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>`
-            : '';
-        ui.showModal('onboarding-modal', `
-            <h2 class="text-2xl font-bold text-primary mb-2">Welcome to H<span class="classy-x">X</span>OUSE</h2><p class="text-secondary mb-6">A few details to get you started.</p>
-            <div class="space-y-4">
-                <input type="text" id="user-name-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Name" required>
-                <input type="tel" id="mobile-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Mobile Number (for Loyalty Points)" required>
-                ${tableInputHTML}
-            </div>
-            <button onclick="app.completeOnboarding()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Let's Go</button>
-        `);
-    },
-
-    async completeOnboarding(){
-        const name = $('#user-name-input').value.trim();
-        const phone = $('#mobile-number-input').value.trim();
-        let tableNumber = this.state.tableNumber;
-
-        if (!tableNumber) {
-             const tableInput = $('#table-number-input');
-             if (!tableInput || !tableInput.value) return ui.showToast("Please enter your table number.");
-             tableNumber = parseInt(tableInput.value);
-        }
-        if (!name) return ui.showToast("Please enter your name.");
-        if (!phone || !/^\d{10}$/.test(phone.replace(/\D/g,''))) return ui.showToast("Please enter a valid 10-digit mobile number for loyalty points.");
-        const cleanPhone = phone.replace(/\D/g,'');
-
-        let finalProfileData;
-        try {
-            // --- START FIX for "duplicate key" error ---
-
-            // 1. Check for profile *by ID* (our current auth user)
-            const { data: existingById, error: errorById } = await supabase.from('customers')
-                .select('*, loyalty_points')
-                .eq('id', this.state.user.id)
-                .maybeSingle();
-            
-            if (errorById && errorById.code !== 'PGRST116') {
-                // This is not a "not found" error, so throw it
-                console.error("Error fetching profile by ID:", errorById);
-                throw errorById;
-            }
-
-            // 2. Check for profile *by Phone* (linked to a *different* auth user)
-            const { data: existingByPhone, error: errorByPhone } = await supabase.from('customers')
-                .select('id, loyalty_points')
-                .eq('whatsapp_number', cleanPhone)
-                .not('id', 'eq', this.state.user.id) // Exclude our current user from this check
-                .maybeSingle();
-
-            if (errorByPhone && errorByPhone.code !== 'PGRST116') {
-                 console.error("Error fetching profile by Phone:", errorByPhone);
-                 throw errorByPhone;
-            }
-
-            if (existingByPhone) {
-                // CONFLICT: This phone number is already linked to a *different* profile.
-                
-                // --- MODIFICATION: Added console.error for clarity ---
-                const errorMsg = "Phone number conflict. This phone is already linked to another account.";
-                console.error(errorMsg, { phone: cleanPhone, existingId: existingByPhone.id, currentId: this.state.user.id });
-                ui.showToast(errorMsg);
-                // --- END MODIFICATION ---
-
-                // We must stop here to prevent the error.
-                return; 
-            }
-
-            // If we are here, it means:
-            // 1. The phone number is NOT linked to any *other* user.
-            // 2. The current user *either* has a profile (`existingById`) or they don't.
-
-            if (existingById) {
-                // Case 1: We found a profile for our current user. Update it.
-                // This user might have logged in before but not provided a phone.
-                console.log("Updating existing customer profile by ID:", this.state.user.id);
-                const { data: updatedData, error: updateError } = await supabase.from('customers')
-                    .update({
-                        name: name,
-                        whatsapp_number: cleanPhone
-                        // We don't touch loyalty_points, it's already set
-                    })
-                    .eq('id', this.state.user.id)
-                    .select('*, loyalty_points')
-                    .single();
-                
-                if (updateError) throw updateError;
-                finalProfileData = updatedData;
-
-            } else {
-                // Case 2: No profile for our user ID, and phone is not taken. Create new profile.
-                // This is a brand new user.
-                console.log("Inserting new customer profile for ID:", this.state.user.id);
-                const { data: insertedData, error: insertError } = await supabase.from('customers')
-                    .insert({
-                        id: this.state.user.id,
-                        name: name,
-                        whatsapp_number: cleanPhone,
-                        loyalty_points: 0 // New users start at 0
-                    })
-                    .select('*, loyalty_points')
-                    .single();
-
-                if (insertError) {
-                    // If we get "duplicate key" (code 23505) here, it *must* be an RLS issue
-                    // where our `existingById` check failed to *see* the row.
-                    console.error("Insert failed, checking for RLS conflict...", insertError);
-                    if (insertError.code === '23505') {
-                        // This is the duplicate key error.
-                        // We can now assume the record exists but was hidden.
-                        // Let's try to UPDATE it as a fallback.
-                        console.warn("Insert failed (duplicate key). Attempting to update fallback.");
-                        const { data: updatedData, error: updateError } = await supabase.from('customers')
-                            .update({
-                                name: name,
-                                whatsapp_number: cleanPhone
-                            })
-                            .eq('id', this.state.user.id) // Update the record with our ID
-                            .select('*, loyalty_points')
-                            .single();
-                        
-                        if (updateError) {
-                            // Both insert and update failed. This is a critical error.
-                            console.error("Fallback update also failed:", updateError);
-                            throw updateError; 
-                        }
-                        // Fallback update succeeded
-                        finalProfileData = updatedData;
-                        ui.showToast('Profile updated.');
-
-                    } else {
-                        // It was a different error, throw it
-                        throw insertError;
-                    }
-                } else {
-                    // Insert succeeded
-                    finalProfileData = insertedData;
-                }
-            }
-            // --- END FIX ---
-
-            this.state.customerProfile = finalProfileData;
-            this.state.customerProfile.loyalty_points = this.state.customerProfile.loyalty_points || 0;
-            this.state.tableNumber = tableNumber;
-            ui.closeModal('onboarding-modal');
-            this.startSession();
-
-        } catch (error) {
-            console.error("Onboarding/Linking Error:", error);
-            if (error.message.includes('duplicate key value violates unique constraint')) {
-                // This message is now more generic, as our logic handles the primary key one.
-                // This might catch a duplicate phone number if our check failed.
-                ui.showToast('This phone number might be linked to another session. Please retry.');
-            } else if (error.message.includes('violates row-level security policy for table')) {
-                 ui.showToast('Could not save profile due to security policy. Please contact support.');
-            } else {
-                 ui.showToast(`Could not save profile: ${error.message}`);
-            }
-        }
-    },
-
-
-    showTableNumberModal() {
-        ui.showModal('table-number-modal', `
-            <h2 class="text-2xl font-bold text-primary mb-2">Welcome back, ${this.state.customerProfile.name}!</h2>
-            <p class="text-secondary mb-6">Please enter your table number for today's visit.</p>
-            <input type="number" id="table-number-input" class="w-full p-3 border border-custom rounded-lg bg-secondary text-primary" placeholder="Your Table Number" required>
-            <button onclick="app.completeTableNumberEntry()" class="w-full mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">Continue</button>
-        `);
-    },
-
-    completeTableNumberEntry() {
-        const tableNumber = $('#table-number-input').value;
-        if (!tableNumber) return ui.showToast("Please enter your table number.");
-        this.state.tableNumber = parseInt(tableNumber);
-        ui.closeModal('table-number-modal');
-        this.startSession();
     },
 
     async startSession() {
         await this.fetchActiveOrder();
-        this.showMainInterface();
-    },
-
-    showMainInterface(){
         $('#main-interface').classList.remove('hidden');
         $('#bottom-nav').classList.remove('hidden');
         ui.renderBottomNav();
         this.navigateTo(this.state.currentPage, false);
     },
 
-    navigateTo(page, pushToHistory = true){
-         if (!this.state.customerProfile) return;
-         sound.play('click');
-         if (pushToHistory && location.hash.substring(1) !== page) {
-            location.hash = page;
-         } else if (!pushToHistory && location.hash.substring(1) !== page) {
-            history.replaceState(null, '', location.pathname + location.search + '#' + page);
-         }
-         this.state.currentPage = page;
-         ui.renderHeader(page);
-         ui.renderPageContent(page);
-         ui.updateActiveNav(page);
+    showOnboardingModal() {
+        ui.showModal('onboarding-modal', `
+            <h2 class="text-2xl font-bold text-primary mb-2 text-center uppercase tracking-tighter">New Member</h2>
+            <p class="text-secondary mb-8 text-center text-sm">Please register to access orders and rewards.</p>
+            <div class="space-y-4">
+                <input type="text" id="ob-name" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary font-bold" placeholder="Full Name">
+                <input type="tel" id="ob-phone" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary font-bold" placeholder="WhatsApp Number">
+                ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary font-bold" placeholder="Table #">` : ''}
+            </div>
+            <button id="ob-submit" onclick="app.completeOnboarding()" class="w-full mt-10 brand-bg font-bold py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-sm active:scale-95 transition">Enter HXOUSE</button>
+        `);
     },
 
-    handleHardwareBack(event) {
-         const currentHash = location.hash.substring(1);
-         const openModal = $('#modal-container').children[0];
+    async completeOnboarding() {
+        const name = $('#ob-name').value.trim();
+        const phone = $('#ob-phone').value.trim();
+        const table = this.state.tableNumber || parseInt($('#ob-table')?.value);
+        const btn = $('#ob-submit');
 
-         if (openModal) {
-            ui.closeModal(openModal.id);
-            event.preventDefault();
-            // Ensure the hash reflects the current page after closing modal
-            history.pushState(null, '', '#' + this.state.currentPage);
-            return;
-         }
+        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Incomplete details");
 
-         // If the current hash doesn't match the state (e.g., user used browser back/forward)
-         if (PAGES.includes(currentHash) && currentHash !== this.state.currentPage) {
-            this.navigateTo(currentHash, false); // Sync state to the hash
-         }
-         // If on a page other than home, navigate back to home
-         else if (this.state.currentPage !== 'home') {
-             event.preventDefault(); // Prevent default back behavior (like closing app)
-             this.navigateTo('home');
-         }
-         // If already on home, let the default back behavior happen (or do nothing to prevent closing)
-         // To prevent closing entirely, you might add: else { event.preventDefault(); }
-    },
-
-    applyTheme(){ document.body.dataset.theme = this.state.theme; },
-    toggleTheme(t){ this.state.theme = t; localStorage.setItem('hxouse-theme', t); this.applyTheme(); this.navigateTo('more'); },
-
-    addOrUpdateCart(itemId, quantityChange) {
-        sound.play('click');
-        const item = this.state.allMenuItems.find(i => i.id === itemId);
-        if (!item) return;
-
-        let cartItem = this.state.cart.find(i => i.id === itemId);
-        let newQuantity = (cartItem ? cartItem.quantity : 0) + quantityChange;
-
-        if (newQuantity <= 0) {
-            this.state.cart = this.state.cart.filter(i => i.id !== itemId);
-        } else {
-            if (cartItem) {
-                cartItem.quantity = newQuantity;
-            } else {
-                this.state.cart.push({ cartId: Date.now(), ...item, quantity: newQuantity });
-            }
-            if (quantityChange > 0) sound.play('add_to_cart');
-        }
-        this.state.pointsToRedeem = 0; // Reset points on cart change
-        this.refreshPage();
-    },
-
-    setCartItemQuantity(itemId, quantity) {
-        const item = this.state.allMenuItems.find(i => i.id === itemId);
-        if (!item) return;
-
-        if (quantity <= 0) {
-            this.state.cart = this.state.cart.filter(i => i.id !== itemId);
-        } else {
-            let cartItem = this.state.cart.find(i => i.id === itemId);
-            if (cartItem) {
-                cartItem.quantity = quantity;
-            } else {
-                this.state.cart.push({ cartId: Date.now(), ...item, quantity: quantity });
-            }
-        }
-        if(quantity > 0) {
-            sound.play('add_to_cart');
-            ui.showToast('Cart updated!');
-        }
-        this.state.pointsToRedeem = 0; // Reset points on quantity change
-        ui.closeModal('item-detail-modal');
-        this.refreshPage();
-    },
-
-    performSearch(query) {
-         const searchContainer = $('#search-results-container');
-         const menuSections = $('#menu-sections');
-         this.state.searchQuery = query.toLowerCase();
-
-         if (this.state.searchQuery.length > 1) {
-            if (searchContainer) searchContainer.classList.remove('hidden');
-            if (menuSections) menuSections.classList.add('hidden');
-            this.state.searchResults = this.state.allMenuItems.filter(item =>
-                item.name.toLowerCase().includes(this.state.searchQuery) ||
-                (item.description && item.description.toLowerCase().includes(this.state.searchQuery))
-            );
-            ui.renderMenuItems(this.state.searchResults, 'search-results-container');
-         } else {
-            if (searchContainer) searchContainer.classList.add('hidden');
-            if (menuSections) menuSections.classList.remove('hidden');
-            this.state.searchResults = [];
-            // When search is cleared, we naturally go back to the accordion view
-            // No need to explicitly filter, as the accordion view is always rendered
-            ui.renderMenuPageContent(); // Re-render the accordion view
-         }
-    },
-
-    // Modified function to handle category expansion/collapse
-    toggleCategory(categoryName) {
-        sound.play('click');
-        // FIX 1: Ensure safe ID usage
-        const id = sanitizeId(categoryName);
-        const contentDiv = $(`#items-for-${id}`);
-
-        if (!contentDiv) {
-            console.error(`Could not find content div for category: ${categoryName} (ID: #items-for-${id})`);
-            ui.renderMenuPage(); 
-            return;
-        }
-
-        if (this.state.expandedCategory === categoryName) {
-            // Close
-            contentDiv.style.maxHeight = '0';
-            contentDiv.classList.remove('open');
-            this.state.expandedCategory = null;
-        } else {
-            // Close previous, open new
-            if (this.state.expandedCategory) {
-                // FIX 1: Ensure safe ID usage
-                const prevId = sanitizeId(this.state.expandedCategory);
-                const prevContent = $(`#items-for-${prevId}`);
-                if (prevContent) {
-                    prevContent.style.maxHeight = '0';
-                    prevContent.classList.remove('open');
-                }
-            }
-
-            // Open new
-            contentDiv.classList.add('open');
-            
-            setTimeout(() => {
-                // FIX 2: Look for the inner list container, which holds the actual items
-                const innerDiv = contentDiv.querySelector('.accordion-item-list');
-                
-                // Get the scroll height of the inner content.
-                let contentHeight = innerDiv.scrollHeight; 
-                
-                // FIX 3: Increase buffer size slightly to 24px (1.5rem) to ensure the entire bottom padding is visible and the content isn't clipped.
-                const bufferHeight = 24; 
-                contentDiv.style.maxHeight = contentHeight + bufferHeight + 'px'; 
-                
-                // Get the main container before scrolling (FIX for TypeError)
-                const mainContainer = contentDiv.closest('main');
-
-                // FIX 4: Check if header element exists before getting offsetHeight
-                const headerHeight = $('#page-header') ? $('#page-header').offsetHeight : 0;
-                
-                if (mainContainer) {
-                    // Optional: Scroll the main page content to the newly opened section
-                    mainContainer.scrollTo({
-                        top: contentDiv.parentElement.offsetTop - headerHeight,
-                        behavior: 'smooth'
-                    });
-                }
-            }, 50); // Small delay to allow element height calculation
-
-            this.state.expandedCategory = categoryName;
-        }
-        ui.renderMenuPageContent(); // Re-render to update arrow icon (visual consistency)
-    },
-
-
-    calculateCartTotal(){
-        const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const availablePoints = this.state.customerProfile?.loyalty_points || 0;
-
-        // 1. Calculate max discount
-        const redeemablePoints = Math.floor(availablePoints * 0.8);
-        const maxRedeemableForOrder = Math.min(redeemablePoints, Math.floor(subtotal));
-
-        // 2. Clamp current discount
-        const actualPointsToRedeem = Math.min(this.state.pointsToRedeem, maxRedeemableForOrder);
-        const discountAmount = actualPointsToRedeem;
-
-        // 3. Update state if clamped
-        if (this.state.pointsToRedeem !== actualPointsToRedeem) {
-            console.log("Clamping points to redeem:", actualPointsToRedeem);
-            this.state.pointsToRedeem = actualPointsToRedeem;
-        }
-        
-        // 4. Calculate final totals WITH GST
-        const discountedSubtotal = subtotal - discountAmount;
-        const gst = discountedSubtotal * 0.05; // 5% GST
-        const finalTotal = discountedSubtotal + gst;
-
-        return { 
-            subtotal, 
-            discountAmount, 
-            discountedSubtotal, 
-            gst, 
-            finalTotal: Math.max(0, finalTotal),
-            maxRedeemableForOrder // Pass this to the cart renderer
-        };
-    },
-
-    updatePointsToRedeem(points) {
-        this.state.pointsToRedeem = parseInt(points);
-        ui.updateCartSummary(); // Re-render cart summary with new discount
-    },
-
-    refreshPage(){
-        ui.refreshCartDependentUI();
-        // Re-render the content of the current page
-        if (PAGES.includes(this.state.currentPage)) {
-            ui.renderPageContent(this.state.currentPage);
-        }
-    },
-
-    async placeOrder(paymentMethod, btnElement){
-        if (this.state.cart.length === 0 || !this.state.tableNumber) return ui.showToast("Cart empty or table missing.");
-        if (!this.state.customerProfile || !this.state.customerProfile.id) {
-            console.error("Critical Error: Customer profile ID is missing.", this.state.customerProfile);
-            return ui.showToast("Error: Your profile is not loaded correctly. Please refresh.");
-        }
-
-        btnElement.disabled = true; const originalBtnHTML = btnElement.innerHTML;
-        btnElement.innerHTML = `<span class="flex items-center justify-center"><div class="spinner mr-2"></div> Processing...</span>`;
-
-        // Recalculate just before placing order to ensure points are valid
-        const { subtotal, discountAmount, gst, finalTotal, maxRedeemableForOrder } = this.calculateCartTotal();
-        const pointsToRedeem = this.state.pointsToRedeem; // This is the discountAmount
-
-        let orderData;
+        btn.disabled = true; btn.innerHTML = "Creating Profile...";
 
         try {
-            const { data: tableData, error: tableError } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
-            if (tableError || !tableData) throw new Error(`Table #${this.state.tableNumber} invalid.`);
+            const profile = { id: this.state.user.id, name, whatsapp_number: phone, loyalty_points: 0 };
+            // Using insert for first time onboarding to avoid conflict logic
+            const { error } = await sb.from('customers').upsert(profile);
+            if (error) throw error;
 
-            // Check points again right before RPC call for safety
-            if (pointsToRedeem > 0) {
-                const { data: currentProfile, error: profileError } = await supabase.from('customers').select('loyalty_points').eq('id', this.state.customerProfile.id).single();
-                if (profileError || !currentProfile || currentProfile.loyalty_points < pointsToRedeem) {
-                     throw new Error('Insufficient points. Please refresh cart.');
-                }
+            this.state.customerProfile = profile;
+            this.state.tableNumber = table;
+            ui.closeModal('onboarding-modal');
+            this.startSession();
+        } catch (e) {
+            console.error("Onboarding logic error:", e);
+            ui.showToast("Phone number might be in use.");
+            btn.disabled = false; btn.innerHTML = "Enter HXOUSE";
+        }
+    },
+
+    showTableNumberModal() {
+        ui.showModal('table-modal', `
+            <h2 class="text-2xl font-bold text-primary mb-6 text-center uppercase tracking-tighter">Your Location</h2>
+            <input type="number" id="manual-table" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary text-center font-bold text-2xl shadow-inner" placeholder="0">
+            <button onclick="app.completeTableManual()" class="w-full mt-8 brand-bg font-bold py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-sm">Set Spot</button>
+        `);
+    },
+
+    completeTableManual() {
+        const val = $('#manual-table').value;
+        if (!val) return ui.showToast("Required");
+        this.state.tableNumber = parseInt(val);
+        ui.closeModal('table-modal');
+        this.startSession();
+    },
+
+    navigateTo(page, push = true) {
+        if (push) location.hash = page;
+        this.state.currentPage = page;
+        ui.renderHeader(page);
+        ui.renderPageContent(page);
+        ui.updateActiveNav(page);
+    },
+
+    handleHardwareBack(e) {
+        const modal = $('#modal-container').children[0];
+        if (modal) { ui.closeModal(modal.id); e.preventDefault(); return; }
+        if (this.state.currentPage !== 'home') { this.navigateTo('home'); e.preventDefault(); }
+    },
+
+    toggleCategory(cat) {
+        const id = cat.replace(/\s+/g, '-').toUpperCase();
+        const div = $(`#items-for-${id}`);
+        if (this.state.expandedCategory === cat) {
+            div.style.maxHeight = '0'; div.classList.remove('open');
+            this.state.expandedCategory = null;
+        } else {
+            if (this.state.expandedCategory) {
+                const prevId = this.state.expandedCategory.replace(/\s+/g, '-').toUpperCase();
+                const prev = $(`#items-for-${prevId}`);
+                if (prev) { prev.style.maxHeight = '0'; prev.classList.remove('open'); }
             }
+            this.state.expandedCategory = cat;
+            div.classList.add('open');
+            setTimeout(() => { div.style.maxHeight = div.scrollHeight + 'px'; }, 10);
+        }
+        ui.renderMenuPageContent();
+    },
 
-            // Calculate effective discount percentage for admin panel consistency
-            const effectiveDiscountPercent = (subtotal > 0) ? (discountAmount / subtotal) * 100 : 0;
+    addOrUpdateCart(id, change) {
+        const item = this.state.allMenuItems.find(i => i.id === id);
+        let cartItem = this.state.cart.find(i => i.id === id);
+        if (!cartItem && change > 0) {
+            this.state.cart.push({ ...item, quantity: 1 });
+        } else if (cartItem) {
+            cartItem.quantity += change;
+            if (cartItem.quantity <= 0) this.state.cart = this.state.cart.filter(i => i.id !== id);
+        }
+        this.refreshPage();
+    },
 
+    refreshPage() {
+        ui.renderPageContent(this.state.currentPage);
+        ui.updateActiveNav(this.state.currentPage);
+    },
+
+    calculateTotals() {
+        const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
+        const pts = this.state.customerProfile?.loyalty_points || 0;
+        const maxRedeem = Math.min(Math.floor(pts * 0.8), Math.floor(subtotal));
+        const discount = Math.min(this.state.pointsToRedeem, maxRedeem);
+        const gst = (subtotal - discount) * 0.05;
+        const total = (subtotal - discount) + gst;
+        return { subtotal, discount, gst, total, maxRedeem };
+    },
+
+    async placeOrder(method, btn) {
+        const { subtotal, discount, total } = this.calculateTotals();
+        btn.disabled = true; btn.innerHTML = "Processing...";
+
+        try {
+            const { data: tableData } = await sb.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
             const orderPayload = {
-                customer_id: this.state.customerProfile.id,
+                customer_id: this.state.user.id,
                 table_id: tableData.id,
-                
-                // --- MODIFIED FIELDS for Consistency ---
-                total_amount: finalTotal, // Admin panel expects final total here
-                discount_percentage: effectiveDiscountPercent, // Admin panel uses this
-                
-                // --- Fields for this app's logic ---
-                discount_points_redeemed: pointsToRedeem,
-                discount_amount: discountAmount,
-                final_amount: finalTotal, // This app uses this (now matches total_amount)
-
-                payment_method: paymentMethod,
-                special_instructions: $('#special-instructions')?.value || '',
-                feedback_submitted: false
+                total_amount: total,
+                discount_amount: discount,
+                discount_points_redeemed: this.state.pointsToRedeem,
+                payment_method: method,
+                status: 'received'
             };
-            const { data: insertedOrder, error: orderError } = await supabase.from('orders').insert(orderPayload).select().single();
-            if (orderError) {
-                console.error("Order Insert Error:", orderError);
-                throw new Error(`Order placement failed. (Hint: Check RLS policies for 'orders' table. Customer ID: ${this.state.customerProfile.id})`);
-            }
-            orderData = insertedOrder;
 
-            const orderItems = this.state.cart.map(i => ({
-                order_id: orderData.id,
+            const { data: order, error } = await sb.from('orders').insert(orderPayload).select().single();
+            if (error) throw error;
+
+            const items = this.state.cart.map(i => ({
+                order_id: order.id,
                 product_id: i.id,
                 quantity: i.quantity,
                 price_at_time_of_order: i.price
             }));
-            const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-            if (itemsError) {
-                console.error("Order Items Insert Error:", itemsError);
-                // Attempt to delete the failed order header
-                await supabase.from('orders').delete().eq('id', orderData.id);
-                throw new Error(`Order items failed. (Hint: Check RLS policies for 'order_items' table)`);
-            }
+            await sb.from('order_items').insert(items);
 
-            // Points transactions *after* successful order and items insert
-            try {
-                if (pointsToRedeem > 0) {
-                     const { error: redeemError } = await supabase.rpc('redeem_loyalty_points', { customer_id_input: this.state.customerProfile.id, points_to_redeem: pointsToRedeem });
-                     if (redeeemError) throw new Error(`Redeem failed: ${redeemError.message}`);
-                     // Update local state *after* successful RPC
-                     this.state.customerProfile.loyalty_points -= pointsToRedeem;
-                }
-
-                const pointsEarned = Math.floor(subtotal / 500) * 50;
-                if (pointsEarned > 0) {
-                     const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.customerProfile.id, points_to_add: pointsEarned });
-                     if (incrementError) console.error("Award points failed:", incrementError);
-                     else {
-                         // Update local state *after* successful RPC
-                         this.state.customerProfile.loyalty_points += 50;
-                     }
-                }
-            } catch (pointsError) {
-                // Log warning but don't fail the entire order process
-                console.warn("Points transaction failed after order success:", pointsError.message);
-                ui.showToast("Order placed, but points update failed.");
-                // Fetch latest profile to ensure UI consistency eventually
-                await this.fetchCustomerProfile();
-            }
-
-            // Success flow
-            ui.closeModal('payment-modal');
-            this.state.activeOrder = orderData; // Set active order locally
-            this.listenToOrderUpdates(orderData.id); // Start listening
+            if (this.state.pointsToRedeem > 0) await sb.rpc('redeem_loyalty_points', { customer_id_input: this.state.user.id, points_to_redeem: discount });
+            
             this.state.cart = [];
             this.state.pointsToRedeem = 0;
-            this.refreshPage(); // Refresh UI (will show tracking page now)
-            sound.play('success');
-            this.navigateTo('cart'); // Navigate to cart/tracking
+            this.state.activeOrder = order;
+            this.listenToOrderUpdates(order.id);
+            ui.closeModal('payment-modal');
+            this.navigateTo('cart');
+        } catch (e) {
+            console.error(e);
+            ui.showToast("Order Failed.");
+            btn.disabled = false; btn.innerHTML = "Try Again";
+        }
+    },
 
-        } catch (error) {
-            console.error("Place Order Failed:", error);
-            ui.showToast(`Order failed: ${error.message}`);
-            // If the error was points-related, refresh points display
-            if (error.message.includes('points') || error.message.includes('profile')) {
-                await this.fetchCustomerProfile(); // Get latest points count
-                this.state.pointsToRedeem = 0; // Reset slider
-                this.refreshPage(); // Update cart UI
+    async fetchActiveOrder() {
+        const { data } = await sb.from('orders').select('*, order_items(*, products(*))').eq('customer_id', this.state.user.id).in('status', ['received', 'preparing']).order('created_at', { ascending: false }).limit(1).maybeSingle();
+        this.state.activeOrder = data;
+        if (data) this.listenToOrderUpdates(data.id);
+    },
+
+    listenToOrderUpdates(id) {
+        sb.channel(`order-${id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, p => {
+            this.state.activeOrder = p.new;
+            if (['delivered', 'cancelled'].includes(p.new.status)) {
+                this.state.activeOrder = null;
             }
-            // Reset button state
-            btnElement.disabled = false;
-            btnElement.innerHTML = originalBtnHTML;
-            const otherBtn = [...$$('.payment-btn')].find(b => b !== btnElement);
-            if(otherBtn) otherBtn.disabled = false;
-        }
-    },
-
-
-    async fetchActiveOrder(){
-        if (!this.state.user || !this.state.customerProfile?.id) return;
-        const { data, error } = await supabase.from('orders')
-            .select(`*, order_items(*, products(name)), feedback_submitted`)
-            .eq('customer_id', this.state.customerProfile.id)
-            .in('status', ['received', 'preparing'])
-            .order('created_at', { ascending: false })
-            .limit(1).single();
-
-        if (error && error.code !== 'PGRST116') console.error('Fetch active order error:', error);
-        this.state.activeOrder = data || null;
-        if (this.state.activeOrder) {
-            this.listenToOrderUpdates(this.state.activeOrder.id);
-        }
-    },
-
-    listenToOrderUpdates(orderId){
-        if (this.state.orderSubscription) {
-            supabase.removeChannel(this.state.orderSubscription);
-            this.state.orderSubscription = null;
-        }
-        console.log(`Listening order: ${orderId}`);
-        this.state.orderSubscription = supabase.channel(`public:orders:id=eq.${orderId}`)
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` }, payload => {
-                if (!this.state.activeOrder || this.state.activeOrder.id !== payload.new.id) return;
-
-                const updatedOrder = payload.new;
-                let uiNeedsRefresh = false;
-
-                if (updatedOrder.status !== this.state.activeOrder.status) {
-                    ui.showToast(`Your order is now: ${updatedOrder.status}`);
-                    this.state.activeOrder.status = updatedOrder.status;
-                    uiNeedsRefresh = true;
-                }
-                if ('feedback_submitted' in updatedOrder && updatedOrder.feedback_submitted !== this.state.activeOrder.feedback_submitted) {
-                    this.state.activeOrder.feedback_submitted = updatedOrder.feedback_submitted;
-                    uiNeedsRefresh = true;
-                }
-
-                if (['delivered', 'cancelled'].includes(updatedOrder.status)) {
-                    supabase.removeChannel(this.state.orderSubscription);
-                    this.state.orderSubscription = null;
-                    console.log("Order finished, unsubscribed.");
-
-                    // Show feedback modal ONLY if delivered AND feedback not submitted
-                    if (updatedOrder.status === 'delivered' && !updatedOrder.feedback_submitted) {
-                         ui.showModal('review-modal', `
-                            <div class="text-center">
-                                <span class="text-3xl">⭐</span>
-                                <h2 class="text-2xl font-bold mt-4">Order Delivered!</h2>
-                                <p class="text-secondary my-2">How was your experience? <br/>(+10 Loyalty Points for feedback!)</p>
-                                <textarea id="feedback-text" class="w-full p-3 border border-custom rounded-lg bg-secondary" rows="3" placeholder="Tell us more..."></textarea>
-                                <button onclick="app.submitFeedback('${orderId}')" class="w-full mt-4 brand-bg font-semibold py-3 rounded-lg">Submit Feedback</button>
-                                <button onclick="ui.closeModal('review-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Maybe Later</button>
-                            </div>`);
-                    } else if (updatedOrder.status === 'cancelled') {
-                        ui.showToast('Your order has been cancelled.');
-                    }
-                    this.state.activeOrder = null; // Clear active order
-                    uiNeedsRefresh = true;
-                }
-                // Refresh UI only if relevant changes occurred
-                if(uiNeedsRefresh && this.state.currentPage === 'cart') {
-                     this.refreshPage();
-                } else if (uiNeedsRefresh && this.state.currentPage === 'home') {
-                    this.refreshPage(); // Refresh home to remove active order banner if needed
-                }
-            }).subscribe((status, err) => {
-                if (status === 'SUBSCRIBED') {
-                    console.log(`Subscribed to order ${orderId}`);
-                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                    console.error(`Subscription failed:`, status, err);
-                    // Optionally attempt to resubscribe or notify user
-                }
-            });
-    },
-
-
-    async submitFeedback(orderId){
-        if (!this.state.customerProfile || !this.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
-        const content = $('#feedback-text').value.trim();
-        if (!content) return ui.showToast("Please enter your feedback.");
-
-        const submitBtn = $('#review-modal button:first-of-type');
-        if (submitBtn) submitBtn.disabled = true;
-
-        try {
-            // Verify feedback status again right before submitting
-            const { data: orderData, error: fetchError } = await supabase.from('orders').select('feedback_submitted').eq('id', orderId).single();
-            if (fetchError || !orderData) throw new Error("Could not verify order status.");
-            if (orderData.feedback_submitted) {
-                ui.showToast("Feedback already submitted for this order.");
-                ui.closeModal('review-modal');
-                return; // Exit if already submitted
-            }
-
-            // 1. Insert feedback
-            const { error: insertError } = await supabase.from('feedback').insert({
-                order_id: orderId,
-                customer_id: this.state.customerProfile.id,
-                content: content,
-                rating: 5 // Defaulting rating to 5 as there's no UI for it
-            });
-            if (insertError) throw insertError;
-
-            // 2. Mark order as feedback submitted (best effort)
-             const { error: updateError } = await supabase.from('orders')
-                 .update({ feedback_submitted: true })
-                 .eq('id', orderId);
-             if (updateError) console.warn("Could not mark order as feedback submitted:", updateError);
-
-            // 3. Award loyalty points
-            const { error: incrementError } = await supabase.rpc('increment_loyalty_points', { customer_id_input: this.state.customerProfile.id, points_to_add: 10 });
-            if (incrementError) {
-                console.error("Feedback points award failed:", incrementError);
-                ui.showToast("Feedback submitted, but points award failed.");
-            }
-            else {
-                 // Update local state *after* successful RPC
-                 this.state.customerProfile.loyalty_points += 10;
-                 ui.showToast("Thank you for your feedback! +10 Points added.");
-            }
-
-            // Close modal and refresh relevant UI parts
-            ui.closeModal('review-modal');
-            this.refreshPage(); // This will re-render the current page, updating points display if on 'More' page
-
-        } catch (error) {
-             console.error("Feedback submission error:", error);
-             ui.showToast(`Feedback failed: ${error.message}`);
-             if (submitBtn) submitBtn.disabled = false; // Re-enable button on error
-        }
-    },
-
-    async sendStaffCall(callType = 'assistance') {
-        if (!this.state.tableNumber) return ui.showToast('Table number not set.');
-        if (!this.state.customerProfile || !this.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
-        const { data: tableData } = await supabase.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
-        if (!tableData) return ui.showToast('Invalid table number.');
-
-        const { error } = await supabase.from('staff_calls').insert({
-            table_id: tableData.id,
-            customer_id: this.state.customerProfile.id,
-            call_type: callType
-        });
-
-        if (error) {
-            ui.showToast(`Error calling staff: ${error.message}`);
-        } else {
-            ui.showToast(`Staff have been notified! They'll be right over.`, 5000);
-        }
-    },
-
-    copyCaption(text) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.top = "0";
-        textArea.style.left = "0";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) ui.showToast('Copied!');
-            else ui.showToast('Copy failed.');
-        } catch (err) {
-            console.error('Fallback copy failed', err);
-            ui.showToast('Copy failed.');
-        }
-        document.body.removeChild(textArea);
+            this.refreshPage();
+        }).subscribe();
     }
 };
 
 const ui = {
-    showModal(id, content) {
-        location.hash = id; // Add modal ID to hash
-        const existingModal = $(`#${id}`);
-        if (existingModal) existingModal.remove();
-
-        const modalHTML = `
-            <div id="${id}" class="modal-overlay fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50 p-4">
-                <div class="modal-content bg-primary rounded-t-2xl shadow-xl p-6 w-full max-w-lg">
-                    ${content}
-                </div>
-            </div>`;
-        $('#modal-container').insertAdjacentHTML('beforeend', modalHTML);
-    },
-
-    closeModal(id) {
-        const modal = $(`#${id}`);
-        if (modal) modal.remove();
-        // If the current hash is the modal we are closing, go back
-        if (location.hash.substring(1) === id) {
-            // Check history length to avoid issues on initial load
-            if (history.length > 1 && window.performance.navigation.type !== window.performance.navigation.TYPE_RELOAD) {
-                history.back();
-            } else {
-                 // If no history, replace the hash to avoid broken back button
-                 history.replaceState(null, '', location.pathname + location.search + '#' + app.state.currentPage);
-            }
-        }
-    },
-
-    showToast(message, duration = 3000) {
-        const toast = $('#toast'), p = $('#toast-message');
-        p.textContent = message;
-        toast.classList.remove('hidden');
-        toast.style.animation = `toast-in 0.5s ease, toast-out 0.5s ease ${duration / 1000 - 0.5}s forwards`;
-        setTimeout(() => {
-            toast.classList.add('hidden');
-            toast.style.animation = '';
-        }, duration);
-    },
-
     renderHeader(page) {
         const header = $('#page-header');
-        const pageConfigs = {
-            home: { title: 'H<span class="classy-x">X</span>OUSE'},
-            order: { title: 'Menu'},
-            cart: { title: app.state.activeOrder ? 'Track Order' : 'My Cart'},
-            social: { title: 'Social'},
-            cowork: { title: 'Cowork'},
-            more: { title: 'More Options'}
-        };
-        const config = pageConfigs[page] || { title: 'H<span class="classy-x">X</span>OUSE' };
         header.innerHTML = `
-            <div class="flex items-center space-x-2">
-                <h1 class="text-2xl font-bold brand-text">${config.title}</h1>
-            </div>
+            <div><h1 class="text-2xl font-bold brand-text tracking-tighter uppercase">H<span class="classy-x">X</span>OUSE</h1></div>
             <div class="text-right">
-                <p class="font-semibold text-primary text-sm">${app.state.customerProfile?.name || 'Guest'}</p>
-                <p class="text-xs text-secondary">Table #${app.state.tableNumber || 'N/A'}</p>
+                <p class="font-bold text-sm tracking-tighter">TABLE #${app.state.tableNumber || '?'}</p>
+                <p class="text-[10px] uppercase opacity-40 font-black tracking-widest">${app.state.customerProfile?.name || 'Guest'}</p>
             </div>`;
     },
 
     renderPageContent(page) {
         const content = $('#page-content');
-        content.innerHTML = ''; // Clear previous content
-        const renderers = {
-            home: this.renderHomePage,
-            order: this.renderMenuPage,
-            cart: this.renderCartPage,
-            social: this.renderSocialPage,
-            cowork: this.renderCoworkPage,
-            more: this.renderMorePage,
-        };
-        content.classList.remove('fade-in');
-        void content.offsetWidth; // Trigger reflow
-        content.classList.add('fade-in');
-        // Call the appropriate render function if it exists
-        renderers[page]?.call(this);
+        if (page === 'home') this.renderHome(content);
+        else if (page === 'order') this.renderMenu(content);
+        else if (page === 'cart') this.renderCart(content);
+        else if (page === 'social') this.renderSocial(content);
+        else if (page === 'cowork') this.renderCowork(content);
+        else if (page === 'more') this.renderMore(content);
     },
 
-    renderBottomNav(){
-        const icons = {
-            home: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`,
-            order: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`,
-            cart: `<div class="relative"><svg id="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span id="cart-count" class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></div>`,
-            social: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`,
-            cowork: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`,
-            more: `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" /></svg>`
-        };
-
-        const labels = { home: 'Home', order: 'Menu', cart: 'Cart', social: 'Social', cowork: 'Cowork', more: 'More' };
-        $('#bottom-nav').innerHTML = PAGES.map(p => `<button onclick="app.navigateTo('${p}')" class="nav-item flex-1 p-2 text-secondary" data-page="${p}">${icons[p]}<span id="${p}-tab-label" class="text-xs font-bold capitalize">${labels[p]}</span></button>`).join('');
-    },
-
-    updateActiveNav(page) {
-        const cartLabel = $('#cart-tab-label'), cartIcon = $('#cart-icon-svg');
-        if (app.state.activeOrder) {
-            cartLabel.textContent = 'Track';
-            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />`;
-        } else {
-            cartLabel.textContent = 'Cart';
-            cartIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />`;
-        }
-        $$('.nav-item').forEach(item => {
-            const isActive = item.dataset.page === page;
-            item.classList.toggle('brand-text', isActive);
-            item.classList.toggle('text-secondary', !isActive);
-            item.style.transform = isActive ? 'scale(1.1)' : 'scale(1)';
-        });
-        this.refreshCartDependentUI();
-    },
-
-    refreshCartDependentUI() {
-        const el = $('#cart-count');
-        const total = app.state.cart.reduce((s, i) => s + i.quantity, 0);
-        if (total > 0 && !app.state.activeOrder) {
-            el.textContent = total;
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
-        }
-    },
-
-    renderHomePage(){
-        const settings = app.state.appSettings;
-        const activeOrderHTML = app.state.activeOrder ? `<div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center"> <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2> <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p> <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button> </div>` : '';
-        const loyaltyBannerHTML = `
-            <div class="bg-yellow-100 border border-yellow-200 text-yellow-800 p-4 rounded-xl text-center shadow-sm">
-                <h2 class="font-bold text-lg">✨ Earn 10% Back! ✨</h2>
-                <p class="mt-1">Get <strong class="font-semibold">50 Loyalty Points</strong> (worth ₹50) for every ₹500 spent.</p>
-                <p class="text-xs mt-1">Redeem points in your cart! Also check out our Cowork space.</p>
-            </div>`;
-
-        const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
-        const promoSubtitle = 'Show bill & story at counter.';
-        const bestSellerItems = STATIC_DATA.bestSellers.map(id => app.state.allMenuItems.find(item => item.id === id)).filter(Boolean);
-        const bestSellersHTML = bestSellerItems.map(item => `
-            <div onclick="ui.showItemDetailModal(${item.id})" class="cursor-pointer flex-shrink-0 w-40 bg-secondary rounded-xl p-3 flex flex-col items-center text-center">
-                <div class="text-3xl mb-2">${item.image_url || '☕️'}</div>
-                <h3 class="font-bold text-primary text-sm flex-grow">${item.name}</h3>
-                <p class="font-semibold text-secondary text-sm mt-1">₹${item.price}</p>
-            </div>`).join('');
-
-        $('#page-content').innerHTML = `
-            <div class="space-y-6">
-                <div class="relative h-48 overflow-hidden rounded-b-2xl">
-                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline preload="metadata" class="absolute top-1/2 left-1/2 w-full h-full object-cover -translate-x-1/2 -translate-y-1/2"></video>
-                    <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-center p-4">
-                        <h1 class="text-3xl font-bold">${settings.welcome_title || 'H<span class="classy-x">X</span>OUSE'}</h1>
-                        <p class="text-lg mt-1 font-light">${settings.welcome_subtitle || 'COFFEE CO.'}</p>
+    renderHome(c) {
+        c.innerHTML = `
+            <div class="space-y-6 fade-in">
+                <div class="relative h-60 overflow-hidden rounded-b-[2.5rem] shadow-2xl">
+                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover"></video>
+                    <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white p-6">
+                        <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center">Brewed for <br> the Hustle</h1>
+                        <p class="text-[10px] font-bold tracking-[0.4em] mt-3 opacity-80 uppercase">HXOUSE COFFEE CO.</p>
                     </div>
                 </div>
-                <div class="p-4 space-y-8">
-                    ${loyaltyBannerHTML}
-                    ${activeOrderHTML ? `<div class="mt-8">${activeOrderHTML}</div>` : ''}
-                    <div class="mt-8">
-                        <h2 class="text-2xl font-bold text-primary mb-4 px-1">Our Best Sellers</h2>
-                        <div class="flex space-x-4 overflow-x-auto pb-2">${bestSellersHTML}</div>
+                <div class="p-6 space-y-6">
+                    <div class="bg-yellow-100/80 border-2 border-yellow-200 p-8 rounded-[2.5rem] text-center shadow-sm">
+                        <h2 class="font-black text-lg text-yellow-900 uppercase tracking-tighter">Loyalty Member</h2>
+                        <p class="text-yellow-800 text-xs font-medium mt-1">Get 50 pts for every ₹500 spent.</p>
+                        <div class="mt-4 brand-bg text-primary py-2 px-6 inline-block rounded-full font-black text-sm shadow-sm">${app.state.customerProfile?.loyalty_points || 0} POINTS</div>
                     </div>
-                    <button onclick="app.navigateTo('order')" class="w-full brand-bg font-semibold py-4 px-6 rounded-lg text-lg"> View Full Menu </button>
-                    <div onclick="app.navigateTo('social')" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left">
-                        <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
-                        <p class="mt-1 text-secondary">${promoSubtitle}</p>
-                        <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Learn More &rarr;</button>
-                    </div>
-                    <div class="grid grid-cols-1 gap-4">
-                        <button onclick="app.sendStaffCall()" class="bg-secondary rounded-xl p-4 text-center flex flex-col items-center justify-center h-28"><span class="text-3xl">🛎</span><p class="font-semibold mt-2 text-primary">Call Staff</p></button>
-                    </div>
+                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-6 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 transition uppercase tracking-tighter">Explore Menu</button>
                 </div>
             </div>`;
     },
 
-    renderMenuPage(){
-        const content = $('#page-content');
-        if (app.state.menuData.length === 0 && app.state.allMenuItems.length === 0) {
-            content.innerHTML = `<div class="p-4 text-center text-secondary">Loading menu...</div>`;
-            return;
-        }
-
-        content.innerHTML = `
-            <div id="active-order-banner" class="p-4 hidden"></div>
-            <div class="p-4">
-                <input type="text" id="menu-search-input" placeholder="Search menu..." class="w-full p-3 border-2 border-custom rounded-lg bg-secondary text-primary text-lg" oninput="app.performSearch(this.value)" value="${app.state.searchQuery}">
-            </div>
-            
-            <div id="menu-sections" class="p-4 space-y-3">
-                ${this.renderMenuPageContent()}
-            </div>
-
-            <div id="search-results-container" class="p-4 grid grid-cols-1 gap-4 hidden"></div>`;
-
-        if (app.state.activeOrder) {
-            $('#active-order-banner').classList.remove('hidden');
-            $('#active-order-banner').innerHTML = `
-                <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-4 text-center">
-                    <h2 class="font-bold text-primary">Your order is ${app.state.activeOrder.status}!</h2>
-                    <p class="text-secondary text-sm">Order ID: #${app.state.activeOrder.id.slice(0,6)}</p>
-                    <button onclick="app.navigateTo('cart')" class="mt-2 text-sm font-semibold text-blue-600 hover:underline">View Details &rarr;</button>
-                </div>`;
-        }
-        
-        // If there's an active search query, display search results
-        if (app.state.searchQuery.length > 1) {
-            app.performSearch(app.state.searchQuery);
-        } else {
-             // After initial render, call this to set the correct max-height for the initial open category
-             const initialCategory = app.state.expandedCategory;
-             if (initialCategory) {
-                 // FIX: Use sanitizeId here as well
-                 const id = sanitizeId(initialCategory);
-                 const contentDiv = $(`#items-for-${id}`);
-                 if (contentDiv) {
-                    contentDiv.classList.add('open');
-                    const innerDiv = contentDiv.querySelector('.accordion-item-list');
-                    // Ensure the inner div is measured after rendering
-                    contentDiv.style.maxHeight = innerDiv.scrollHeight + 16 + 'px'; // +16 buffer (1rem)
-                 }
-             }
-        }
+    renderMenu(c) {
+        c.innerHTML = `
+            <div class="p-4 fade-in"><input type="text" id="menu-search" placeholder="Search beverages..." class="w-full p-5 bg-secondary border border-custom rounded-[1.5rem] font-bold shadow-inner" oninput="app.state.searchQuery = this.value; ui.renderMenuPageContent()"></div>
+            <div id="menu-sections" class="p-4 space-y-4"></div>`;
+        this.renderMenuPageContent();
     },
 
-    // NEW FUNCTION: Renders the vertical accordion menu
     renderMenuPageContent() {
-        const menuSections = $('#menu-sections');
-        const contentHTML = app.state.menuData.map(group => this.renderCategorySection(group)).join('');
-        if (!menuSections) return contentHTML;
+        const target = $('#menu-sections');
+        if (!target) return;
+        const q = app.state.searchQuery.toLowerCase();
         
-        menuSections.innerHTML = contentHTML;
-    },
-    
-    // NEW FUNCTION: Renders a single expandable category section
-    renderCategorySection(group) {
-        const isExpanded = app.state.expandedCategory === group.category;
-        
-        // Initial max-height calculation for rendering purposes, actual transition logic is in app.toggleCategory
-        const initialMaxHeight = isExpanded ? '500px' : '0'; // Use a large buffer initially if expanded
-        const openClass = isExpanded ? 'open' : '';
-        const rotateClass = isExpanded ? 'rotate-90' : 'rotate-0';
-        
-        // FIX: Use sanitizeId when creating the ID
-        const categoryId = sanitizeId(group.category);
-
-        return `
-            <div class="bg-secondary rounded-xl shadow-sm overflow-hidden border border-custom">
-                <!-- Category Header (Clickable) -->
-                <button onclick="app.toggleCategory('${group.category}')" class="w-full flex items-center justify-between p-4 focus:outline-none">
-                    <h2 class="text-xl font-bold text-primary">${group.category}</h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="accordion-arrow h-6 w-6 text-brand-primary ${rotateClass}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-                
-                <!-- Items Content (Collapsible) -->
-                <div id="items-for-${categoryId}" class="accordion-content ${openClass}" style="max-height: ${initialMaxHeight};">
-                    <!-- FIX: Using grid/gap for spacing which removes the trailing margin on the last item -->
-                    <div class="accordion-item-list"> 
-                        ${group.items.length > 0 ? group.items.map(item => this.renderMenuItemCard(item)).join('') : '<p class="text-secondary text-center py-4">No items available in this category.</p>'}
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-    
-    // RENAMED/MODIFIED FUNCTION: Renders a single menu item card (for use in both accordion and search results)
-    renderMenuItemCard(item) {
-        const cartItem = app.state.cart.find(ci => ci.id === item.id);
-        const actionButtonHTML = cartItem
-            ? `<div class="quantity-control" onclick="event.stopPropagation();">
-                   <button onclick="app.addOrUpdateCart(${item.id}, -1)">-</button>
-                   <span>${cartItem.quantity}</span>
-                   <button onclick="app.addOrUpdateCart(${item.id}, 1)">+</button>
-               </div>`
-            : `<button class="add-to-cart-btn" onclick="event.stopPropagation(); app.addOrUpdateCart(${item.id}, 1)">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-               </button>`; // Added plus icon for aesthetics
-
-        return `
-            <div class="bg-primary rounded-lg shadow-md overflow-hidden cursor-pointer border border-custom" onclick="ui.showItemDetailModal(${item.id})">
-                <div class="p-3 flex items-center justify-between">
-                    <div class="flex-1 pr-4">
-                        <h3 class="font-semibold text-base truncate text-primary">${item.name}</h3>
-                        <p class="font-bold text-sm text-secondary mt-1">₹${item.price}</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        ${actionButtonHTML}
-                    </div>
-                </div>
-            </div>`;
-    },
-
-    // ORIGINAL FUNCTION: Renders search results
-    renderMenuItems(items, containerId) {
-        const container = $(`#${containerId}`);
-        if (!container) return;
-        if (!items || items.length === 0) {
-            container.innerHTML = `<p class="text-secondary text-center col-span-full mt-8">No items found.</p>`;
-            return;
-        }
-        // Use the new single card renderer
-        container.innerHTML = items.map(item => this.renderMenuItemCard(item)).join('');
-    },
-
-    renderCartPage() {
-        const content = $('#page-content');
-        if (app.state.activeOrder) this.renderOrderTracking(content);
-        else if (app.state.cart.length > 0) this.renderCart(content);
-        else content.innerHTML = `
-            <div class="text-center p-10">
-                <h2 class="text-2xl font-bold text-primary">Your cart is empty</h2>
-                <p class="text-secondary mt-2">Add items from the menu to get started.</p>
-                <button onclick="app.navigateTo('order')" class="mt-6 brand-bg font-semibold py-3 px-6 rounded-lg">View Menu</button>
-            </div>`;
-    },
-
-    renderCart(container){
-        // MODIFICATION: Use new calculateTotals function
-        const { subtotal, discountAmount, gst, finalTotal, maxRedeemableForOrder } = app.calculateCartTotal();
-        const loyaltyPoints = app.state.customerProfile?.loyalty_points || 0;
-        
-        // Clamp pointsToRedeem on initial render as well
-        app.state.pointsToRedeem = Math.min(app.state.pointsToRedeem, maxRedeemableForOrder);
-        const currentDiscount = app.state.pointsToRedeem; // This is the discountAmount
-
-        let hamperMessage = '';
-        if (subtotal > 0 && subtotal < 799) {
-            const amountNeeded = 799 - subtotal;
-            hamperMessage = `<div class="p-4"><div class="bg-yellow-100 border border-yellow-200 text-yellow-800 p-3 rounded-lg text-center font-bold">🛒 Order for ₹${amountNeeded.toFixed(2)} more to get a free hamper!</div></div>`;
-        } else if (subtotal >= 799) {
-            hamperMessage = `<div class="p-4"><div class="bg-green-100 border border-green-200 text-green-800 p-3 rounded-lg text-center font-bold">🎉 You're eligible for a free hamper! Don't forget to post a story.</div></div>`;
-        }
-
-        const loyaltyExplanation = `<p class="text-xs text-secondary mt-1 mb-3">Earn 50 points (worth ₹50) for every ₹500 spent on subtotal. Redeemable points = 80% of balance.</p>`;
-
-        let loyaltySectionHTML = '';
-        if (loyaltyPoints > 0 && maxRedeemableForOrder > 0) {
-            loyaltySectionHTML = `
-                <div class="p-4 border-t border-b border-custom">
-                    <h3 class="font-bold text-lg mb-2 text-primary">Redeem Loyalty Points</h3>
-                    <p class="text-sm text-secondary mb-1">Available: ${loyaltyPoints} points</p>
-                    ${loyaltyExplanation}
-                    <p class="text-sm text-secondary mb-3">Redeemable (max ₹${maxRedeemableForOrder}):</p>
-                    <input type="range" id="loyalty-slider" min="0" max="${maxRedeemableForOrder}" value="${app.state.pointsToRedeem}"
-                           oninput="app.updatePointsToRedeem(this.value)" class="w-full h-2 rounded-lg cursor-pointer">
-                    <div class="flex justify-between text-sm font-semibold mt-2">
-                        <span>Redeem: <span id="points-to-redeem-display">${app.state.pointsToRedeem}</span> pts</span>
-                        <span>Discount: - ₹<span id="discount-amount-display">${currentDiscount.toFixed(2)}</span></span>
-                    </div>
-                </div>`;
-        } else if (loyaltyPoints > 0) {
-             loyaltySectionHTML = `<div class="p-4 border-t border-b border-custom"><p class="text-sm text-secondary text-center">You have ${loyaltyPoints} points. ${loyaltyExplanation} Earn more/increase order total to redeem.</p></div>`;
-        } else {
-             loyaltySectionHTML = `<div class="p-4 border-t border-b border-custom"><p class="text-sm text-secondary text-center">${loyaltyExplanation}</p></div>`;
-        }
-
-
-        container.innerHTML = `
-            <div class="p-4 space-y-3">
-                ${app.state.cart.map(i => `
-                    <div class="bg-secondary p-3 rounded-xl flex items-center justify-between">
-                        <div>
-                            <p class="font-bold text-primary">${i.name}</p>
-                            <p class="font-semibold text-secondary text-sm">₹${(i.price * i.quantity).toFixed(2)}</p>
-                        </div>
-                        <div class="quantity-control" style="background-color: var(--bg-primary); color: var(--brand-primary); border: 1px solid var(--border-color);">
-                            <button onclick="app.addOrUpdateCart(${i.id}, -1)">-</button>
-                            <span>${i.quantity}</span>
-                            <button onclick="app.addOrUpdateCart(${i.id}, 1)">+</button>
+        target.innerHTML = app.state.menuData.map(group => {
+            const filteredItems = group.items.filter(i => i.name.toLowerCase().includes(q));
+            if (filteredItems.length === 0 && q.length > 0) return '';
+            const isExp = app.state.expandedCategory === group.category || q.length > 0;
+            const id = group.category.replace(/\s+/g, '-').toUpperCase();
+            return `
+                <div class="bg-secondary rounded-[1.5rem] border border-custom overflow-hidden shadow-sm">
+                    <button onclick="app.toggleCategory('${group.category}')" class="w-full p-5 flex justify-between items-center font-black uppercase text-[10px] tracking-widest">
+                        ${group.category} <span class="accordion-arrow transform transition-transform ${isExp ? 'rotate-90' : ''}">→</span>
+                    </button>
+                    <div id="items-for-${id}" class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '2000px' : '0'}">
+                        <div class="accordion-item-list">
+                            ${filteredItems.map(i => this.renderItemCard(i)).join('')}
                         </div>
                     </div>
-                `).join('')}
-            </div>
-            ${hamperMessage}
-            ${loyaltySectionHTML}
-            <div class="p-4"><textarea id="special-instructions" class="w-full p-3 border-custom rounded-lg bg-secondary" placeholder="Add special instructions..."></textarea></div>
-            <div class="p-4 bg-primary border-t-custom sticky bottom-16">
-                 <div id="cart-summary" class="mb-4 space-y-1 text-primary"></div>
-                <button id="place-order-btn" onclick="ui.showPaymentModal()" class="w-full brand-bg font-bold py-4 rounded-lg">Proceed to Payment</button>
-            </div>`;
-        this.updateCartSummary(); // Initial render of summary
-    },
-
-    updateCartSummary() {
-        // Recalculate here as well to ensure consistency
-        const { subtotal, discountAmount, gst, finalTotal } = app.calculateCartTotal();
-        const currentDiscount = discountAmount; // Use the value from the function
-
-        const pointsDisplay = $('#points-to-redeem-display');
-        const discountDisplay = $('#discount-amount-display');
-        if(pointsDisplay) pointsDisplay.textContent = currentDiscount.toFixed(0); // Points are integers
-        if(discountDisplay) discountDisplay.textContent = currentDiscount.toFixed(2);
-
-        const summaryDiv = $('#cart-summary');
-        if (summaryDiv) {
-            summaryDiv.innerHTML = `
-                <div class="flex justify-between items-center text-md">
-                    <span>Subtotal</span>
-                    <span>₹${subtotal.toFixed(2)}</span>
-                </div>
-                <div class="flex justify-between items-center text-md text-green-600 ${currentDiscount > 0 ? '' : 'hidden'}">
-                    <span>Loyalty Discount</span>
-                    <span>- ₹${currentDiscount.toFixed(2)}</span>
-                </div>
-                <div class="flex justify-between items-center text-md ${gst > 0 ? '' : 'hidden'}">
-                    <span>GST (5%)</span>
-                    <span>₹${gst.toFixed(2)}</span>
-                </div>
-                <div class="flex justify-between items-center text-xl font-bold pt-1 border-t border-custom">
-                    <span>To Pay</span>
-                    <span>₹${finalTotal.toFixed(2)}</span>
                 </div>`;
-        }
+        }).join('');
     },
 
+    renderItemCard(i) {
+        const cartItem = app.state.cart.find(ci => ci.id === i.id);
+        return `
+            <div class="bg-primary p-5 rounded-2xl shadow-sm flex justify-between items-center border border-custom transform active:scale-95 transition">
+                <div class="flex-grow pr-4">
+                    <h4 class="font-black text-sm uppercase leading-tight mb-1">${i.name}</h4>
+                    <p class="text-secondary font-black text-xs opacity-50 tracking-widest uppercase">₹${i.price}</p>
+                </div>
+                <div class="flex-shrink-0">
+                    ${cartItem ? `
+                        <div class="quantity-control bg-primary border-2 border-brand-primary text-brand-primary">
+                            <button onclick="app.addOrUpdateCart(${i.id}, -1)" class="px-3 font-black">−</button>
+                            <span class="text-sm font-black">${cartItem.quantity}</span>
+                            <button onclick="app.addOrUpdateCart(${i.id}, 1)" class="px-3 font-black">+</button>
+                        </div>
+                    ` : `
+                        <button onclick="app.addOrUpdateCart(${i.id}, 1)" class="add-to-cart-btn brand-bg shadow-lg font-black text-2xl active:scale-90 transition">+</button>
+                    `}
+                </div>
+            </div>`;
+    },
 
-    renderOrderTracking(container) {
-        const order = app.state.activeOrder;
-        if (!order) { container.innerHTML = ''; return; }
-        const statuses = ['received', 'preparing', 'delivered'];
-        const icons = { received: '📝', preparing: '🍳', delivered: '😊' };
-        const currentIndex = statuses.indexOf(order.status);
-        const progressPercentage = currentIndex > 0 ? (currentIndex / (statuses.length - 1)) * 100 : 0;
-        container.innerHTML = `
-            <div class="p-6 flex flex-col items-center justify-center h-full">
-                <h2 class="text-3xl font-bold text-center capitalize">Your Order is ${order.status}</h2>
-                <p class="text-secondary text-center mb-10">Order ID: #${order.id.slice(0,6)}</p>
-                <div class="tracker-container my-12 w-full max-w-sm">
-                    <div class="tracker-line-container">
-                        <div class="tracker-progress" style="width: ${progressPercentage}%"></div>
-                    </div>
-                    ${statuses.map((status, index) => `
-                        <div class="tracker-step ${index <= currentIndex ? 'active' : ''}">
-                            <div class="tracker-icon-container">${icons[status]}</div>
-                            <span class="tracker-label capitalize">${status}</span>
+    renderCart(c) {
+        if (app.state.activeOrder) { this.renderTracking(c); return; }
+        if (app.state.cart.length === 0) { c.innerHTML = `<div class="p-20 text-center opacity-30 fade-in h-full flex flex-col justify-center"><p class="text-7xl mb-8">☕️</p><p class="font-black tracking-widest uppercase text-xs">Selection Empty</p></div>`; return; }
+
+        const { subtotal, discount, gst, total, maxRedeem } = app.calculateTotals();
+        c.innerHTML = `
+            <div class="p-6 space-y-6 pb-32 fade-in">
+                <h2 class="text-3xl font-black tracking-tighter uppercase">Cart</h2>
+                <div class="space-y-3">
+                    ${app.state.cart.map(i => `
+                        <div class="flex justify-between items-center p-5 bg-secondary rounded-[1.5rem] border border-custom shadow-sm">
+                            <div><p class="font-black text-sm uppercase">${i.name}</p><p class="text-[10px] opacity-40 font-black mt-1 tracking-widest">₹${i.price} x ${i.quantity}</p></div>
+                            <div class="quantity-control shadow-sm"><button onclick="app.addOrUpdateCart(${i.id}, -1)" class="px-2">−</button><span>${i.quantity}</span><button onclick="app.addOrUpdateCart(${i.id}, 1)" class="px-2">+</button></div>
                         </div>`).join('')}
                 </div>
-                <div class="mt-auto pt-10 text-center">
-                    <p class="text-secondary mb-4">While you wait, why not play a game?</p>
-                    <button onclick="ui.showGamesModal()" class="brand-bg font-semibold py-3 px-8 rounded-lg">Play Games</button>
+                ${maxRedeem > 0 ? `
+                    <div class="p-8 bg-secondary rounded-[2rem] border border-custom shadow-inner">
+                        <p class="text-[10px] font-black uppercase mb-5 opacity-40 tracking-widest text-center">Redeem Rewards</p>
+                        <input type="range" id="loyalty-slider" min="0" max="${maxRedeem}" value="${app.state.pointsToRedeem}" oninput="app.state.pointsToRedeem = parseInt(this.value); ui.renderPageContent('cart')">
+                        <div class="flex justify-between font-black text-[10px] mt-5 uppercase opacity-60"><span>Redeem ₹${app.state.pointsToRedeem}</span><span>Balance ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem} pts</span></div>
+                    </div>` : ''}
+                <div class="p-8 bg-secondary rounded-[2rem] space-y-3 border border-custom shadow-sm">
+                    <div class="flex justify-between font-black text-[10px] opacity-40 uppercase tracking-widest"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
+                    ${discount > 0 ? `<div class="flex justify-between font-black text-[10px] text-green-600 uppercase tracking-widest"><span>Discount</span><span>-₹${discount.toFixed(2)}</span></div>` : ''}
+                    <div class="flex justify-between font-black text-[10px] opacity-40 uppercase tracking-widest"><span>GST (5%)</span><span>₹${gst.toFixed(2)}</span></div>
+                    <div class="flex justify-between font-black text-2xl pt-4 border-t border-custom tracking-tighter uppercase"><span>Total</span><span>₹${total.toFixed(2)}</span></div>
+                </div>
+                <button onclick="ui.showPaymentModal()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-2xl shadow-2xl tracking-tighter uppercase active:scale-95 transition">Place Order</button>
+            </div>`;
+    },
+
+    renderTracking(c) {
+        const order = app.state.activeOrder;
+        const steps = ['received', 'preparing', 'delivered'];
+        const idx = steps.indexOf(order.status);
+        const progress = ((idx + 1) / steps.length) * 100;
+        
+        c.innerHTML = `
+            <div class="p-8 text-center space-y-12 fade-in">
+                <h2 class="text-4xl font-black tracking-tighter uppercase">Tracking</h2>
+                <div class="relative h-5 w-full bg-secondary rounded-full overflow-hidden border border-custom shadow-inner">
+                    <div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${progress}%"></div>
+                </div>
+                <div class="space-y-10 text-left px-4">
+                    ${steps.map((s, i) => `
+                        <div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}">
+                            <div class="w-16 h-16 rounded-[1.5rem] border-2 border-custom flex items-center justify-center text-3xl shadow-sm bg-secondary">${i === 0 ? '📝' : i === 1 ? '☕' : '🏁'}</div>
+                            <div>
+                                <p class="font-black text-sm uppercase tracking-widest leading-none mb-2">${s}</p>
+                                <p class="text-[10px] font-bold text-secondary uppercase opacity-60 tracking-wider">${i <= idx ? 'Done' : 'Upcoming'}</p>
+                            </div>
+                        </div>`).join('')}
                 </div>
             </div>`;
     },
 
-    renderSocialPage(){
-        const promoTitle = 'Order for ₹799+ & post a story to get a <span class="instagram-card">Free Hamper!</span>';
-        const promoSubtitle = 'Show your bill & story at the counter to claim your gift from H<span class="classy-x">X</span>OUSE.';
-        $('#page-content').innerHTML = `
-            <div class="p-4 space-y-6 text-center">
-                 <div class="bg-secondary p-6 rounded-xl shadow-sm">
-                    <h2 class="text-2xl font-bold text-primary">Join Our Community!</h2>
-                    <p class="text-secondary mt-1">Follow us on Instagram for updates, offers, and good vibes.</p>
-                    <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="instagram-card text-2xl font-bold my-4 block">@hxousecoffeeco</a>
-                    <div class="flex justify-center">
-                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://instagram.com/hxousecoffeeco" alt="Instagram QR Code" class="rounded-lg bg-white p-2">
-                    </div>
-                    <p class="text-xs text-secondary mt-2">Scan to follow!</p>
+    renderSocial(c) {
+        c.innerHTML = `
+            <div class="p-6 space-y-8 fade-in h-full flex flex-col justify-center text-center">
+                <h2 class="text-3xl font-black uppercase tracking-tighter">Inner Circle</h2>
+                <div class="bg-secondary p-10 rounded-[2.5rem] border border-custom shadow-xl">
+                    <p class="instagram-card font-black text-2xl mb-8 tracking-tighter">@hxousecoffeeco</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[2rem] border-8 border-white p-2 shadow-inner">
                 </div>
-
-                <div onclick="ui.showInstagramPromo()" class="cursor-pointer group relative bg-secondary rounded-xl p-6 overflow-hidden shadow-sm text-left">
-                     <h2 class="text-2xl font-bold text-primary">${promoTitle}</h2>
-                    <p class="mt-1 text-secondary">${promoSubtitle}</p>
-                    <button class="font-semibold mt-3 text-sm brand-bg px-4 py-2 rounded-lg group-hover:opacity-90 transition">Get Caption Ideas &rarr;</button>
-                </div>
-            </div>
-        `;
-    },
-
-    renderCoworkPage() {
-        $('#page-content').innerHTML = `
-            <div class="p-6 space-y-6 text-center">
-                 <div class="bg-secondary p-8 rounded-xl shadow-lg border border-custom">
-                    <span class="text-5xl mb-4 block">🏢</span>
-                    <h2 class="text-3xl font-bold text-primary mb-2">Work & Caffeinate!</h2>
-                    <p class="text-lg text-secondary mb-6">Did you know HXOUSE offers a dedicated coworking space?</p>
-                    <ul class="text-left space-y-2 mb-8 list-disc list-inside text-secondary">
-                        <li>High-speed Wi-Fi included</li>
-                        <li>Comfortable seating & power outlets</li>
-                        <li>Quiet, productive environment</li>
-                        <li>Perfect for students, freelancers & teams</li>
-                        <li>Exclusive cafe discounts for members</li>
-                    </ul>
-                    <p class="text-primary font-semibold mb-4">Interested? Ask our staff!</p>
-                    <button onclick="app.sendStaffCall('cowork_inquiry')" class="w-full mb-4 brand-bg font-semibold py-3 px-6 rounded-lg transition hover:opacity-90">
-                        🛎 Call Staff for Tour & Details
-                    </button>
-
-                    <a href="https://instagram.com/hxousecoffeeco" target="_blank" class="inline-block bg-secondary text-primary font-semibold py-3 px-6 rounded-lg transition hover:bg-primary hover:text-secondary">
-                        Follow <span class="instagram-card" style="background: none; -webkit-text-fill-color: inherit; font-weight: bold;">@hxousecoffeeco</span>
-                    </a>
-                </div>
-            </div>
-        `;
-    },
-
-    renderMorePage(){
-        const loyaltyPoints = app.state.customerProfile?.loyalty_points ?? 0;
-        const loyaltyExplanation = `<p class="text-xs text-secondary mt-1">Earn 50 pts (₹50) per ₹500 spent. 1 pt = ₹1 discount (redeem in Cart).</p>`;
-        const options = [
-            { icon: "🪙", text: `Loyalty Points: ${loyaltyPoints}`, action: "", explanation: loyaltyExplanation },
-            { icon: "🛎", text: "Call Staff (General Assistance)", action: "app.sendStaffCall('assistance')" },
-            { icon: "🎨", text: "Change Theme", action: "ui.showThemeModal()" },
-            { icon: "🎮", text: "Play Games", action: "ui.showGamesModal()" },
-            { icon: "📶", text: "View Wi-Fi Details", action: "ui.showWifiModal()" },
-            { icon: "📜", text: "Order History", action: "ui.showOrderHistoryModal()" },
-        ];
-        $('#page-content').innerHTML = `
-            <div class="p-4 space-y-3">
-                ${options.map(opt =>
-                    opt.action
-                    ? `<button onclick="${opt.action}" class="w-full flex items-center justify-between bg-secondary p-4 rounded-xl text-left">
-                           <div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>
-                           <span class="text-secondary">&rarr;</span>
-                       </button>`
-                    : `<div class="w-full bg-secondary p-4 rounded-xl text-left">
-                           <div class="flex items-center"><span class="text-2xl mr-4">${opt.icon}</span><span class="font-semibold text-primary">${opt.text}</span></div>
-                           ${opt.explanation || ''}
-                       </div>`
-                ).join("")}
             </div>`;
     },
 
-    showPaymentModal(){
-         ui.showModal('payment-modal', `
-            <h2 class="text-xl font-bold text-primary mb-4">Select Payment</h2>
-            <div class="space-y-3">
-                <button onclick="app.placeOrder('Pay at Counter', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">💵</span><span class="font-semibold">Pay at Counter</span></button>
-                <!-- <button onclick="app.placeOrder('UPI / QR Code', this)" class="payment-btn w-full flex items-center justify-center bg-secondary p-4 rounded-xl"><span class="text-2xl mr-4">📱</span><span class="font-semibold">UPI / QR Code</span></button> -->
-            </div>
-            <button onclick="ui.closeModal('payment-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
-        `);
+    renderCowork(c) {
+        c.innerHTML = `
+            <div class="p-8 text-center space-y-10 fade-in h-full flex flex-col justify-center">
+                <span class="text-9xl mb-4 drop-shadow-2xl">🏢</span>
+                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none">Studio</h2>
+                <p class="text-secondary font-medium leading-relaxed px-10 text-sm">Fiber-optic Wi-Fi, premium brews, and a productive creative vibe. Ask staff for availability.</p>
+                <button onclick="app.sendStaffCall('cowork')" class="brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Inquire Seat</button>
+            </div>`;
     },
 
-    showItemDetailModal(itemId){
-        const item = app.state.allMenuItems.find(i => i.id === itemId); if (!item) return;
-        const cartItem = app.state.cart.find(ci => ci.id === itemId);
-        const currentQuantity = cartItem ? cartItem.quantity : 1;
-        let optionsHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${i + 1 === currentQuantity ? 'selected' : ''}>${i + 1}</option>`).join('');
-        optionsHTML = `<option value="0" ${!cartItem ? 'selected' : ''}>0 (Remove)</option>` + optionsHTML;
-
-        ui.showModal('item-detail-modal', `
-            <div class="flex justify-between items-start">
-                <div>
-                    <h2 class="text-2xl font-bold text-primary">${item.name}</h2>
-                    <p class="text-xl font-semibold text-secondary">₹${item.price}</p>
+    renderMore(c) {
+        c.innerHTML = `
+            <div class="p-6 space-y-4 fade-in">
+                <h2 class="text-3xl font-black uppercase tracking-tighter">Account</h2>
+                <div class="bg-secondary p-10 rounded-[2rem] border border-custom shadow-sm mb-8">
+                    <p class="text-[10px] font-black uppercase opacity-40 mb-2 tracking-[0.3em]">Verified Member</p>
+                    <p class="font-black text-2xl tracking-tighter uppercase">${app.state.customerProfile?.name || 'Guest'}</p>
+                    <p class="text-xs opacity-50 font-bold mt-2 tracking-widest">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
                 </div>
-                <div class="text-5xl">${item.image_url || '☕️'}</div>
-            </div>
-            <p class="text-secondary mt-2">${item.description || 'A delicious choice.'}</p>
-            <div class="flex items-center justify-between my-6 bg-secondary p-3 rounded-lg">
-                <label for="modal-quantity-select" class="font-semibold text-primary">Quantity:</label>
-                <select id="modal-quantity-select" class="bg-primary border border-custom text-primary font-semibold rounded-lg p-2">${optionsHTML}</select>
-            </div>
-            <div class="mt-6 grid grid-cols-2 gap-4">
-                <button onclick="ui.closeModal('item-detail-modal')" class="w-full bg-secondary font-semibold py-3 rounded-lg">Back</button>
-                <button onclick="app.setCartItemQuantity(${item.id}, parseInt($('#modal-quantity-select').value))" class="w-full brand-bg font-semibold py-3 rounded-lg">${cartItem ? 'Update Quantity' : 'Add to Cart'}</button>
-            </div>`);
+                <button onclick="ui.showGamesModal()" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between shadow-sm active:bg-primary transition"><span>Mini Arcade</span><span>🎮</span></button>
+                <button onclick="location.reload()" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between shadow-sm active:bg-primary transition"><span>Refresh Engine</span><span>⟳</span></button>
+            </div>`;
     },
 
-    showInstagramPromo(){
-        const vibes = Object.entries(STATIC_DATA.captionIdeas).map(([key, _]) => ({
-            name: key, icon: { student: '🎓', office: '💼', couple: '❤️', friends: '🎉' }[key]
-        }));
-        ui.showModal('insta-modal', `
-            <h2 class="text-2xl font-bold">Post for a Free Hamper!</h2>
-            <p class="text-secondary mt-1 mb-6">If your order is over ₹799, post a story tagging us, and show both at the counter!</p>
-            <div class="grid grid-cols-2 gap-4">${vibes.map(v => `
-                <button onclick="ui.showCaptionIdeas('${v.name}')" class="bg-secondary p-4 rounded-xl text-center">
-                    <span class="text-3xl">${v.icon}</span><p class="font-semibold mt-2 capitalize">${v.name}</p>
-                </button>`).join('')}
-            </div>
-            <button onclick="ui.closeModal('insta-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Cancel</button>
-        `);
+    showModal(id, content) {
+        const m = document.createElement('div');
+        m.id = id; m.className = "modal-overlay fixed inset-0 bg-black/95 z-[60] flex items-end p-4 backdrop-blur-md";
+        m.innerHTML = `<div class="modal-content w-full bg-primary p-12 rounded-[3.5rem] shadow-2xl border border-custom">${content}</div>`;
+        $('#modal-container').appendChild(m);
     },
 
-    showCaptionIdeas(category){
-        ui.closeModal('insta-modal');
-        const captions = STATIC_DATA.captionIdeas[category];
-        ui.showModal('caption-modal', `
-            <h2 class="text-2xl font-bold">Caption Ideas</h2>
-            <p class="text-secondary mt-1 mb-4">Tap to copy. Tag us <span class="font-bold brand-text">@hxousecoffeeco</span>!</p>
-            <div class="space-y-2 max-h-48 overflow-y-auto">${captions.map(c => `
-                <div onclick="app.copyCaption('${c.replace(/'/g, "\\'")}')" class="bg-secondary p-3 rounded-lg text-sm font-medium cursor-pointer flex justify-between items-center">
-                    <span>${c}</span><span class="text-xs font-bold brand-text">COPY</span>
-                </div>`).join('')}
+    closeModal(id) { $(`#${id}`)?.remove(); },
+
+    showToast(msg) {
+        const t = $('#toast'); $('#toast-message').textContent = msg.toUpperCase();
+        t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2500);
+    },
+
+    showPaymentModal() {
+        this.showModal('payment-modal', `
+            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter">Select Pay</h2>
+            <div class="space-y-4">
+                <button onclick="app.placeOrder('Counter', this)" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between items-center shadow-sm uppercase text-xs tracking-widest"><span>Counter Pay</span><span>💵</span></button>
+                <button onclick="app.placeOrder('UPI', this)" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between items-center shadow-sm uppercase text-xs tracking-widest"><span>UPI Digital</span><span>📱</span></button>
             </div>
-            <a href="instagram://story-camera" class="block w-full text-center mt-6 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white font-semibold py-3 rounded-lg">Open Instagram Story</a>
-            <button onclick="ui.closeModal('caption-modal')" class="w-full mt-2 bg-secondary font-semibold py-3 rounded-lg">Close</button>
+            <button onclick="ui.closeModal('payment-modal')" class="w-full mt-10 opacity-40 font-black uppercase text-[10px] tracking-widest">Cancel</button>
         `);
     },
 
     showGamesModal() {
-        ui.showModal('games-modal', `
-            <h2 class="text-xl font-bold text-center mb-4">Entertainment</h2>
-            <div class="space-y-3">
-                ${Object.values(GAMES).map(game => `
-                    <div class="bg-secondary p-4 rounded-xl">
-                        <h3 class="text-lg font-bold text-primary mb-1">${game.title}</h3>
-                        <p class="text-secondary text-sm mb-3">${game.description}</p>
-                        <button onclick="GAMES['${game.id}'].start()" class="brand-bg font-semibold py-2 px-4 rounded-lg text-sm">Play</button>
-                    </div>`).join("")}
-            </div>
-            <button onclick="ui.closeModal('games-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
-        `);
-    },
-
-    showThemeModal() {
-        const themes = [ { n: 'light', i: '☀️' }, { n: 'dark', i: '🌙' }, { n: 'sunset', i: '🌆' }, { n: 'matcha', i: '🍵' }];
-        ui.showModal('theme-modal', `
-            <h2 class="text-xl font-bold mb-4">Choose Theme</h2>
-            <div class="grid grid-cols-2 gap-4">${themes.map(t => `<button onclick="app.toggleTheme('${t.n}')" class="bg-secondary p-4 rounded-xl text-center"><span class="text-3xl">${t.i}</span><p class="font-semibold mt-1 capitalize">${t.n}</p></button>`).join('')}</div>
-            <button onclick="ui.closeModal('theme-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
-        `);
-    },
-
-    showWifiModal() {
-        ui.showModal('wifi-modal', `
-            <div class="text-center">
-                <h2 class="text-xl font-bold mb-2">Wi-Fi Network</h2>
-                <p class="text-secondary mb-4">Connect and enjoy!</p>
-                <div class="bg-secondary p-4 rounded-lg">
-                    <p class="text-xs">Network Name</p><p class="font-bold text-lg">THE CO-WORK HUB</p>
-                    <hr class="border-custom my-3">
-                    <p class="text-xs">Password</p><p class="font-bold text-lg">95462418</p>
+        this.showModal('games-modal', `
+            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter">Arcade</h2>
+            <div class="space-y-4">
+                <div class="bg-secondary p-8 rounded-[1.5rem] border border-custom shadow-sm flex justify-between items-center">
+                    <p class="font-black uppercase text-xs tracking-widest">Tic-Tac-Toe</p>
+                    <button onclick="GAMES.ttt.start()" class="brand-bg px-8 py-3 rounded-full font-black text-[10px] uppercase shadow-sm">Play</button>
                 </div>
-                <button onclick="ui.closeModal('wifi-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
             </div>
+            <button onclick="ui.closeModal('games-modal')" class="w-full mt-10 opacity-40 font-black uppercase text-[10px] tracking-widest">Return</button>
         `);
     },
 
-    async showOrderHistoryModal() {
-        if (!app.state.customerProfile || !app.state.customerProfile.id) return ui.showToast("Error: Profile not loaded.");
-        const { data } = await supabase.from('orders').select(`*, order_items (products(name), quantity), discount_amount, discount_points_redeemed`).eq('customer_id', app.state.customerProfile.id).order('created_at', { ascending: false });
-        const historyHTML = data?.length > 0 ? data.map(o => `
-            <div class="bg-secondary p-3 rounded-lg">
-                <div class="flex justify-between">
-                    <div>
-                        <p class="font-bold">Order #${o.id.slice(0, 6)}</p>
-                        <p class="text-xs text-secondary">${new Date(o.created_at).toLocaleString()}</p>
-                    </div>
-                    <p class="font-semibold">₹${(o.final_amount ?? o.total_amount).toFixed(2)}</p>
-                </div>
-                <div class="text-sm text-secondary mt-2">${o.order_items.length > 0 ? o.order_items.map(i => `${i.products.name} (x${i.quantity})`).join(', ') : 'No items found'}</div>
-                ${o.discount_amount > 0 ? `<p class="text-xs text-green-600 mt-1">Discount: -₹${o.discount_amount.toFixed(2)} (${o.discount_points_redeemed} points)</p>` : ''}
-            </div>`).join('') : '<p class="text-secondary text-center">No past orders found.</p>';
+    renderBottomNav() {
+        const nav = $('#bottom-nav');
+        const items = [
+            { id: 'home', l: 'Home', i: '🏠' },
+            { id: 'order', l: 'Menu', i: '☕' },
+            { id: 'cart', l: 'Track', i: '🛒' },
+            { id: 'more', l: 'User', i: '☰' }
+        ];
+        nav.innerHTML = items.map(item => `
+            <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all duration-300" id="nav-${item.id}">
+                <div class="mb-1 text-lg">${item.i}</div>
+                <span class="text-[8px] font-black uppercase tracking-[0.2em] opacity-40">${item.l}</span>
+            </button>
+        `).join('');
+    },
 
-        ui.showModal('history-modal', `
-            <h2 class="text-xl font-bold text-center mb-4">Order History</h2>
-            <div class="space-y-3 max-h-60 overflow-y-auto">${historyHTML}</div>
-            <button onclick="ui.closeModal('history-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Close</button>
-        `);
+    updateActiveNav(page) {
+        $$('.nav-btn').forEach(btn => { 
+            btn.classList.remove('brand-text', 'scale-110'); 
+            btn.querySelector('span').classList.replace('opacity-100', 'opacity-40'); 
+        });
+        const active = $(`#nav-${page}`);
+        if (active) { 
+            active.classList.add('brand-text', 'scale-110'); 
+            active.querySelector('span').classList.replace('opacity-40', 'opacity-100'); 
+        }
     }
 };
 
 const GAMES = {
-    ticTacToe: {
-        id: 'ticTacToe', title: 'Tic-Tac-Toe', description: 'Classic 2-player game for your table.',
-        board: Array(9).fill(null),
-        currentPlayer: "X",
-        winner: null,
+    ttt: {
+        board: Array(9).fill(null), p: 'X', win: null,
         start() {
-            this.reset();
-            ui.showModal('ttt-modal', `
-                <h2 class="text-2xl font-bold mb-2 text-center">Tic-Tac-Toe</h2>
-                <p id="ttt-status" class="font-semibold text-secondary mb-4 text-center">Player X's turn</p>
-                <div class="w-full max-w-[250px] mx-auto">
-                    <div id="ttt-board" class="grid grid-cols-3 gap-2 my-4">
-                        ${this.board.map((_, i) => `<div class="aspect-square bg-secondary flex items-center justify-center text-5xl sm:text-6xl font-bold rounded-lg cursor-pointer" onclick="GAMES.ticTacToe.play(${i})"></div>`).join("")}
-                    </div>
+            this.board.fill(null); this.p = 'X'; this.win = null;
+            ui.showModal('ttt-ui', `
+                <h2 class="text-3xl font-black mb-8 text-center tracking-tighter uppercase">Tic-Tac-Toe</h2>
+                <div class="grid grid-cols-3 gap-3 w-72 mx-auto mb-10">
+                    ${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-20 h-20 bg-secondary rounded-[1.5rem] flex items-center justify-center text-4xl font-black border border-custom shadow-sm transition active:scale-90" id="ttt-${i}"></div>`).join('')}
                 </div>
-                <button onclick="GAMES.ticTacToe.start()" class="w-full mt-2 brand-bg font-semibold py-3 rounded-lg">New Game</button>
-                <button onclick="ui.closeModal('ttt-modal')" class="w-full mt-2 bg-secondary py-3 rounded-lg">Close</button>
+                <p id="ttt-status" class="text-center font-black uppercase text-[10px] tracking-[0.5em] opacity-40 mb-10">Turn: ${this.p}</p>
+                <button onclick="ui.closeModal('ttt-ui')" class="w-full opacity-30 font-black uppercase text-[8px] tracking-widest">Quit Game</button>
             `);
         },
         play(i) {
-            if (this.board[i] || this.winner) return;
-            this.board[i] = this.currentPlayer;
-            this.checkWinner();
-            this.currentPlayer = this.currentPlayer === "X" ? "O" : "X";
-            this.updateUI();
-        },
-        checkWinner() {
-            const lines = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                [0, 4, 8], [2, 4, 6]
-            ];
-            for (let line of lines) {
-                const [a, b, c] = line;
-                if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
-                    this.winner = this.board[a];
-                    sound.play("win");
-                    return;
-                }
-            }
-            if (this.board.every(cell => cell)) {
-                this.winner = "Draw";
-                sound.play("draw");
-            }
-        },
-        updateUI() {
-            $$("#ttt-board > div").forEach((cell, i) => {
-                cell.textContent = this.board[i];
-                cell.style.color = this.board[i] === "X" ? "#3b82f6" : "#ef4444";
-            });
-            $("#ttt-status").textContent = this.winner ? (this.winner === "Draw" ? "It's a Draw!" : `Player ${this.winner} wins!`) : `Player ${this.currentPlayer}'s turn`;
-        },
-        reset() {
-            this.board.fill(null);
-            this.currentPlayer = "X";
-            this.winner = null;
-        }
-    },
-    coffeeTrivia: {
-        id: 'coffeeTrivia', title: 'Coffee Trivia', description: 'Test your coffee knowledge!',
-        currentQuestion: null,
-        trivia: [
-            { q: "Where was coffee first discovered?", o: ["Brazil", "Ethiopia", "Colombia", "Vietnam"], a: 1 },
-            { q: "What does 'espresso' mean in Italian?", o: ["Fast Coffee", "Dark Coffee", "Expressed or Forced Out", "Morning Ritual"], a: 2 },
-            { q: "What is the most expensive coffee in the world, often involving an animal?", o: ["Blue Mountain", "Geisha", "Kopi Luwak", "Bourbon"], a: 2 },
-            { q: "Which country is the largest producer of coffee?", o: ["Brazil", "Vietnam", "Indonesia", "India"], a: 0 }
-        ],
-        start() {
-            this.currentQuestion = this.trivia[Math.floor(Math.random() * this.trivia.length)];
-            const item = this.currentQuestion;
-            ui.showModal('trivia-modal', `
-                <div class="text-center">
-                    <h2 class="text-xl font-bold mb-2">Coffee Trivia</h2>
-                    <p class="text-secondary mb-6 h-12">${item.q}</p>
-                    <div id="trivia-options" class="space-y-3">
-                        ${item.o.map((opt, index) => `<button class="trivia-option w-full bg-secondary font-semibold p-3 rounded-lg text-left" onclick="GAMES.coffeeTrivia.checkAnswer(${index}, ${item.a})">${opt}</button>`).join('')}
-                    </div>
-                    <button onclick="ui.closeModal('trivia-modal')" class="w-full mt-6 bg-secondary py-3 rounded-lg">Close</button>
-                </div>
-            `);
-        },
-        checkAnswer(selectedIndex, correctIndex) {
-            const options = $$('.trivia-option');
-            options.forEach((btn, index) => {
-                btn.disabled = true;
-                if (index === correctIndex) {
-                    btn.classList.remove('bg-secondary');
-                    btn.classList.add('bg-green-500', 'text-white');
-                } else if (index === selectedIndex) {
-                    btn.classList.remove('bg-secondary');
-                    btn.classList.add('bg-red-500', 'text-white');
-                }
-            });
-
-            if (selectedIndex === correctIndex) {
-                sound.play('success');
+            if (this.board[i] || this.win) return;
+            this.board[i] = this.p;
+            $(`#ttt-${i}`).textContent = this.p;
+            if (this.check()) {
+                this.win = this.p;
+                $('#ttt-status').textContent = `Winner: ${this.p}`;
+            } else if (this.board.every(b => b)) {
+                this.win = 'Draw';
+                $('#ttt-status').textContent = `Draw Game`;
             } else {
-                sound.play('draw');
+                this.p = this.p === 'X' ? 'O' : 'X';
+                $('#ttt-status').textContent = `Turn: ${this.p}`;
             }
-
-            setTimeout(() => this.start(), 2000);
+        },
+        check() {
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            return wins.some(w => this.board[w[0]] && this.board[w[0]] === this.board[w[1]] && this.board[w[0]] === this.board[w[2]]);
         }
-    },
-    coffeeArt: {
-        id: 'coffeeArt', title: 'Coffee Art Studio', description: 'Unleash your inner barista and create some latte art.',
-        canvas: null, ctx: null, painting: false,
-        start() {
-            ui.showModal('art-modal', `
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold mb-2">Coffee Art Studio</h2>
-                    <div class="relative w-full aspect-square mx-auto my-4 rounded-full bg-[#c4a484] overflow-hidden cursor-crosshair" id="canvas-container">
-                        <canvas id="coffee-art-canvas"></canvas>
-                    </div>
-                    <div class="flex justify-center items-center space-x-2">
-                        <button onclick="GAMES.coffeeArt.changeColor('#ffffff')" class="w-8 h-8 rounded-full bg-white border-2 border-custom"></button>
-                        <button onclick="GAMES.coffeeArt.changeColor('#5a3825')" class="w-8 h-8 rounded-full bg-[#5a3825] border-2 border-custom"></button>
-                        <button onclick="GAMES.coffeeArt.clearCanvas()" class="bg-secondary font-semibold py-1 px-3 rounded-lg text-sm">Clear</button>
-                    </div>
-                    <button onclick="ui.closeModal('art-modal')" class="w-full mt-6 bg-secondary font-semibold py-3 rounded-lg">Done</button>
-                </div>`);
-            this.initCanvas();
-        },
-        initCanvas() {
-            this.canvas = $("#coffee-art-canvas");
-            const container = $('#canvas-container');
-            if (!this.canvas || !container) return;
-            this.ctx = this.canvas.getContext("2d");
-            const size = container.clientWidth;
-            this.canvas.width = size;
-            this.canvas.height = size;
-            this.ctx.strokeStyle = "#ffffff"; this.ctx.lineWidth = 5; this.ctx.lineCap = "round";
-            this.canvas.addEventListener("pointerdown", this.startPosition.bind(this));
-            this.canvas.addEventListener("pointerup", this.finishedPosition.bind(this));
-            this.canvas.addEventListener("pointermove", this.draw.bind(this));
-            this.canvas.addEventListener("touchstart", this.startPosition.bind(this), { passive: false });
-            this.canvas.addEventListener("touchend", this.finishedPosition.bind(this));
-            this.canvas.addEventListener("touchmove", this.draw.bind(this), { passive: false });
-        },
-        getEventPosition(e) {
-            const rect = this.canvas.getBoundingClientRect();
-            if (e.touches && e.touches.length > 0) {
-                return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-            }
-            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        },
-        startPosition(e) { this.painting = true; this.draw(e); },
-        finishedPosition() { this.painting = false; this.ctx.beginPath(); },
-        draw(e) {
-            if (!this.painting) return;
-            e.preventDefault();
-            const { x, y } = this.getEventPosition(e);
-            this.ctx.lineTo(x, y); this.ctx.stroke();
-            this.ctx.beginPath(); this.ctx.moveTo(x, y);
-        },
-        changeColor(c) { if(this.ctx) this.ctx.strokeStyle = c; },
-        clearCanvas() { if(this.ctx) this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); }
-    },
+    }
 };
 
-document.addEventListener('DOMContentLoaded', () => app.init());
-
+window.addEventListener('load', () => app.init());
 </script>
 </body>
 </html>
-
