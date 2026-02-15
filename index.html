@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Welcome to HXOUSE Coffee Co.</title>
+    <title>HXOUSE Coffee Co. | Live Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,9 +33,6 @@
         .modal-content { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        #splash-screen img { animation: pulse 2s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
         .accordion-content { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 0; opacity: 0; }
         .accordion-content.open { opacity: 1; }
 
@@ -52,44 +49,47 @@
         .quantity-control { display: flex; align-items: center; justify-content: space-between; background-color: var(--brand-primary); color: var(--bg-primary); border-radius: 9999px; font-weight: 600; overflow: hidden; width: 100px; height: 40px; }
         .add-to-cart-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); color: var(--brand-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
         
-        #loyalty-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--bg-secondary); border-radius: 4px; }
-        #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--brand-primary); border-radius: 50%; cursor: pointer; }
-
-        .accordion-arrow { transition: transform 0.3s ease; }
-        .rotate-90 { transform: rotate(90deg); }
-        .accordion-item-list { padding-left: 1rem; padding-right: 1rem; padding-bottom: 1rem; display: grid; gap: 0.75rem; }
+        #loyalty-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--bg-secondary); border-radius: 4px; outline: none; }
+        #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--brand-primary); border-radius: 50%; cursor: pointer; border: 2px solid var(--bg-primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        #art-canvas { background: #c4a484; touch-action: none; cursor: crosshair; }
     </style>
 </head>
 <body data-theme="matcha">
 
+    <!-- Splash Loader -->
     <div id="splash-screen" class="fixed inset-0 bg-primary flex flex-col items-center justify-center z-[100]">
-        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full shadow-2xl">
-        <div id="splash-loading" class="mt-8 flex flex-col items-center">
-            <div class="spinner border-4 border-t-brand w-8 h-8 rounded-full animate-spin mb-4"></div>
-            <p class="text-secondary text-xs font-bold tracking-widest animate-pulse">BREWING CONNECTION...</p>
+        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" 
+             alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full shadow-2xl">
+        <div id="splash-status" class="mt-12 flex flex-col items-center text-center">
+            <div class="w-10 h-10 border-4 border-t-brand border-secondary rounded-full animate-spin mb-6"></div>
+            <p class="text-secondary text-xs font-bold tracking-[0.4em] animate-pulse uppercase">HXOUSE Engine Loading</p>
         </div>
     </div>
 
+    <!-- Main Container -->
     <div id="app" class="app-container max-w-lg mx-auto shadow-2xl flex flex-col hidden">
         <main class="flex-grow overflow-y-auto">
             <div id="main-interface" class="hidden">
-                <header id="page-header" class="sticky top-0 bg-primary z-20 h-16 px-4 flex justify-between items-center border-b border-custom"></header>
+                <header id="page-header" class="sticky top-0 bg-primary z-20 h-20 px-6 flex justify-between items-center border-b border-custom"></header>
                 <div id="page-content"></div>
             </div>
             <div class="h-20 flex-shrink-0"></div>
         </main>
-        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-16 z-30 hidden pb-2"></nav>
+        
+        <!-- Navbar -->
+        <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-20 z-30 hidden pb-4 shadow-2xl"></nav>
     </div>
 
     <div id="modal-container"></div>
-    <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 brand-bg py-3 px-5 rounded-lg shadow-xl z-50 whitespace-nowrap text-white font-bold">
+    <div id="toast" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 brand-bg py-3 px-8 rounded-full shadow-2xl z-[70] whitespace-nowrap text-white font-black text-xs uppercase tracking-widest">
         <p id="toast-message"></p>
     </div>
 
 <script>
 /**
  * HXOUSE COFFEE CO.
- * STABILITY PATCH: ONBOARDING & AUTH FIX
+ * CORE LIVE ENGINE v2.0
  */
 
 const $ = (s) => document.querySelector(s);
@@ -98,7 +98,7 @@ const $$ = (s) => document.querySelectorAll(s);
 const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
 
-// Renamed to 'sb' to prevent global naming conflict with Supabase JS library
+// Rename to 'sb' to avoid global naming conflict
 const sb = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const PAGES = ['home', 'order', 'cart', 'social', 'cowork', 'more'];
@@ -117,214 +117,160 @@ const app = {
         expandedCategory: null,
         searchQuery: '',
         pointsToRedeem: 0,
+        realtimeChannel: null
     },
 
     async init() {
         this.setHeight();
         window.addEventListener('resize', () => this.setHeight());
-        window.addEventListener('popstate', (e) => this.handleHardwareBack(e));
+        window.addEventListener('popstate', (e) => this.handleBack(e));
 
         const initialHash = location.hash.substring(1);
         this.state.currentPage = PAGES.includes(initialHash) ? initialHash : 'home';
         
-        await this.startAppFlow();
+        await this.runStartup();
     },
 
     setHeight() { document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`); },
 
-    async startAppFlow() {
-        console.log("🚀 HXOUSE: Initialization sequence started...");
-        
-        // Safety Timeout: If loading takes > 8 seconds, show manual skip
-        const loadTimeout = setTimeout(() => {
-            console.warn("⚠️ HXOUSE: Supabase taking too long. Check Internet or dashboard settings.");
-            $('#splash-loading').innerHTML = `
-                <p class="text-red-500 font-bold mb-4">Connection slow...</p>
-                <button onclick="location.reload()" class="bg-secondary p-3 rounded-xl font-bold mb-2">Retry Connection</button>
-                <p class="text-[10px] text-secondary opacity-50 px-6 text-center">Ensure "Anonymous Auth" is enabled in Supabase Providers.</p>
-            `;
-        }, 8000);
-
+    async runStartup() {
+        console.log("🚀 HXOUSE: Igniting Engine...");
         try {
-            // 1. Auth Bridge
-            const { data: { session }, error: sessionError } = await sb.auth.getSession();
-            if (sessionError) throw sessionError;
+            // 1. Authenticate
+            const { data: { session } } = await sb.auth.getSession();
             this.state.user = session?.user;
             
             if (!this.state.user) {
-                console.log("🔐 HXOUSE: No session. Authenticating anonymously...");
-                const { data: anonData, error: anonError } = await sb.auth.signInAnonymously();
-                if (anonError) {
-                    console.error("❌ Auth Error:", anonError);
-                    throw new Error("Anonymous Auth is likely DISABLED in your dashboard.");
-                }
-                this.state.user = anonData.user;
+                const { data: anon, error: authErr } = await sb.auth.signInAnonymously();
+                if (authErr) throw authErr;
+                this.state.user = anon.user;
             }
-            console.log("👤 HXOUSE: User ID established:", this.state.user.id);
+            console.log("👤 HXOUSE: User Identified", this.state.user.id);
 
-            // 2. Data Sync
-            await Promise.all([
-                this.fetchCustomerProfile(),
-                this.fetchMenuData()
-            ]);
+            // 2. Hydrate Data
+            await Promise.all([this.loadProfile(), this.loadMenu()]);
+            this.parseTable();
 
-            this.getTableNumberFromURL();
-
-            if (this.state.menuData.length > 0) this.state.expandedCategory = this.state.menuData[0].category;
-
-            // Clear timeout and Launch
-            clearTimeout(loadTimeout);
+            // 3. Launch UI
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             $('#app').classList.add('flex');
 
             if (!this.state.customerProfile || !this.state.customerProfile.name) {
-                console.log("📝 HXOUSE: Profile needed.");
-                this.showOnboardingModal();
+                this.onboard();
             } else if (this.state.tableNumber) {
-                console.log("✨ HXOUSE: Launching session.");
-                this.startSession();
+                this.launch();
             } else {
-                this.showTableNumberModal();
+                this.askTable();
             }
         } catch (e) {
-            console.error("❌ HXOUSE Startup Failed:", e);
-            clearTimeout(loadTimeout);
-            $('#splash-loading').innerHTML = `
-                <p class="text-red-500 font-bold mb-2">System Error</p>
-                <p class="text-xs text-secondary px-8 mb-6">${e.message}</p>
-                <button onclick="location.reload()" class="bg-primary text-secondary px-8 py-3 rounded-full font-bold shadow-xl">Re-Init</button>
-            `;
+            console.error("❌ HXOUSE: Startup Failure", e);
+            $('#splash-status').innerHTML = `<p class="text-red-500 font-bold mb-4 uppercase">Sync Failure</p><button onclick="location.reload()" class="bg-primary text-secondary px-10 py-3 rounded-full font-black text-sm shadow-xl">REBOOT</button>`;
         }
     },
 
-    async fetchCustomerProfile() {
-        console.log("📡 HXOUSE: Fetching profile...");
-        const { data, error } = await sb.from('customers').select('*').eq('id', this.state.user.id).maybeSingle();
-        if (error) console.warn("Profile fetch warning:", error);
+    async loadProfile() {
+        const { data } = await sb.from('customers').select('*').eq('id', this.state.user.id).maybeSingle();
         this.state.customerProfile = data;
     },
 
-    async fetchMenuData() {
-        console.log("📡 HXOUSE: Fetching menu...");
+    async loadMenu() {
         const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
         if (error) throw error;
-        this.state.allMenuItems = data;
+        this.state.allMenuItems = data || [];
         this.state.menuData = data.reduce((acc, item) => {
             let cat = acc.find(c => c.category === item.category);
             if (!cat) { cat = { category: item.category, items: [] }; acc.push(cat); }
             cat.items.push(item);
             return acc;
         }, []);
+        if (this.state.menuData.length > 0) this.state.expandedCategory = this.state.menuData[0].category;
     },
 
-    getTableNumberFromURL() {
+    parseTable() {
         const params = new URLSearchParams(window.location.search);
-        const scanned = params.get('table');
-        if (scanned) {
-            const fixMap = { "6": 1, "10": 2, "1": 3, "7": 4, "4": 6, "3": 7, "2": 8 };
-            this.state.tableNumber = parseInt(fixMap[scanned] || scanned);
+        const raw = params.get('table');
+        if (raw) {
+            const map = { "6": 1, "10": 2, "1": 3, "7": 4, "4": 6, "3": 7, "2": 8 };
+            this.state.tableNumber = parseInt(map[raw] || raw);
         }
     },
 
-    async startSession() {
-        await this.fetchActiveOrder();
+    launch() {
+        this.fetchActiveOrder();
         $('#main-interface').classList.remove('hidden');
         $('#bottom-nav').classList.remove('hidden');
-        ui.renderBottomNav();
+        ui.renderNav();
         this.navigateTo(this.state.currentPage, false);
     },
 
-    showOnboardingModal() {
-        ui.showModal('onboarding-modal', `
-            <h2 class="text-2xl font-bold text-primary mb-2 text-center uppercase tracking-tighter">New Member</h2>
-            <p class="text-secondary mb-8 text-center text-sm">Please register to access orders and rewards.</p>
-            <div class="space-y-4">
-                <input type="text" id="ob-name" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary font-bold" placeholder="Full Name">
-                <input type="tel" id="ob-phone" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary font-bold" placeholder="WhatsApp Number">
-                ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary font-bold" placeholder="Table #">` : ''}
+    onboard() {
+        ui.showModal('onboard-ui', `
+            <div class="text-center">
+                <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter">Enter HXOUSE</h2>
+                <p class="text-secondary mb-10 text-sm font-medium">Verify your details to access rewards and order tracking.</p>
+                <div class="space-y-4">
+                    <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold uppercase text-center" placeholder="Your Full Name">
+                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center" placeholder="10-Digit WhatsApp">
+                    ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center" placeholder="Table Number">` : ''}
+                </div>
+                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-12 py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition tracking-widest uppercase">Start Experience</button>
             </div>
-            <button id="ob-submit" onclick="app.completeOnboarding()" class="w-full mt-10 brand-bg font-bold py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-sm active:scale-95 transition">Enter HXOUSE</button>
         `);
     },
 
-    async completeOnboarding() {
+    async submitOnboard() {
         const name = $('#ob-name').value.trim();
         const phone = $('#ob-phone').value.trim();
         const table = this.state.tableNumber || parseInt($('#ob-table')?.value);
-        const btn = $('#ob-submit');
-
-        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Incomplete details");
-
-        btn.disabled = true; btn.innerHTML = "Creating Profile...";
+        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Incomplete Data");
 
         try {
             const profile = { id: this.state.user.id, name, whatsapp_number: phone, loyalty_points: 0 };
-            // Using insert for first time onboarding to avoid conflict logic
             const { error } = await sb.from('customers').upsert(profile);
             if (error) throw error;
-
             this.state.customerProfile = profile;
             this.state.tableNumber = table;
-            ui.closeModal('onboarding-modal');
-            this.startSession();
-        } catch (e) {
-            console.error("Onboarding logic error:", e);
-            ui.showToast("Phone number might be in use.");
-            btn.disabled = false; btn.innerHTML = "Enter HXOUSE";
-        }
+            ui.closeModal('onboard-ui');
+            this.launch();
+        } catch (e) { ui.showToast("Onboarding Failed"); }
     },
 
-    showTableNumberModal() {
-        ui.showModal('table-modal', `
-            <h2 class="text-2xl font-bold text-primary mb-6 text-center uppercase tracking-tighter">Your Location</h2>
-            <input type="number" id="manual-table" class="w-full p-5 border border-custom rounded-2xl bg-secondary text-primary text-center font-bold text-2xl shadow-inner" placeholder="0">
-            <button onclick="app.completeTableManual()" class="w-full mt-8 brand-bg font-bold py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-sm">Set Spot</button>
+    askTable() {
+        ui.showModal('table-ui', `
+            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter text-center">Your Table?</h2>
+            <div class="grid grid-cols-5 gap-3 mb-10">
+                ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg transition-colors">${n}</button>`).join('')}
+            </div>
+            <input type="number" id="manual-table" class="w-full p-6 border border-custom rounded-3xl bg-secondary font-black text-center text-4xl shadow-inner mb-8" placeholder="--">
+            <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-widest">Enter Spot</button>
         `);
     },
 
-    completeTableManual() {
-        const val = $('#manual-table').value;
-        if (!val) return ui.showToast("Required");
-        this.state.tableNumber = parseInt(val);
-        ui.closeModal('table-modal');
-        this.startSession();
+    submitTable() {
+        const v = parseInt($('#manual-table').value);
+        if (!v) return;
+        this.state.tableNumber = v;
+        ui.closeModal('table-ui');
+        this.launch();
     },
 
     navigateTo(page, push = true) {
         if (push) location.hash = page;
         this.state.currentPage = page;
-        ui.renderHeader(page);
-        ui.renderPageContent(page);
-        ui.updateActiveNav(page);
+        ui.renderHeader();
+        ui.renderContent();
+        ui.updateNav();
+        $('#app main').scrollTo(0, 0);
     },
 
-    handleHardwareBack(e) {
+    handleBack(e) {
         const modal = $('#modal-container').children[0];
         if (modal) { ui.closeModal(modal.id); e.preventDefault(); return; }
         if (this.state.currentPage !== 'home') { this.navigateTo('home'); e.preventDefault(); }
     },
 
-    toggleCategory(cat) {
-        const id = cat.replace(/\s+/g, '-').toUpperCase();
-        const div = $(`#items-for-${id}`);
-        if (this.state.expandedCategory === cat) {
-            div.style.maxHeight = '0'; div.classList.remove('open');
-            this.state.expandedCategory = null;
-        } else {
-            if (this.state.expandedCategory) {
-                const prevId = this.state.expandedCategory.replace(/\s+/g, '-').toUpperCase();
-                const prev = $(`#items-for-${prevId}`);
-                if (prev) { prev.style.maxHeight = '0'; prev.classList.remove('open'); }
-            }
-            this.state.expandedCategory = cat;
-            div.classList.add('open');
-            setTimeout(() => { div.style.maxHeight = div.scrollHeight + 'px'; }, 10);
-        }
-        ui.renderMenuPageContent();
-    },
-
-    addOrUpdateCart(id, change) {
+    addCart(id, change) {
         const item = this.state.allMenuItems.find(i => i.id === id);
         let cartItem = this.state.cart.find(i => i.id === id);
         if (!cartItem && change > 0) {
@@ -333,273 +279,263 @@ const app = {
             cartItem.quantity += change;
             if (cartItem.quantity <= 0) this.state.cart = this.state.cart.filter(i => i.id !== id);
         }
-        this.refreshPage();
-    },
-
-    refreshPage() {
-        ui.renderPageContent(this.state.currentPage);
-        ui.updateActiveNav(this.state.currentPage);
-    },
-
-    calculateTotals() {
-        const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const pts = this.state.customerProfile?.loyalty_points || 0;
-        const maxRedeem = Math.min(Math.floor(pts * 0.8), Math.floor(subtotal));
-        const discount = Math.min(this.state.pointsToRedeem, maxRedeem);
-        const gst = (subtotal - discount) * 0.05;
-        const total = (subtotal - discount) + gst;
-        return { subtotal, discount, gst, total, maxRedeem };
-    },
-
-    async placeOrder(method, btn) {
-        const { subtotal, discount, total } = this.calculateTotals();
-        btn.disabled = true; btn.innerHTML = "Processing...";
-
-        try {
-            const { data: tableData } = await sb.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
-            const orderPayload = {
-                customer_id: this.state.user.id,
-                table_id: tableData.id,
-                total_amount: total,
-                discount_amount: discount,
-                discount_points_redeemed: this.state.pointsToRedeem,
-                payment_method: method,
-                status: 'received'
-            };
-
-            const { data: order, error } = await sb.from('orders').insert(orderPayload).select().single();
-            if (error) throw error;
-
-            const items = this.state.cart.map(i => ({
-                order_id: order.id,
-                product_id: i.id,
-                quantity: i.quantity,
-                price_at_time_of_order: i.price
-            }));
-            await sb.from('order_items').insert(items);
-
-            if (this.state.pointsToRedeem > 0) await sb.rpc('redeem_loyalty_points', { customer_id_input: this.state.user.id, points_to_redeem: discount });
-            
-            this.state.cart = [];
-            this.state.pointsToRedeem = 0;
-            this.state.activeOrder = order;
-            this.listenToOrderUpdates(order.id);
-            ui.closeModal('payment-modal');
-            this.navigateTo('cart');
-        } catch (e) {
-            console.error(e);
-            ui.showToast("Order Failed.");
-            btn.disabled = false; btn.innerHTML = "Try Again";
-        }
+        ui.renderContent();
     },
 
     async fetchActiveOrder() {
         const { data } = await sb.from('orders').select('*, order_items(*, products(*))').eq('customer_id', this.state.user.id).in('status', ['received', 'preparing']).order('created_at', { ascending: false }).limit(1).maybeSingle();
         this.state.activeOrder = data;
-        if (data) this.listenToOrderUpdates(data.id);
+        if (data) this.subscribeRealtime(data.id);
+        ui.renderContent();
     },
 
-    listenToOrderUpdates(id) {
-        sb.channel(`order-${id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, p => {
+    subscribeRealtime(id) {
+        if (this.state.realtimeChannel) sb.removeChannel(this.state.realtimeChannel);
+        this.state.realtimeChannel = sb.channel(`order-${id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, p => {
             this.state.activeOrder = p.new;
             if (['delivered', 'cancelled'].includes(p.new.status)) {
                 this.state.activeOrder = null;
+                ui.showToast(`Order is ${p.new.status.toUpperCase()}`);
             }
-            this.refreshPage();
+            ui.renderContent();
         }).subscribe();
+    },
+
+    async placeOrder(method, btn) {
+        btn.disabled = true; btn.innerHTML = "Submitting...";
+        const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
+        const discount = this.state.pointsToRedeem;
+        const total = (subtotal - discount) * 1.05;
+
+        try {
+            const { data: tableData } = await sb.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
+            const payload = {
+                table_number_input: this.state.tableNumber,
+                special_instructions_input: $('#special-inst')?.value || "",
+                total_amount_input: total,
+                discount_percentage_input: (discount / subtotal) * 100 || 0,
+                source_input: 'Customer',
+                order_items: this.state.cart.map(i => ({ product_id: i.id, quantity: i.quantity, price_at_time_of_order: i.price }))
+            };
+
+            const { data: orderId, error } = await sb.rpc('create_order_with_items', payload);
+            if (error) throw error;
+
+            if (discount > 0) await sb.rpc('redeem_loyalty_points', { customer_id_input: this.state.user.id, points_to_redeem: discount });
+            
+            // Loyalty award (10% back in points every ₹500 spend)
+            const pts = Math.floor(subtotal / 500) * 50;
+            if (pts > 0) await sb.rpc('increment_loyalty_points', { customer_id_input: this.state.user.id, points_to_add: pts });
+
+            this.state.cart = [];
+            this.state.pointsToRedeem = 0;
+            ui.closeModal('pay-ui');
+            await this.fetchActiveOrder();
+            this.navigateTo('cart');
+        } catch (e) {
+            ui.showToast("Failed to place order.");
+            btn.disabled = false; btn.innerHTML = "Place Order";
+        }
     }
 };
 
 const ui = {
-    renderHeader(page) {
-        const header = $('#page-header');
-        header.innerHTML = `
-            <div><h1 class="text-2xl font-bold brand-text tracking-tighter uppercase">H<span class="classy-x">X</span>OUSE</h1></div>
+    renderHeader() {
+        const h = $('#page-header');
+        h.innerHTML = `
+            <div><h1 class="text-2xl font-black brand-text tracking-tighter uppercase">H<span class="classy-x">X</span>OUSE</h1></div>
             <div class="text-right">
-                <p class="font-bold text-sm tracking-tighter">TABLE #${app.state.tableNumber || '?'}</p>
+                <p class="font-black text-sm tracking-tighter uppercase">#${app.state.tableNumber || '?'}</p>
                 <p class="text-[10px] uppercase opacity-40 font-black tracking-widest">${app.state.customerProfile?.name || 'Guest'}</p>
             </div>`;
     },
 
-    renderPageContent(page) {
-        const content = $('#page-content');
-        if (page === 'home') this.renderHome(content);
-        else if (page === 'order') this.renderMenu(content);
-        else if (page === 'cart') this.renderCart(content);
-        else if (page === 'social') this.renderSocial(content);
-        else if (page === 'cowork') this.renderCowork(content);
-        else if (page === 'more') this.renderMore(content);
+    renderContent() {
+        const c = $('#page-content');
+        const p = app.state.currentPage;
+        if (p === 'home') this.home(c);
+        else if (p === 'order') this.menu(c);
+        else if (p === 'cart') this.cart(c);
+        else if (p === 'social') this.social(c);
+        else if (p === 'cowork') this.cowork(c);
+        else if (p === 'more') this.more(c);
     },
 
-    renderHome(c) {
+    home(c) {
         c.innerHTML = `
             <div class="space-y-6 fade-in">
-                <div class="relative h-60 overflow-hidden rounded-b-[2.5rem] shadow-2xl">
-                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover"></video>
-                    <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white p-6">
-                        <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center">Brewed for <br> the Hustle</h1>
-                        <p class="text-[10px] font-bold tracking-[0.4em] mt-3 opacity-80 uppercase">HXOUSE COFFEE CO.</p>
+                <div class="relative h-64 overflow-hidden rounded-b-[3rem] shadow-2xl">
+                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover opacity-60"></video>
+                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6">
+                        <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center">Fueled for <br> the Hustle</h1>
+                        <p class="text-[10px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">HXOUSE COFFEE CO.</p>
                     </div>
                 </div>
                 <div class="p-6 space-y-6">
                     <div class="bg-yellow-100/80 border-2 border-yellow-200 p-8 rounded-[2.5rem] text-center shadow-sm">
-                        <h2 class="font-black text-lg text-yellow-900 uppercase tracking-tighter">Loyalty Member</h2>
-                        <p class="text-yellow-800 text-xs font-medium mt-1">Get 50 pts for every ₹500 spent.</p>
-                        <div class="mt-4 brand-bg text-primary py-2 px-6 inline-block rounded-full font-black text-sm shadow-sm">${app.state.customerProfile?.loyalty_points || 0} POINTS</div>
+                        <h2 class="font-black text-lg text-yellow-900 uppercase tracking-tighter">Member Rewards</h2>
+                        <p class="text-yellow-800 text-xs font-bold mt-1">Get 50 pts for every ₹500 spent.</p>
+                        <div class="mt-6 brand-bg text-primary py-3 px-8 inline-block rounded-full font-black text-sm shadow-xl">${app.state.customerProfile?.loyalty_points || 0} POINTS</div>
                     </div>
-                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-6 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 transition uppercase tracking-tighter">Explore Menu</button>
+                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl transform active:scale-95 transition uppercase tracking-tighter">Open Menu</button>
+                    <div class="bg-secondary p-8 rounded-[2.5rem] border border-custom shadow-sm flex justify-between items-center">
+                        <div class="pr-4">
+                            <h3 class="font-black text-lg uppercase tracking-tighter leading-none mb-2">Free Hamper!</h3>
+                            <p class="text-xs text-secondary leading-relaxed font-bold">Tag us on Instagram for ₹799+ orders to get a gift.</p>
+                        </div>
+                        <span class="text-4xl">🎁</span>
+                    </div>
                 </div>
             </div>`;
     },
 
-    renderMenu(c) {
+    menu(c) {
         c.innerHTML = `
-            <div class="p-4 fade-in"><input type="text" id="menu-search" placeholder="Search beverages..." class="w-full p-5 bg-secondary border border-custom rounded-[1.5rem] font-bold shadow-inner" oninput="app.state.searchQuery = this.value; ui.renderMenuPageContent()"></div>
-            <div id="menu-sections" class="p-4 space-y-4"></div>`;
-        this.renderMenuPageContent();
+            <div class="p-6 fade-in">
+                <input type="text" placeholder="Search menu..." class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold shadow-inner mb-6" oninput="app.state.searchQuery = this.value; ui.menuList()">
+                <div id="menu-sections" class="space-y-4"></div>
+            </div>`;
+        this.menuList();
     },
 
-    renderMenuPageContent() {
+    menuList() {
         const target = $('#menu-sections');
         if (!target) return;
         const q = app.state.searchQuery.toLowerCase();
-        
         target.innerHTML = app.state.menuData.map(group => {
-            const filteredItems = group.items.filter(i => i.name.toLowerCase().includes(q));
-            if (filteredItems.length === 0 && q.length > 0) return '';
-            const isExp = app.state.expandedCategory === group.category || q.length > 0;
-            const id = group.category.replace(/\s+/g, '-').toUpperCase();
+            const filtered = group.items.filter(i => i.name.toLowerCase().includes(q));
+            if (filtered.length === 0 && q) return '';
+            const isExp = app.state.expandedCategory === group.category || q;
             return `
                 <div class="bg-secondary rounded-[1.5rem] border border-custom overflow-hidden shadow-sm">
-                    <button onclick="app.toggleCategory('${group.category}')" class="w-full p-5 flex justify-between items-center font-black uppercase text-[10px] tracking-widest">
-                        ${group.category} <span class="accordion-arrow transform transition-transform ${isExp ? 'rotate-90' : ''}">→</span>
+                    <button onclick="app.state.expandedCategory='${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[11px] tracking-widest">
+                        ${group.category} <span class="text-xl ${isExp ? 'rotate-90' : ''}">→</span>
                     </button>
-                    <div id="items-for-${id}" class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '2000px' : '0'}">
-                        <div class="accordion-item-list">
-                            ${filteredItems.map(i => this.renderItemCard(i)).join('')}
+                    <div class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '2000px' : '0'}">
+                        <div class="p-4 space-y-3">
+                            ${filtered.map(i => this.itemCard(i)).join('')}
                         </div>
                     </div>
                 </div>`;
         }).join('');
     },
 
-    renderItemCard(i) {
+    itemCard(i) {
         const cartItem = app.state.cart.find(ci => ci.id === i.id);
         return `
             <div class="bg-primary p-5 rounded-2xl shadow-sm flex justify-between items-center border border-custom transform active:scale-95 transition">
                 <div class="flex-grow pr-4">
-                    <h4 class="font-black text-sm uppercase leading-tight mb-1">${i.name}</h4>
-                    <p class="text-secondary font-black text-xs opacity-50 tracking-widest uppercase">₹${i.price}</p>
+                    <h4 class="font-black text-sm uppercase leading-tight mb-2 tracking-tighter">${i.name}</h4>
+                    <p class="text-secondary font-black text-xs opacity-50 tracking-widest">₹${i.price}</p>
                 </div>
-                <div class="flex-shrink-0">
+                <div>
                     ${cartItem ? `
-                        <div class="quantity-control bg-primary border-2 border-brand-primary text-brand-primary">
-                            <button onclick="app.addOrUpdateCart(${i.id}, -1)" class="px-3 font-black">−</button>
-                            <span class="text-sm font-black">${cartItem.quantity}</span>
-                            <button onclick="app.addOrUpdateCart(${i.id}, 1)" class="px-3 font-black">+</button>
-                        </div>
-                    ` : `
-                        <button onclick="app.addOrUpdateCart(${i.id}, 1)" class="add-to-cart-btn brand-bg shadow-lg font-black text-2xl active:scale-90 transition">+</button>
-                    `}
+                        <div class="quantity-control shadow-sm"><button onclick="app.addCart(${i.id}, -1)" class="px-3">−</button><span>${cartItem.quantity}</span><button onclick="app.addCart(${i.id}, 1)" class="px-3">+</button></div>
+                    ` : `<button onclick="app.addCart(${i.id}, 1)" class="add-to-cart-btn brand-bg font-black text-2xl active:scale-90 transition">+</button>`}
                 </div>
             </div>`;
     },
 
-    renderCart(c) {
-        if (app.state.activeOrder) { this.renderTracking(c); return; }
-        if (app.state.cart.length === 0) { c.innerHTML = `<div class="p-20 text-center opacity-30 fade-in h-full flex flex-col justify-center"><p class="text-7xl mb-8">☕️</p><p class="font-black tracking-widest uppercase text-xs">Selection Empty</p></div>`; return; }
+    cart(c) {
+        if (app.state.activeOrder) return this.track(c);
+        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center opacity-30 h-full flex flex-col justify-center"><p class="text-8xl mb-8">☕️</p><p class="font-black tracking-widest uppercase text-xs">Selection Empty</p></div>`;
 
-        const { subtotal, discount, gst, total, maxRedeem } = app.calculateTotals();
+        const subtotal = app.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
+        const maxRedeem = Math.min(Math.floor((app.state.customerProfile?.loyalty_points || 0) * 0.8), Math.floor(subtotal));
+        const gst = (subtotal - app.state.pointsToRedeem) * 0.05;
+        const total = (subtotal - app.state.pointsToRedeem) + gst;
+
         c.innerHTML = `
             <div class="p-6 space-y-6 pb-32 fade-in">
-                <h2 class="text-3xl font-black tracking-tighter uppercase">Cart</h2>
-                <div class="space-y-3">
-                    ${app.state.cart.map(i => `
-                        <div class="flex justify-between items-center p-5 bg-secondary rounded-[1.5rem] border border-custom shadow-sm">
-                            <div><p class="font-black text-sm uppercase">${i.name}</p><p class="text-[10px] opacity-40 font-black mt-1 tracking-widest">₹${i.price} x ${i.quantity}</p></div>
-                            <div class="quantity-control shadow-sm"><button onclick="app.addOrUpdateCart(${i.id}, -1)" class="px-2">−</button><span>${i.quantity}</span><button onclick="app.addOrUpdateCart(${i.id}, 1)" class="px-2">+</button></div>
-                        </div>`).join('')}
-                </div>
+                <h2 class="text-4xl font-black tracking-tighter uppercase mb-8">Selection</h2>
+                <div class="space-y-3">${app.state.cart.map(i => `<div class="flex justify-between items-center p-5 bg-secondary rounded-[1.5rem] border border-custom shadow-sm"><div><p class="font-black text-sm uppercase">${i.name}</p><p class="text-[10px] opacity-40 font-black mt-1 uppercase tracking-widest">₹${i.price} x ${i.quantity}</p></div><div class="quantity-control shadow-sm"><button onclick="app.addCart(${i.id}, -1)" class="px-3">−</button><span>${i.quantity}</span><button onclick="app.addCart(${i.id}, 1)" class="px-3">+</button></div></div>`).join('')}</div>
                 ${maxRedeem > 0 ? `
-                    <div class="p-8 bg-secondary rounded-[2rem] border border-custom shadow-inner">
-                        <p class="text-[10px] font-black uppercase mb-5 opacity-40 tracking-widest text-center">Redeem Rewards</p>
-                        <input type="range" id="loyalty-slider" min="0" max="${maxRedeem}" value="${app.state.pointsToRedeem}" oninput="app.state.pointsToRedeem = parseInt(this.value); ui.renderPageContent('cart')">
-                        <div class="flex justify-between font-black text-[10px] mt-5 uppercase opacity-60"><span>Redeem ₹${app.state.pointsToRedeem}</span><span>Balance ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem} pts</span></div>
+                    <div class="p-8 bg-secondary rounded-[2rem] border border-custom shadow-inner text-center">
+                        <p class="text-[10px] font-black uppercase mb-6 opacity-40 tracking-[0.2em]">Redeem Points</p>
+                        <input type="range" id="loyalty-slider" min="0" max="${maxRedeem}" value="${app.state.pointsToRedeem}" oninput="app.state.pointsToRedeem = parseInt(this.value); ui.cart(document.querySelector('#page-content'))">
+                        <div class="flex justify-between font-black text-[11px] mt-6 uppercase opacity-60"><span>Redeem ₹${app.state.pointsToRedeem}</span><span>Balance ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem} pts</span></div>
                     </div>` : ''}
-                <div class="p-8 bg-secondary rounded-[2rem] space-y-3 border border-custom shadow-sm">
-                    <div class="flex justify-between font-black text-[10px] opacity-40 uppercase tracking-widest"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
-                    ${discount > 0 ? `<div class="flex justify-between font-black text-[10px] text-green-600 uppercase tracking-widest"><span>Discount</span><span>-₹${discount.toFixed(2)}</span></div>` : ''}
-                    <div class="flex justify-between font-black text-[10px] opacity-40 uppercase tracking-widest"><span>GST (5%)</span><span>₹${gst.toFixed(2)}</span></div>
-                    <div class="flex justify-between font-black text-2xl pt-4 border-t border-custom tracking-tighter uppercase"><span>Total</span><span>₹${total.toFixed(2)}</span></div>
+                <textarea id="special-inst" placeholder="Special instructions..." class="w-full p-6 bg-secondary border border-custom rounded-2xl h-28 font-bold text-sm shadow-inner focus:bg-primary"></textarea>
+                <div class="p-10 bg-secondary rounded-[2.5rem] space-y-3 border border-custom shadow-sm text-center uppercase">
+                    <div class="flex justify-between font-black text-[11px] opacity-40"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
+                    <div class="flex justify-between font-black text-[11px] opacity-40"><span>GST (5%)</span><span>₹${gst.toFixed(2)}</span></div>
+                    <div class="flex justify-between font-black text-3xl pt-5 border-t border-custom tracking-tighter"><span>Grand Total</span><span>₹${total.toFixed(2)}</span></div>
                 </div>
-                <button onclick="ui.showPaymentModal()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-2xl shadow-2xl tracking-tighter uppercase active:scale-95 transition">Place Order</button>
+                <button onclick="ui.payModal()" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl tracking-tighter uppercase active:scale-95 transition">Checkout</button>
             </div>`;
     },
 
-    renderTracking(c) {
-        const order = app.state.activeOrder;
+    track(c) {
         const steps = ['received', 'preparing', 'delivered'];
-        const idx = steps.indexOf(order.status);
+        const idx = steps.indexOf(app.state.activeOrder.status);
         const progress = ((idx + 1) / steps.length) * 100;
-        
         c.innerHTML = `
-            <div class="p-8 text-center space-y-12 fade-in">
-                <h2 class="text-4xl font-black tracking-tighter uppercase">Tracking</h2>
-                <div class="relative h-5 w-full bg-secondary rounded-full overflow-hidden border border-custom shadow-inner">
-                    <div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${progress}%"></div>
+            <div class="p-10 text-center space-y-16 fade-in h-full flex flex-col justify-center">
+                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none">Your Order <br> Status</h2>
+                <div class="relative h-6 w-full bg-secondary rounded-full overflow-hidden border border-custom shadow-inner"><div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${progress}%"></div></div>
+                <div class="space-y-12 text-left px-4">
+                    ${steps.map((s, i) => `<div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}"><div class="w-20 h-20 rounded-3xl border-4 border-custom flex items-center justify-center text-4xl shadow-xl bg-secondary">${i === 0 ? '📝' : i === 1 ? '🍳' : '🏁'}</div><div><p class="font-black text-base uppercase tracking-widest leading-none mb-2">${s}</p><p class="text-xs font-bold text-secondary uppercase opacity-60 tracking-widest">${i <= idx ? 'Complete' : 'Pending'}</p></div></div>`).join('')}
                 </div>
-                <div class="space-y-10 text-left px-4">
-                    ${steps.map((s, i) => `
-                        <div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}">
-                            <div class="w-16 h-16 rounded-[1.5rem] border-2 border-custom flex items-center justify-center text-3xl shadow-sm bg-secondary">${i === 0 ? '📝' : i === 1 ? '☕' : '🏁'}</div>
-                            <div>
-                                <p class="font-black text-sm uppercase tracking-widest leading-none mb-2">${s}</p>
-                                <p class="text-[10px] font-bold text-secondary uppercase opacity-60 tracking-wider">${i <= idx ? 'Done' : 'Upcoming'}</p>
-                            </div>
-                        </div>`).join('')}
+                <div class="pt-8"><p class="text-[11px] opacity-40 mb-8 font-black uppercase tracking-[0.4em]">Wait with a mini-game</p><button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest active:scale-95 transition">Enter Arcade</button></div>
+            </div>`;
+    },
+
+    social(c) {
+        c.innerHTML = `
+            <div class="p-6 space-y-12 fade-in h-full flex flex-col justify-center text-center">
+                <h2 class="text-4xl font-black uppercase tracking-tighter leading-none">Join the <br> Inner Circle</h2>
+                <div class="bg-secondary p-12 rounded-[3rem] border border-custom shadow-2xl">
+                    <p class="instagram-card font-black text-3xl mb-10 tracking-tighter">@hxousecoffeeco</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[2.5rem] border-8 border-white p-2 shadow-2xl scale-110">
+                    <p class="text-[11px] font-black uppercase tracking-[0.6em] mt-12 opacity-40">Scan to follow</p>
                 </div>
             </div>`;
     },
 
-    renderSocial(c) {
+    cowork(c) {
+        c.innerHTML = `<div class="p-10 text-center space-y-12 fade-in h-full flex flex-col justify-center"><span class="text-[10rem] mb-6 drop-shadow-2xl">🏢</span><h2 class="text-6xl font-black tracking-tighter uppercase leading-none">Creative <br> Studio</h2><p class="text-secondary font-medium leading-relaxed px-10 text-base">High-speed Wi-Fi, premium beans, and a community of builders. Inquire for membership or seat availability.</p><button onclick="ui.showToast('Staff Notified!')" class="brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Inquire Seat</button></div>`;
+    },
+
+    more(c) {
         c.innerHTML = `
-            <div class="p-6 space-y-8 fade-in h-full flex flex-col justify-center text-center">
-                <h2 class="text-3xl font-black uppercase tracking-tighter">Inner Circle</h2>
-                <div class="bg-secondary p-10 rounded-[2.5rem] border border-custom shadow-xl">
-                    <p class="instagram-card font-black text-2xl mb-8 tracking-tighter">@hxousecoffeeco</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[2rem] border-8 border-white p-2 shadow-inner">
+            <div class="p-8 space-y-6 fade-in">
+                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10">Member</h2>
+                <div class="bg-secondary p-12 rounded-[2.5rem] border border-custom shadow-xl mb-12">
+                    <p class="text-[11px] font-black uppercase opacity-40 mb-3 tracking-[0.4em]">Verified HXOUSE ID</p>
+                    <p class="font-black text-3xl tracking-tighter uppercase mb-2">${app.state.customerProfile?.name || 'Guest'}</p>
+                    <p class="text-sm opacity-50 font-black tracking-widest">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
                 </div>
+                <button onclick="ui.gameModal()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition"><span>Arcade Center</span><span>🎮</span></button>
+                <button onclick="location.reload()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition"><span>Refresh System</span><span>⟳</span></button>
+                <p class="text-center text-[9px] font-black uppercase opacity-20 mt-20 tracking-[0.8em]">HXOUSE LIVE ENGINE v2.0.4</p>
             </div>`;
     },
 
-    renderCowork(c) {
-        c.innerHTML = `
-            <div class="p-8 text-center space-y-10 fade-in h-full flex flex-col justify-center">
-                <span class="text-9xl mb-4 drop-shadow-2xl">🏢</span>
-                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none">Studio</h2>
-                <p class="text-secondary font-medium leading-relaxed px-10 text-sm">Fiber-optic Wi-Fi, premium brews, and a productive creative vibe. Ask staff for availability.</p>
-                <button onclick="app.sendStaffCall('cowork')" class="brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Inquire Seat</button>
-            </div>`;
+    payModal() {
+        ui.showModal('pay-ui', `
+            <h2 class="text-4xl font-black mb-12 uppercase tracking-tighter">Checkout</h2>
+            <div class="space-y-5">
+                <button onclick="app.placeOrder('Counter', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors"><span>Counter Pay</span><span>💵</span></button>
+                <button onclick="app.placeOrder('UPI', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors"><span>Digital Payment</span><span>📱</span></button>
+            </div>
+            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-[0.4em]">Return</button>
+        `);
     },
 
-    renderMore(c) {
-        c.innerHTML = `
-            <div class="p-6 space-y-4 fade-in">
-                <h2 class="text-3xl font-black uppercase tracking-tighter">Account</h2>
-                <div class="bg-secondary p-10 rounded-[2rem] border border-custom shadow-sm mb-8">
-                    <p class="text-[10px] font-black uppercase opacity-40 mb-2 tracking-[0.3em]">Verified Member</p>
-                    <p class="font-black text-2xl tracking-tighter uppercase">${app.state.customerProfile?.name || 'Guest'}</p>
-                    <p class="text-xs opacity-50 font-bold mt-2 tracking-widest">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
-                </div>
-                <button onclick="ui.showGamesModal()" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between shadow-sm active:bg-primary transition"><span>Mini Arcade</span><span>🎮</span></button>
-                <button onclick="location.reload()" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between shadow-sm active:bg-primary transition"><span>Refresh Engine</span><span>⟳</span></button>
-            </div>`;
+    gameModal() {
+        ui.showModal('games-ui', `
+            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter">Arcade Center</h2>
+            <div class="space-y-5">
+                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest">Tic-Tac-Toe</p><button onclick="GAMES.ttt.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Play</button></div>
+                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest">Art Studio</p><button onclick="GAMES.art.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Enter</button></div>
+            </div>
+            <button onclick="ui.closeModal('games-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-widest">Close</button>
+        `);
     },
 
     showModal(id, content) {
-        const m = document.createElement('div');
-        m.id = id; m.className = "modal-overlay fixed inset-0 bg-black/95 z-[60] flex items-end p-4 backdrop-blur-md";
-        m.innerHTML = `<div class="modal-content w-full bg-primary p-12 rounded-[3.5rem] shadow-2xl border border-custom">${content}</div>`;
+        const m = document.createElement('div'); m.id = id; m.className = "modal-overlay fixed inset-0 bg-black/98 z-[60] flex items-end p-4 backdrop-blur-xl";
+        m.innerHTML = `<div class="modal-content w-full bg-primary p-12 rounded-[4rem] shadow-2xl border border-custom">${content}</div>`;
         $('#modal-container').appendChild(m);
     },
 
@@ -607,55 +543,27 @@ const ui = {
 
     showToast(msg) {
         const t = $('#toast'); $('#toast-message').textContent = msg.toUpperCase();
-        t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2500);
+        t.classList.remove('hidden'); t.classList.add('fade-in');
+        setTimeout(() => t.classList.add('hidden'), 2500);
     },
 
-    showPaymentModal() {
-        this.showModal('payment-modal', `
-            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter">Select Pay</h2>
-            <div class="space-y-4">
-                <button onclick="app.placeOrder('Counter', this)" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between items-center shadow-sm uppercase text-xs tracking-widest"><span>Counter Pay</span><span>💵</span></button>
-                <button onclick="app.placeOrder('UPI', this)" class="w-full p-6 bg-secondary rounded-2xl text-left font-black border border-custom flex justify-between items-center shadow-sm uppercase text-xs tracking-widest"><span>UPI Digital</span><span>📱</span></button>
-            </div>
-            <button onclick="ui.closeModal('payment-modal')" class="w-full mt-10 opacity-40 font-black uppercase text-[10px] tracking-widest">Cancel</button>
-        `);
-    },
-
-    showGamesModal() {
-        this.showModal('games-modal', `
-            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter">Arcade</h2>
-            <div class="space-y-4">
-                <div class="bg-secondary p-8 rounded-[1.5rem] border border-custom shadow-sm flex justify-between items-center">
-                    <p class="font-black uppercase text-xs tracking-widest">Tic-Tac-Toe</p>
-                    <button onclick="GAMES.ttt.start()" class="brand-bg px-8 py-3 rounded-full font-black text-[10px] uppercase shadow-sm">Play</button>
-                </div>
-            </div>
-            <button onclick="ui.closeModal('games-modal')" class="w-full mt-10 opacity-40 font-black uppercase text-[10px] tracking-widest">Return</button>
-        `);
-    },
-
-    renderBottomNav() {
+    renderNav() {
         const nav = $('#bottom-nav');
-        const items = [
-            { id: 'home', l: 'Home', i: '🏠' },
-            { id: 'order', l: 'Menu', i: '☕' },
-            { id: 'cart', l: 'Track', i: '🛒' },
-            { id: 'more', l: 'User', i: '☰' }
-        ];
+        const items = [{ id: 'home', l: 'Home', i: '🏠' }, { id: 'order', l: 'Menu', i: '☕' }, { id: 'cart', l: 'Live', i: '🛒' }, { id: 'more', l: 'User', i: '☰' }];
         nav.innerHTML = items.map(item => `
             <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all duration-300" id="nav-${item.id}">
-                <div class="mb-1 text-lg">${item.i}</div>
-                <span class="text-[8px] font-black uppercase tracking-[0.2em] opacity-40">${item.l}</span>
+                <div class="mb-2 text-2xl">${item.i}</div>
+                <span class="text-[9px] font-black uppercase tracking-[0.3em] opacity-40">${item.l}</span>
             </button>
         `).join('');
     },
 
-    updateActiveNav(page) {
+    updateNav() {
         $$('.nav-btn').forEach(btn => { 
             btn.classList.remove('brand-text', 'scale-110'); 
             btn.querySelector('span').classList.replace('opacity-100', 'opacity-40'); 
         });
-        const active = $(`#nav-${page}`);
+        const active = $(`#nav-${app.state.currentPage}`);
         if (active) { 
             active.classList.add('brand-text', 'scale-110'); 
             active.querySelector('span').classList.replace('opacity-40', 'opacity-100'); 
@@ -668,33 +576,38 @@ const GAMES = {
         board: Array(9).fill(null), p: 'X', win: null,
         start() {
             this.board.fill(null); this.p = 'X'; this.win = null;
-            ui.showModal('ttt-ui', `
-                <h2 class="text-3xl font-black mb-8 text-center tracking-tighter uppercase">Tic-Tac-Toe</h2>
-                <div class="grid grid-cols-3 gap-3 w-72 mx-auto mb-10">
-                    ${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-20 h-20 bg-secondary rounded-[1.5rem] flex items-center justify-center text-4xl font-black border border-custom shadow-sm transition active:scale-90" id="ttt-${i}"></div>`).join('')}
-                </div>
-                <p id="ttt-status" class="text-center font-black uppercase text-[10px] tracking-[0.5em] opacity-40 mb-10">Turn: ${this.p}</p>
-                <button onclick="ui.closeModal('ttt-ui')" class="w-full opacity-30 font-black uppercase text-[8px] tracking-widest">Quit Game</button>
-            `);
+            ui.showModal('ttt-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter">Tic-Tac-Toe</h2><div class="grid grid-cols-3 gap-4 w-80 mx-auto mb-12">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-24 h-24 bg-secondary rounded-[2rem] flex items-center justify-center text-5xl font-black border-2 border-custom shadow-xl transition active:scale-90" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[12px] tracking-[0.6em] opacity-40 mb-12">PLAYER ${this.p} TURN</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest">Quit Game</button>`);
         },
         play(i) {
             if (this.board[i] || this.win) return;
             this.board[i] = this.p;
             $(`#ttt-${i}`).textContent = this.p;
-            if (this.check()) {
-                this.win = this.p;
-                $('#ttt-status').textContent = `Winner: ${this.p}`;
-            } else if (this.board.every(b => b)) {
-                this.win = 'Draw';
-                $('#ttt-status').textContent = `Draw Game`;
-            } else {
-                this.p = this.p === 'X' ? 'O' : 'X';
-                $('#ttt-status').textContent = `Turn: ${this.p}`;
-            }
+            if (this.check()) { this.win = this.p; $('#ttt-status').textContent = `PLAYER ${this.p} WINS!`; $('#ttt-status').classList.add('brand-text'); }
+            else if (this.board.every(b => b)) { $('#ttt-status').textContent = `STALEMATE!`; }
+            else { this.p = this.p === 'X' ? 'O' : 'X'; $('#ttt-status').textContent = `PLAYER ${this.p} TURN`; }
         },
-        check() {
-            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return wins.some(w => this.board[w[0]] && this.board[w[0]] === this.board[w[1]] && this.board[w[0]] === this.board[w[2]]);
+        check() { const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return w.some(l => this.board[l[0]] && this.board[l[0]] === this.board[l[1]] && this.board[l[0]] === this.board[l[2]]); }
+    },
+    art: {
+        painting: false,
+        start() {
+            ui.showModal('art-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter">Studio Art</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[4rem] border-[12px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Complete Masterpiece</button>`);
+            this.run();
+        },
+        run() {
+            const c = $('#art-canvas'); const ctx = c.getContext('2d');
+            c.width = c.clientWidth; c.height = c.clientWidth;
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 15; ctx.lineCap = 'round';
+            const draw = (e) => {
+                if(!this.painting) return;
+                const rect = c.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+            };
+            c.onmousedown = c.ontouchstart = (e) => { this.painting = true; draw(e); };
+            c.onmouseup = c.ontouchend = () => { this.painting = false; ctx.beginPath(); };
+            c.onmousemove = c.ontouchmove = draw;
         }
     }
 };
