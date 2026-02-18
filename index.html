@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>HXOUSE Coffee Co. | Aniga Edition</title>
+    <title>HXOUSE Coffee Co. | Build Your Own</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,7 +51,6 @@
         
         #art-canvas { background: #c4a484; touch-action: none; cursor: crosshair; }
 
-        /* Aniga Special Styles */
         .aniga-float { animation: anigaPulse 3s infinite ease-in-out; }
         @keyframes anigaPulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px var(--brand-primary)); } 50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--brand-primary)); } }
         .chat-bubble-user { border-radius: 20px 20px 4px 20px; }
@@ -59,8 +58,9 @@
         .listening-ring { position: absolute; border: 2px solid var(--brand-primary); border-radius: 50%; animation: ringExpand 1.5s infinite; opacity: 0; }
         @keyframes ringExpand { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
 
-        /* Countdown Style */
         .countdown-timer { font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+
+        .option-button.active { background-color: var(--brand-primary); color: white; border-color: var(--brand-primary); }
     </style>
 </head>
 <body data-theme="matcha">
@@ -74,7 +74,7 @@
         </div>
         <div id="splash-status" class="mt-12 flex flex-col items-center text-center">
             <div class="w-10 h-10 border-4 border-t-brand border-secondary rounded-full animate-spin mb-6"></div>
-            <p class="text-secondary text-xs font-bold tracking-[0.4em] animate-pulse uppercase">Aniga Engine Initializing</p>
+            <p class="text-secondary text-xs font-bold tracking-[0.4em] animate-pulse uppercase">HXOUSE Build Engine Loading</p>
         </div>
     </div>
 
@@ -100,7 +100,7 @@
 <script>
 /**
  * HXOUSE COFFEE CO.
- * ANIGA AI ENGINE v3.1 (Countdown & Preview Edition)
+ * ANIGA AI ENGINE v3.2 (Custom Combo & Countdown Edition)
  */
 
 const $ = (s) => document.querySelector(s);
@@ -123,18 +123,10 @@ const ANIGA_KNOWLEDGE = {
     ],
     suggestions: [
         "Try the Margherita + Peri Peri combo – it's the fan favorite today!",
-        "Feeling creative? Our Art Studio game is a great way to wait for your order.",
-        "If you tag @hxousecoffeeco on IG, you might get a free gift hamper if your order is over ₹799!"
+        "Check out our new 'Build Your Own Combo' feature. You get Peri Peri fries either way!",
+        "Tag @hxousecoffeeco on IG for a chance to win a free gift hamper!"
     ]
 };
-
-const CAMPAIGN_COMBOS = [
-    { id: 'combo_1', name: 'Margherita + Peri Peri + Drink', price: 159, description: 'Mini Margherita with Peri Peri fries + choice of mocktail/cold frappe', category: 'OFFERS' },
-    { id: 'combo_2', name: 'Paneer Tikka + Peri Peri + Drink', price: 179, description: 'Mini Paneer Tikka with Peri Peri fries + choice of mocktail/cold frappe', category: 'OFFERS' },
-    { id: 'combo_3a', name: 'Veg Momos + Mocktail', price: 99, description: 'Veg Steam Momos + Mocktail of choice', category: 'OFFERS' },
-    { id: 'combo_3b', name: 'Paneer Momos + Mocktail', price: 119, description: 'Paneer Momos + Mocktail of choice', category: 'OFFERS' },
-    { id: 'combo_3c', name: 'Cheese Corn Momos + Mocktail', price: 129, description: 'Cheese Corn Momos + Mocktail of choice', category: 'OFFERS' }
-];
 
 const app = {
     state: {
@@ -152,9 +144,15 @@ const app = {
         pointsToRedeem: 0,
         realtimeChannel: null,
         isListening: false,
-        chatHistory: [{ role: 'aniga', text: "Hey! I'm Aniga. I'm here to guide your HXOUSE experience. Try asking for 'recommendations' or 'Instagram captions'!" }],
+        chatHistory: [{ role: 'aniga', text: "Hey! I'm Aniga. I've been updated with the new Combo Builder. Try saying 'I want a combo'!" }],
         countdownText: "00d 00h 00m 00s",
-        countdownInterval: null
+        countdownInterval: null,
+        // Builder Temp State
+        builder: {
+            snack: null,
+            drink: null,
+            fries: 'Peri Peri' // Hardcoded as per request
+        }
     },
 
     async init() {
@@ -185,7 +183,6 @@ const app = {
                 const s = Math.floor((diff % (1000 * 60)) / 1000);
                 this.state.countdownText = `${String(d).padStart(2, '0')}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
             }
-            
             const el = $('#home-countdown');
             if (el) el.textContent = this.state.countdownText;
         }, 1000);
@@ -197,20 +194,16 @@ const app = {
         try {
             const { data: { session } } = await sb.auth.getSession();
             this.state.user = session?.user;
-            
             if (!this.state.user) {
                 const { data: anon, error: authErr } = await sb.auth.signInAnonymously();
                 if (authErr) throw authErr;
                 this.state.user = anon.user;
             }
-
             await Promise.all([this.loadProfile(), this.loadMenu()]);
             this.parseTable();
-
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             $('#app').classList.add('flex');
-
             if (!this.state.customerProfile || !this.state.customerProfile.name) {
                 this.onboard();
             } else if (this.state.tableNumber) {
@@ -229,7 +222,7 @@ const app = {
     async loadMenu() {
         const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
         if (error) throw error;
-        this.state.allMenuItems = [...(data || []), ...CAMPAIGN_COMBOS];
+        this.state.allMenuItems = data || [];
         const groups = this.state.allMenuItems.reduce((acc, item) => {
             let cat = acc.find(c => c.category === item.category);
             if (!cat) { cat = { category: item.category, items: [] }; acc.push(cat); }
@@ -237,7 +230,6 @@ const app = {
             return acc;
         }, []);
         this.state.menuData = groups;
-        if (this.state.menuData.length > 0) this.state.expandedCategory = 'OFFERS';
     },
 
     parseTable() {
@@ -262,7 +254,6 @@ const app = {
             <div class="text-center">
                 <div class="w-24 h-24 brand-bg mx-auto rounded-full flex items-center justify-center text-4xl mb-6 shadow-xl aniga-float">A</div>
                 <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter text-primary">HXOUSE ID</h2>
-                <p class="text-secondary mb-10 text-sm font-medium">Verify your profile with Aniga.</p>
                 <div class="space-y-4">
                     <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold uppercase text-center text-primary" placeholder="Full Name">
                     <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="WhatsApp Number">
@@ -277,7 +268,7 @@ const app = {
         const name = $('#ob-name').value.trim();
         const phone = $('#ob-phone').value.trim();
         const table = this.state.tableNumber || parseInt($('#ob-table')?.value);
-        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Missing Data");
+        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Incomplete Data");
         try {
             const profile = { id: this.state.user.id, name, whatsapp_number: phone, loyalty_points: 0 };
             await sb.from('customers').upsert(profile);
@@ -285,17 +276,17 @@ const app = {
             this.state.tableNumber = table;
             ui.closeModal('onboard-ui');
             this.launch();
-        } catch (e) { ui.showToast("Error joining"); }
+        } catch (e) { ui.showToast("System Error"); }
     },
 
     askTable() {
         ui.showModal('table-ui', `
-            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter text-center text-primary">Table Number?</h2>
+            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter text-center text-primary">Your Table?</h2>
             <div class="grid grid-cols-5 gap-3 mb-10">
                 ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg text-primary">${n}</button>`).join('')}
             </div>
             <input type="number" id="manual-table" class="w-full p-6 border border-custom rounded-3xl bg-secondary font-black text-center text-4xl text-primary" placeholder="--">
-            <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest mt-4">Confirm Spot</button>
+            <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl uppercase mt-4">Confirm Spot</button>
         `);
     },
 
@@ -334,6 +325,22 @@ const app = {
         ui.renderContent();
     },
 
+    addCustomCombo() {
+        const { snack, drink, fries } = this.state.builder;
+        if (!snack || !drink) return ui.showToast("Choose your items!");
+        const comboItem = {
+            id: `custom_${Date.now()}`,
+            name: `Combo: ${snack} + ${drink}`,
+            price: 189,
+            quantity: 1,
+            description: `Includes ${fries} Fries.`
+        };
+        this.state.cart.push(comboItem);
+        ui.closeModal('builder-ui');
+        ui.showToast("Combo added to cart!");
+        this.navigateTo('cart');
+    },
+
     async fetchActiveOrder() {
         const { data } = await sb.from('orders').select('*, order_items(*, products(*))').eq('customer_id', this.state.user.id).in('status', ['received', 'preparing']).order('created_at', { ascending: false }).limit(1).maybeSingle();
         this.state.activeOrder = data;
@@ -351,7 +358,7 @@ const app = {
     },
 
     startVoice() {
-        if (!('webkitSpeechRecognition' in window)) return ui.showToast("Voice not supported");
+        if (!('webkitSpeechRecognition' in window)) return ui.showToast("Voice unavailable");
         const rec = new webkitSpeechRecognition();
         rec.lang = 'en-US';
         rec.onstart = () => { this.state.isListening = true; ui.renderContent(); };
@@ -365,44 +372,23 @@ const app = {
 
     handleAnigaInput(input) {
         this.state.chatHistory.push({ role: 'user', text: input });
-        let reply = "I'm not sure about that, but try asking for recommendations!";
+        let reply = "Hustle on! Try asking for combo suggestions.";
+        if (input.includes('menu')) { reply = "Opening the menu..."; setTimeout(() => this.navigateTo('order'), 1000); }
+        else if (input.includes('combo')) { reply = "Opening the Combo Builder for you!"; setTimeout(() => ui.builderModal(), 1000); }
+        else if (input.includes('caption')) { reply = ANIGA_KNOWLEDGE.captions[Math.floor(Math.random() * ANIGA_KNOWLEDGE.captions.length)]; }
         
-        if (input.includes('menu') || input.includes('order')) {
-            reply = "Redirecting you to our menu!";
-            setTimeout(() => this.navigateTo('order'), 1000);
-        } else if (input.includes('instagram') || input.includes('social')) {
-            reply = "Heading to our socials!";
-            setTimeout(() => this.navigateTo('social'), 1000);
-        } else if (input.includes('caption')) {
-            reply = "Here's a cool caption: " + ANIGA_KNOWLEDGE.captions[Math.floor(Math.random() * ANIGA_KNOWLEDGE.captions.length)];
-        } else if (input.includes('suggest') || input.includes('recommend')) {
-            reply = ANIGA_KNOWLEDGE.suggestions[Math.floor(Math.random() * ANIGA_KNOWLEDGE.suggestions.length)];
-        } else if (input.includes('hi') || input.includes('hello')) {
-            reply = "Hi there! I'm Aniga, your talented guide. How can I help you hustle today?";
-        }
-
         setTimeout(() => {
             this.state.chatHistory.push({ role: 'aniga', text: reply });
             ui.renderContent();
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(reply);
-                window.speechSynthesis.speak(utterance);
-            }
+            if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
         }, 600);
     },
 
     async placeOrder(method, btn) {
         btn.disabled = true;
-        btn.innerHTML = "SYSTEM PREVIEW";
-        ui.showToast("Order System Launching March 1st! (Preview Mode)");
-        
-        // Mock success for preview
-        setTimeout(() => {
-            this.state.cart = [];
-            ui.closeModal('pay-ui');
-            ui.showToast("Order Logged in Preview Mode!");
-            this.navigateTo('cart');
-        }, 1500);
+        btn.innerHTML = "PREVIEW MODE";
+        ui.showToast("Launching March 1st. See the timer!");
+        setTimeout(() => { this.state.cart = []; ui.closeModal('pay-ui'); this.navigateTo('cart'); }, 1500);
     }
 };
 
@@ -411,11 +397,9 @@ const ui = {
         const h = $('#page-header');
         h.innerHTML = `
             <div onclick="app.navigateTo('home')"><h1 class="text-2xl font-black brand-text tracking-tighter uppercase cursor-pointer">H<span class="classy-x">X</span>OUSE</h1></div>
-            <div class="flex items-center space-x-4">
-                <div class="text-right">
-                    <p class="font-black text-sm tracking-tighter uppercase text-primary">Table #${app.state.tableNumber || '?'}</p>
-                    <p class="text-[9px] uppercase opacity-40 font-black tracking-widest text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
-                </div>
+            <div class="text-right">
+                <p class="font-black text-sm tracking-tighter uppercase text-primary">Table #${app.state.tableNumber || '?'}</p>
+                <p class="text-[9px] uppercase opacity-40 font-black tracking-widest text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
             </div>`;
     },
 
@@ -426,7 +410,6 @@ const ui = {
         else if (p === 'order') this.menu(c);
         else if (p === 'cart') this.cart(c);
         else if (p === 'social') this.social(c);
-        else if (p === 'cowork') this.cowork(c);
         else if (p === 'aniga') this.aniga(c);
         else if (p === 'more') this.more(c);
     },
@@ -434,253 +417,221 @@ const ui = {
     home(c) {
         c.innerHTML = `
             <div class="space-y-6 fade-in pb-10">
-                <!-- Video/Hero Section -->
-                <div class="relative h-64 overflow-hidden rounded-b-[3rem] shadow-2xl group">
+                <div class="relative h-64 overflow-hidden rounded-b-[3.5rem] shadow-2xl">
                     <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover opacity-60"></video>
-                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6 transition-all group-hover:bg-black/20">
-                        <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center transform group-hover:scale-105 transition">Fuel the <br> Hustle</h1>
-                        <p class="text-[10px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">AI-Powered Experience</p>
+                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6">
+                        <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center">HXOUSE Build</h1>
+                        <p class="text-[9px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">March 1st Launch Countdown</p>
                     </div>
                 </div>
 
-                <!-- Limited Offers Countdown -->
                 <div class="px-6">
-                    <div class="bg-primary border-2 border-custom rounded-3xl p-6 text-center shadow-lg transform scale-[0.98]">
-                        <p class="text-[10px] font-black uppercase text-secondary tracking-[0.4em] mb-2">Limited Offers Ending In:</p>
+                    <div class="bg-primary border-2 border-custom rounded-[2.5rem] p-7 text-center shadow-lg">
+                        <p class="text-[9px] font-black uppercase text-secondary tracking-[0.4em] mb-3">Limited Offers Expire In:</p>
                         <div id="home-countdown" class="text-3xl font-black text-primary tracking-tighter countdown-timer">${app.state.countdownText}</div>
-                        <p class="text-[8px] font-black uppercase text-secondary mt-2 opacity-50 tracking-[0.2em]">Full Launch: March 1st, 2026</p>
                     </div>
                 </div>
 
-                <!-- Mood Selector -->
+                <!-- Custom Combo Builder Card -->
                 <div class="px-6">
-                    <h2 class="font-black text-[10px] uppercase tracking-[0.3em] text-secondary mb-4">Current Vibe</h2>
-                    <div class="flex space-x-3 overflow-x-auto no-scrollbar pb-2">
-                        ${['☕️ Focused', '🚀 Energetic', '🍵 Calm', '🎨 Creative'].map(m => `
-                            <button onclick="ui.showToast('Vibe set: ${m}')" class="flex-shrink-0 px-4 py-2 bg-secondary border border-custom rounded-full text-[10px] font-black uppercase tracking-widest text-primary hover:brand-bg hover:text-white transition-all">${m}</button>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <!-- Flash Combos -->
-                <div class="px-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex flex-col">
-                            <h2 class="font-black text-xl uppercase tracking-tighter text-primary">Limited Offers</h2>
-                            <p class="text-[9px] font-bold text-secondary uppercase tracking-widest">Selected by Aniga</p>
+                    <div onclick="ui.builderModal()" class="combo-card p-10 rounded-[3rem] text-center shadow-2xl cursor-pointer border-4 border-dashed transform active:scale-95 transition-all">
+                        <div class="flex flex-col items-center">
+                            <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase mb-4">NEW FEATURE</span>
+                            <h2 class="text-3xl font-black text-primary uppercase tracking-tighter leading-none mb-2">Build Your <br> Own Combo</h2>
+                            <p class="text-[10px] text-secondary font-bold uppercase tracking-widest mt-2">Pick Snack + Drinks. Fries Included!</p>
+                            <button class="mt-8 brand-bg px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl">Start Building</button>
                         </div>
-                        <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest">FLASH SALE</span>
-                    </div>
-                    <div class="flex overflow-x-auto space-x-4 pb-4 no-scrollbar">
-                        ${CAMPAIGN_COMBOS.map(combo => `
-                            <div class="combo-card flex-shrink-0 w-64 p-5 rounded-[2.5rem] shadow-sm relative border border-custom">
-                                <h3 class="font-black text-sm uppercase leading-tight text-primary mb-1">${combo.name}</h3>
-                                <p class="text-[9px] font-medium text-secondary leading-snug mb-4">${combo.description}</p>
-                                <div class="flex justify-between items-center mt-auto">
-                                    <span class="font-black text-xl text-primary tracking-tighter">₹${combo.price}</span>
-                                    <button onclick="app.addCart('${combo.id}', 1); ui.showToast('Added to Cart!')" class="brand-bg w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold active:scale-90 transition">+</button>
-                                </div>
-                            </div>
-                        `).join('')}
                     </div>
                 </div>
 
-                <!-- Rewards & Action -->
+                <div class="px-6 flex space-x-3 overflow-x-auto no-scrollbar">
+                    ${['☕️ Focus', '🚀 Energy', '🍵 Zen', '🎨 Idea'].map(m => `<button class="flex-shrink-0 px-5 py-3 bg-secondary border border-custom rounded-full text-[10px] font-black uppercase text-primary">${m}</button>`).join('')}
+                </div>
+
                 <div class="p-6 space-y-6">
-                    <div onclick="app.navigateTo('aniga')" class="bg-primary border-4 border-dashed border-custom p-8 rounded-[3rem] text-center shadow-xl cursor-pointer hover:border-brand-primary transition-all">
-                        <p class="text-xs font-black text-secondary uppercase tracking-[0.2em] mb-2">Need Guidance?</p>
-                        <h2 class="font-black text-2xl text-primary uppercase tracking-tighter">Chat with Aniga</h2>
-                    </div>
-                    
-                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl active:scale-95 transition uppercase tracking-tighter">Full Menu</button>
-                    
-                    <div class="bg-secondary p-8 rounded-[2.5rem] border border-custom shadow-sm flex justify-between items-center">
-                        <div class="pr-4">
-                            <h3 class="font-black text-lg uppercase tracking-tighter mb-2 text-primary">Rewards</h3>
-                            <p class="text-[10px] text-secondary font-bold uppercase tracking-widest">${app.state.customerProfile?.loyalty_points || 0} Points Balance</p>
+                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl uppercase tracking-tighter">Browse Menu</button>
+                    <div class="bg-secondary p-8 rounded-[2.5rem] border border-custom flex justify-between items-center shadow-sm">
+                        <div>
+                            <h3 class="font-black text-lg uppercase tracking-tighter mb-1 text-primary">HXOUSE Rewards</h3>
+                            <p class="text-[10px] text-secondary font-bold uppercase tracking-widest">${app.state.customerProfile?.loyalty_points || 0} Points</p>
                         </div>
-                        <span class="text-4xl aniga-float">💎</span>
+                        <span class="text-3xl">💎</span>
                     </div>
                 </div>
             </div>`;
+    },
+
+    builderModal() {
+        app.state.builder = { snack: null, drink: null, fries: 'Peri Peri' };
+        ui.showModal('builder-ui', `
+            <div class="text-center">
+                <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter text-primary leading-none">Combo <br> Builder</h2>
+                <p class="text-secondary text-[10px] font-bold uppercase tracking-widest mb-10">Select your items</p>
+                
+                <div class="space-y-10">
+                    <!-- Step 1: Main Snack -->
+                    <div>
+                        <p class="text-[9px] font-black text-secondary uppercase tracking-[0.4em] mb-4">1. Select Snack</p>
+                        <div class="flex flex-wrap justify-center gap-2" id="snack-opts">
+                            ${['Margherita', 'Paneer Tikka', 'Momos'].map(s => `<button onclick="ui.setBuilder('snack', '${s}')" class="option-button flex-grow p-4 bg-secondary border border-custom rounded-2xl font-black uppercase text-[10px] text-primary transition-all">${s}</button>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Drink Options -->
+                    <div>
+                        <p class="text-[9px] font-black text-secondary uppercase tracking-[0.4em] mb-4">2. Select Drink Choice</p>
+                        <div class="grid grid-cols-2 gap-3" id="drink-opts">
+                            <button onclick="ui.setBuilder('drink', '2x Mojitos')" class="option-button p-6 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center transition-all">
+                                <span class="text-2xl mb-2">🍹🍹</span>
+                                <span class="font-black uppercase text-[9px] text-primary">2x Mojitos</span>
+                                <span class="text-[8px] opacity-40 uppercase font-bold mt-1">(Best for 2)</span>
+                            </button>
+                            <button onclick="ui.setBuilder('drink', '1x Cold Frappe')" class="option-button p-6 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center transition-all">
+                                <span class="text-2xl mb-2">🥤</span>
+                                <span class="font-black uppercase text-[9px] text-primary">Cold Frappe</span>
+                                <span class="text-[8px] opacity-40 uppercase font-bold mt-1">(Solo Choice)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Fixed Item -->
+                    <div class="bg-primary border-2 border-custom border-dashed p-5 rounded-3xl">
+                        <p class="text-[8px] font-black text-secondary uppercase tracking-widest mb-1">Included Automatically</p>
+                        <h3 class="font-black uppercase text-sm text-primary">🔥 Peri Peri Fries</h3>
+                    </div>
+                </div>
+
+                <div class="mt-12 flex flex-col space-y-4">
+                    <div class="flex justify-between items-center px-4 font-black text-primary">
+                        <span class="uppercase tracking-tighter text-xl">Combo Price</span>
+                        <span class="text-2xl tracking-tighter">₹189</span>
+                    </div>
+                    <button onclick="app.addCustomCombo()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-widest">Add Hustle Combo</button>
+                    <button onclick="ui.closeModal('builder-ui')" class="opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Cancel</button>
+                </div>
+            </div>
+        `);
+    },
+
+    setBuilder(type, val) {
+        app.state.builder[type] = val;
+        const selector = type === 'snack' ? '#snack-opts' : '#drink-opts';
+        $$(selector + ' .option-button').forEach(btn => {
+            if (btn.innerText.includes(val)) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
     },
 
     menu(c) {
         c.innerHTML = `
             <div class="p-6 fade-in">
-                <div class="relative mb-6">
-                    <input type="text" placeholder="I want coffee..." class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold shadow-inner text-primary pl-14" oninput="app.state.searchQuery = this.value; ui.menuList()">
-                    <span class="absolute left-5 top-5 opacity-40">🔍</span>
-                </div>
-                <div id="menu-sections" class="space-y-4"></div>
+                <input type="text" placeholder="I'm craving..." class="w-full p-6 bg-secondary border border-custom rounded-2xl font-bold shadow-inner text-primary" oninput="app.state.searchQuery = this.value; ui.menuList()">
+                <div id="menu-sections" class="space-y-4 mt-6"></div>
             </div>`;
         this.menuList();
     },
 
     menuList() {
-        const target = $('#menu-sections');
-        if (!target) return;
+        const target = $('#menu-sections'); if (!target) return;
         const q = app.state.searchQuery.toLowerCase();
-        const sortedMenu = [...app.state.menuData].sort((a,b) => a.category === 'OFFERS' ? -1 : 1);
-
-        target.innerHTML = sortedMenu.map(group => {
+        target.innerHTML = app.state.menuData.map(group => {
             const filtered = group.items.filter(i => i.name.toLowerCase().includes(q));
             if (filtered.length === 0 && q) return '';
             const isExp = app.state.expandedCategory === group.category || q;
             return `
                 <div class="bg-secondary rounded-[2rem] border border-custom overflow-hidden shadow-sm">
                     <button onclick="app.state.expandedCategory='${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[10px] tracking-widest text-primary">
-                        ${group.category} <span class="text-xl transition-transform ${isExp ? 'rotate-90' : ''}">→</span>
+                        ${group.category} <span class="transition-transform ${isExp ? 'rotate-90' : ''}">→</span>
                     </button>
-                    <div class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '2000px' : '0'}">
+                    <div class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '1000px' : '0'}">
                         <div class="p-4 space-y-3">
-                            ${filtered.map(i => this.itemCard(i)).join('')}
+                            ${filtered.map(i => `<div class="bg-primary p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center border border-custom">
+                                <div class="pr-4"><h4 class="font-black text-sm uppercase leading-tight text-primary">${i.name}</h4><p class="text-secondary font-black text-[10px] opacity-50">₹${i.price}</p></div>
+                                <button onclick="app.addCart('${i.id}', 1)" class="add-to-cart-btn brand-bg font-black text-2xl">+</button>
+                            </div>`).join('')}
                         </div>
                     </div>
                 </div>`;
         }).join('');
     },
 
-    itemCard(i) {
-        const cartItem = app.state.cart.find(ci => ci.id === i.id);
-        const isOffer = i.category === 'OFFERS';
-        return `
-            <div class="${isOffer ? 'combo-card' : 'bg-primary'} p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center border border-custom transition-all active:scale-[0.98]">
-                <div class="flex-grow pr-4">
-                    <h4 class="font-black text-sm uppercase leading-tight mb-2 tracking-tighter text-primary">${i.name}</h4>
-                    <p class="text-secondary font-black text-xs opacity-50 tracking-widest">₹${i.price}</p>
-                </div>
-                <div>
-                    ${cartItem ? `
-                        <div class="quantity-control shadow-sm"><button onclick="app.addCart('${i.id}', -1)" class="px-3">−</button><span class="text-xs">${cartItem.quantity}</span><button onclick="app.addCart('${i.id}', 1)" class="px-3">+</button></div>
-                    ` : `<button onclick="app.addCart('${i.id}', 1)" class="add-to-cart-btn brand-bg font-black text-2xl">+</button>`}
-                </div>
-            </div>`;
-    },
-
     cart(c) {
         if (app.state.activeOrder) return this.track(c);
-        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center opacity-30 h-full flex flex-col justify-center"><p class="text-8xl mb-8">🛒</p><p class="font-black tracking-widest uppercase text-xs">Selection Empty</p><button onclick="app.navigateTo('order')" class="mt-8 font-black underline text-primary">GO TO MENU</button></div>`;
-
+        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center opacity-30 h-full flex flex-col justify-center"><p class="text-9xl mb-10">🛒</p><p class="font-black uppercase tracking-widest text-xs">Cart is Empty</p></div>`;
         const subtotal = app.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const maxRedeem = Math.min(Math.floor((app.state.customerProfile?.loyalty_points || 0) * 0.8), Math.floor(subtotal));
-        const gst = (subtotal - app.state.pointsToRedeem) * 0.05;
-        const total = (subtotal - app.state.pointsToRedeem) + gst;
-
         c.innerHTML = `
             <div class="p-6 space-y-6 pb-32 fade-in">
-                <h2 class="text-4xl font-black tracking-tighter uppercase mb-8 text-primary">Preview Cart</h2>
-                <div class="space-y-3">${app.state.cart.map(i => `
-                    <div class="flex justify-between items-center p-5 bg-secondary rounded-[1.5rem] border border-custom shadow-sm">
-                        <div>
-                            <p class="font-black text-sm uppercase text-primary">${i.name}</p>
-                            <p class="text-[10px] opacity-40 font-black mt-1 uppercase tracking-widest text-primary">₹${i.price} x ${i.quantity}</p>
+                <h2 class="text-4xl font-black tracking-tighter uppercase mb-10 text-primary">Selected</h2>
+                <div class="space-y-4">${app.state.cart.map(i => `
+                    <div class="flex justify-between items-center p-6 bg-secondary rounded-[2rem] border border-custom shadow-sm">
+                        <div class="flex-grow pr-4">
+                            <p class="font-black text-sm uppercase text-primary leading-tight">${i.name}</p>
+                            <p class="text-[9px] opacity-40 font-black mt-2 uppercase text-primary">₹${i.price} x ${i.quantity}</p>
+                            ${i.description ? `<p class="text-[8px] text-brand-primary font-black uppercase mt-1 italic">${i.description}</p>` : ''}
                         </div>
                         <div class="quantity-control shadow-sm">
                             <button onclick="app.addCart('${i.id}', -1)" class="px-3">−</button><span>${i.quantity}</span><button onclick="app.addCart('${i.id}', 1)" class="px-3">+</button>
                         </div>
                     </div>`).join('')}
                 </div>
-                ${maxRedeem > 0 ? `
-                    <div class="p-8 bg-secondary rounded-[2rem] border border-custom shadow-inner text-center">
-                        <p class="text-[10px] font-black uppercase mb-6 opacity-40 tracking-[0.2em] text-primary">Redeem Points</p>
-                        <input type="range" id="loyalty-slider" min="0" max="${maxRedeem}" value="${app.state.pointsToRedeem}" oninput="app.state.pointsToRedeem = parseInt(this.value); ui.cart($('#page-content'))">
-                        <div class="flex justify-between font-black text-[11px] mt-6 uppercase opacity-60 text-primary"><span>₹${app.state.pointsToRedeem} Off</span><span>Bal: ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem}</span></div>
-                    </div>` : ''}
-                <textarea id="special-inst" placeholder="Instructions? Aniga can help if you ask her..." class="w-full p-6 bg-secondary border border-custom rounded-2xl h-28 font-bold text-sm shadow-inner text-primary"></textarea>
-                <div class="p-8 bg-secondary rounded-[2.5rem] space-y-3 border border-custom shadow-sm uppercase text-primary">
-                    <div class="flex justify-between font-black text-[10px] opacity-40"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
-                    <div class="flex justify-between font-black text-[10px] opacity-40"><span>Tax</span><span>₹${gst.toFixed(2)}</span></div>
-                    <div class="flex justify-between font-black text-2xl pt-4 border-t border-custom tracking-tighter"><span>Total</span><span>₹${total.toFixed(2)}</span></div>
+                <div class="p-10 bg-secondary rounded-[3rem] border border-custom shadow-sm uppercase text-primary">
+                    <div class="flex justify-between font-black text-3xl tracking-tighter uppercase"><span>Total</span><span>₹${subtotal}</span></div>
                 </div>
-                <button onclick="ui.payModal()" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl tracking-tighter uppercase active:scale-95 transition">Preview Checkout</button>
+                <button onclick="ui.payModal()" class="w-full brand-bg py-8 rounded-[2.5rem] font-black text-2xl shadow-2xl uppercase tracking-tighter">Preview Checkout</button>
             </div>`;
     },
 
     track(c) {
-        const steps = ['received', 'preparing', 'delivered'];
-        const idx = steps.indexOf(app.state.activeOrder?.status || 'received');
-        const progress = ((idx + 1) / steps.length) * 100;
-        c.innerHTML = `
-            <div class="p-10 text-center space-y-16 fade-in h-full flex flex-col justify-center">
-                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none text-primary">Live <br> Progress</h2>
-                <div class="relative h-6 w-full bg-secondary rounded-full overflow-hidden border border-custom"><div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${progress}%"></div></div>
-                <div class="space-y-10 text-left px-4">
-                    ${steps.map((s, i) => `<div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}"><div class="w-16 h-16 rounded-3xl border-2 border-custom flex items-center justify-center text-3xl bg-secondary">${i === 0 ? '📝' : i === 1 ? '🍳' : '🏁'}</div><div><p class="font-black text-sm uppercase tracking-widest text-primary">${s}</p><p class="text-[9px] font-bold text-secondary uppercase opacity-60">${i <= idx ? 'Done' : 'Wait'}</p></div></div>`).join('')}
-                </div>
-                <button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest active:scale-95 transition text-primary">Play Arcade</button>
-            </div>`;
+        c.innerHTML = `<div class="p-10 text-center space-y-16 fade-in h-full flex flex-col justify-center"><h2 class="text-5xl font-black uppercase leading-none text-primary">HXOUSE <br> Live</h2><div class="relative h-6 w-full bg-secondary rounded-full overflow-hidden border border-custom shadow-inner"><div class="absolute h-full brand-bg" style="width: 33%"></div></div><p class="text-xs font-black uppercase text-secondary tracking-widest">System Preview Mode</p><button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest text-primary">Play Arcade</button></div>`;
     },
 
     social(c) {
         c.innerHTML = `
             <div class="p-6 space-y-12 fade-in h-full flex flex-col justify-center text-center">
                 <h2 class="text-4xl font-black uppercase tracking-tighter leading-none text-primary">Connect @ <br> HXOUSE</h2>
-                <div class="bg-secondary p-12 rounded-[3.5rem] border border-custom shadow-2xl">
-                    <p class="instagram-card font-black text-3xl mb-10 tracking-tighter cursor-pointer" onclick="window.open('https://instagram.com/hxousecoffeeco', '_blank')">@hxousecoffeeco</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[2.5rem] border-8 border-white p-2 shadow-2xl transition-transform active:rotate-3">
-                    <p class="text-[10px] font-black uppercase tracking-[0.6em] mt-12 opacity-40 text-primary">Tap profile to visit</p>
+                <div class="bg-secondary p-12 rounded-[4rem] border border-custom shadow-2xl">
+                    <p class="instagram-card font-black text-4xl mb-12 tracking-tighter" onclick="window.open('https://instagram.com/hxousecoffeeco', '_blank')">@hxousecoffeeco</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[3rem] border-8 border-white p-2 shadow-2xl scale-110">
                 </div>
-                <button onclick="app.navigateTo('aniga')" class="brand-bg py-4 px-10 rounded-full font-black text-[10px] uppercase mx-auto tracking-widest">Ask Aniga for Captions</button>
+                <button onclick="app.navigateTo('aniga')" class="brand-bg py-4 px-12 rounded-full font-black text-[10px] uppercase mx-auto tracking-widest">Ask Aniga for IG Captions</button>
             </div>`;
     },
 
     aniga(c) {
         c.innerHTML = `
             <div class="p-6 flex flex-col h-full fade-in">
-                <div class="flex-grow overflow-y-auto space-y-4 pr-2 pb-6" id="chat-window">
+                <div class="flex-grow overflow-y-auto space-y-5 pr-2 pb-6" id="chat-window">
                     ${app.state.chatHistory.map(chat => `
                         <div class="flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}">
-                            <div class="${chat.role === 'user' ? 'chat-bubble-user brand-bg text-primary' : 'chat-bubble-aniga bg-secondary text-primary'} p-5 max-w-[85%] text-sm font-bold shadow-sm">
-                                ${chat.text}
-                            </div>
+                            <div class="${chat.role === 'user' ? 'chat-bubble-user brand-bg text-primary' : 'chat-bubble-aniga bg-secondary text-primary'} p-6 max-w-[90%] text-sm font-bold shadow-md">${chat.text}</div>
                         </div>
                     `).join('')}
-                    ${app.state.isListening ? `
-                        <div class="flex justify-start">
-                            <div class="chat-bubble-aniga bg-secondary p-5 flex items-center space-x-2">
-                                <div class="w-2 h-2 brand-bg rounded-full animate-bounce"></div>
-                                <div class="w-2 h-2 brand-bg rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                                <div class="w-2 h-2 brand-bg rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
-                            </div>
-                        </div>
-                    ` : ''}
+                    ${app.state.isListening ? `<div class="flex justify-start"><div class="chat-bubble-aniga bg-secondary p-5 flex space-x-2"><div class="w-2 h-2 brand-bg rounded-full animate-bounce"></div><div class="w-2 h-2 brand-bg rounded-full animate-bounce delay-100"></div><div class="w-2 h-2 brand-bg rounded-full animate-bounce delay-200"></div></div></div>` : ''}
                 </div>
-                
                 <div class="mt-auto space-y-4">
                     <div class="flex space-x-2">
-                        <input type="text" id="chat-input" placeholder="Ask Aniga..." class="flex-grow p-6 bg-secondary border border-custom rounded-[2rem] font-bold text-sm text-primary shadow-inner">
-                        <button onclick="app.handleAnigaInput($('#chat-input').value); $('#chat-input').value=''" class="brand-bg w-16 h-16 rounded-[2rem] flex items-center justify-center text-xl">➔</button>
+                        <input type="text" id="chat-input" placeholder="Ask Aniga about combos..." class="flex-grow p-6 bg-secondary border border-custom rounded-[2rem] font-bold text-sm text-primary shadow-inner">
+                        <button onclick="app.handleAnigaInput($('#chat-input').value); $('#chat-input').value=''" class="brand-bg w-16 h-16 rounded-[2rem] flex items-center justify-center text-xl shadow-xl">➔</button>
                     </div>
-                    <button onclick="app.startVoice()" class="w-full flex items-center justify-center space-x-3 py-6 rounded-[2rem] bg-secondary border-2 border-custom font-black uppercase text-xs tracking-widest text-primary active:scale-95 transition">
-                        <span class="text-xl">🎙️</span>
-                        <span>${app.state.isListening ? 'Listening...' : 'Tap for Voice'}</span>
-                    </button>
+                    <button onclick="app.startVoice()" class="w-full flex items-center justify-center space-x-3 py-6 rounded-[2rem] bg-secondary border-2 border-custom font-black uppercase text-xs tracking-widest text-primary shadow-lg">${app.state.isListening ? 'Listening...' : '🎙️ Tap Voice'}</button>
                 </div>
             </div>`;
-        const win = $('#chat-window');
-        win.scrollTop = win.scrollHeight;
-    },
-
-    cowork(c) {
-        c.innerHTML = `<div class="p-10 text-center space-y-12 fade-in h-full flex flex-col justify-center"><span class="text-[10rem] mb-6 drop-shadow-2xl">🏛️</span><h2 class="text-6xl font-black tracking-tighter uppercase leading-none text-primary">Creative <br> Studio</h2><p class="text-secondary font-medium px-10 text-sm">Gigabit fiber, premium roasts, and a global collective of builders.</p><button onclick="ui.showToast('Agent Dispatched!')" class="brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Secure Workspace</button></div>`;
+        const win = $('#chat-window'); win.scrollTop = win.scrollHeight;
     },
 
     more(c) {
         c.innerHTML = `
             <div class="p-8 space-y-6 fade-in">
-                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">HXOUSE Profile</h2>
-                <div class="bg-secondary p-12 rounded-[3rem] border border-custom shadow-xl mb-12">
-                    <p class="text-[9px] font-black uppercase opacity-40 mb-3 tracking-[0.4em] text-primary">Digital Identity</p>
-                    <p class="font-black text-3xl tracking-tighter uppercase mb-2 text-primary">${app.state.customerProfile?.name || 'Guest User'}</p>
-                    <p class="text-xs opacity-50 font-black tracking-widest text-primary">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
+                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">Member</h2>
+                <div class="bg-secondary p-12 rounded-[3rem] border border-custom shadow-xl mb-10">
+                    <p class="font-black text-3xl tracking-tighter uppercase mb-2 text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
+                    <p class="text-[9px] opacity-40 uppercase tracking-[0.5em] text-primary">Member ID: ${app.state.user.id.substring(0,8)}</p>
                 </div>
                 <div class="space-y-4">
-                    <button onclick="ui.gameModal()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Arcade Center</span><span>🎮</span></button>
-                    <button onclick="location.reload()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Reset Engine</span><span>⟳</span></button>
-                    <button onclick="app.navigateTo('aniga')" class="w-full p-7 brand-bg rounded-[1.5rem] text-left font-black flex justify-between shadow-xl text-primary"><span>Chat with Aniga</span><span>✨</span></button>
+                    <button onclick="ui.gameModal()" class="w-full p-8 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Arcade</span><span>🎮</span></button>
+                    <button onclick="location.reload()" class="w-full p-8 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Reload System</span><span>⟳</span></button>
                 </div>
-                <p class="text-center text-[8px] font-black uppercase opacity-20 mt-20 tracking-[1em] text-primary">ANIGA AI CORE v3.1.0</p>
+                <p class="text-center text-[8px] font-black uppercase opacity-20 mt-20 tracking-[1em] text-primary">HXOUSE ENGINE v3.2.0</p>
             </div>`;
     },
 
@@ -688,20 +639,20 @@ const ui = {
         ui.showModal('pay-ui', `
             <h2 class="text-4xl font-black mb-12 uppercase tracking-tighter text-primary">Checkout</h2>
             <div class="space-y-5">
-                <button onclick="app.placeOrder('Preview', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Simulate Pay</span><span>🖥️</span></button>
-                <button onclick="app.placeOrder('Preview', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Table Pay</span><span>💵</span></button>
+                <button onclick="app.placeOrder('Preview', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary"><span>Simulate Pay</span><span>🖥️</span></button>
+                <button onclick="app.placeOrder('Preview', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary"><span>Table Pay</span><span>💵</span></button>
             </div>
-            <p class="text-center text-[9px] uppercase font-black opacity-40 mt-6 tracking-widest text-primary">System Launching March 1st</p>
+            <p class="text-center text-[9px] uppercase font-black opacity-40 mt-10 tracking-[0.4em] text-primary">Launching March 1st</p>
             <button onclick="ui.closeModal('pay-ui')" class="w-full mt-6 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Return</button>
         `);
     },
 
     gameModal() {
         ui.showModal('games-ui', `
-            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter text-primary text-center">Arcade</h2>
+            <h2 class="text-3xl font-black mb-12 uppercase tracking-tighter text-primary text-center">Arcade</h2>
             <div class="space-y-5">
-                <div class="bg-secondary p-10 rounded-[2.5rem] border border-custom flex justify-between items-center shadow-lg text-primary"><p class="font-black uppercase text-xs tracking-widest">Tic-Tac-Toe</p><button onclick="GAMES.ttt.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[10px] uppercase shadow-xl">PLAY</button></div>
-                <div class="bg-secondary p-10 rounded-[2.5rem] border border-custom flex justify-between items-center shadow-lg text-primary"><p class="font-black uppercase text-xs tracking-widest">Art Studio</p><button onclick="GAMES.art.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[10px] uppercase shadow-xl">ENTER</button></div>
+                <div class="bg-secondary p-12 rounded-[3rem] border border-custom flex justify-between items-center text-primary shadow-lg"><p class="font-black uppercase text-xs tracking-widest">Tic-Tac-Toe</p><button onclick="GAMES.ttt.start()" class="brand-bg px-12 py-5 rounded-full font-black text-[10px] shadow-xl">PLAY</button></div>
+                <div class="bg-secondary p-12 rounded-[3rem] border border-custom flex justify-between items-center text-primary shadow-lg"><p class="font-black uppercase text-xs tracking-widest">Art Studio</p><button onclick="GAMES.art.start()" class="brand-bg px-12 py-5 rounded-full font-black text-[10px] shadow-xl">ENTER</button></div>
             </div>
             <button onclick="ui.closeModal('games-ui')" class="w-full mt-10 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">CLOSE</button>
         `);
@@ -709,7 +660,7 @@ const ui = {
 
     showModal(id, content) {
         const m = document.createElement('div'); m.id = id; m.className = "modal-overlay fixed inset-0 bg-black/98 z-[60] flex items-end p-4 backdrop-blur-xl";
-        m.innerHTML = `<div class="modal-content w-full bg-primary p-12 rounded-[4rem] shadow-2xl border border-custom">${content}</div>`;
+        m.innerHTML = `<div class="modal-content w-full bg-primary p-12 rounded-[4.5rem] shadow-2xl border border-custom">${content}</div>`;
         $('#modal-container').appendChild(m);
     },
 
@@ -726,7 +677,7 @@ const ui = {
         const items = [{ id: 'home', l: 'Home', i: '🏠' }, { id: 'order', l: 'Menu', i: '☕' }, { id: 'aniga', l: 'Aniga', i: '✨' }, { id: 'cart', l: 'Live', i: '🛒' }, { id: 'more', l: 'User', i: '☰' }];
         nav.innerHTML = items.map(item => `
             <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all duration-300" id="nav-${item.id}">
-                <div class="mb-2 text-2xl">${item.i === '✨' ? '<span class="aniga-float">✨</span>' : item.i}</div>
+                <div class="mb-2 text-2xl">${item.id === 'aniga' ? '<span class="aniga-float">✨</span>' : item.i}</div>
                 <span class="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 text-primary">${item.l}</span>
             </button>
         `).join('');
@@ -750,7 +701,7 @@ const GAMES = {
             if (this.board[i] || this.win) return;
             this.board[i] = this.p;
             $(`#ttt-${i}`).textContent = this.p;
-            if (this.check()) { this.win = this.p; $('#ttt-status').textContent = `PLAYER ${this.p} WINS!`; $('#ttt-status').classList.add('brand-text'); }
+            if (this.check()) { this.win = this.p; $('#ttt-status').textContent = `WINNER: ${this.p}`; $('#ttt-status').classList.add('brand-text'); }
             else if (this.board.every(b => b)) { $('#ttt-status').textContent = `DRAW!`; }
             else { this.p = this.p === 'X' ? 'O' : 'X'; $('#ttt-status').textContent = `TURN: ${this.p}`; }
         },
@@ -759,7 +710,7 @@ const GAMES = {
     art: {
         painting: false,
         start() {
-            ui.showModal('art-run', `<h2 class="text-3xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Studio</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[3.5rem] border-[8px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Export</button>`);
+            ui.showModal('art-run', `<h2 class="text-3xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Studio</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[3.5rem] border-[8px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Export Art</button>`);
             this.run();
         },
         run() {
