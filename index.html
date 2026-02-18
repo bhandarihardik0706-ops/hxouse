@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>HXOUSE Coffee Co. | Live Experience</title>
+    <title>HXOUSE Coffee Co. | Aniga Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,28 +50,42 @@
         #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--brand-primary); border-radius: 50%; cursor: pointer; border: 2px solid var(--bg-primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
         #art-canvas { background: #c4a484; touch-action: none; cursor: crosshair; }
+
+        /* Aniga Special Styles */
+        .aniga-float { animation: anigaPulse 3s infinite ease-in-out; }
+        @keyframes anigaPulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px var(--brand-primary)); } 50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--brand-primary)); } }
+        .chat-bubble-user { border-radius: 20px 20px 4px 20px; }
+        .chat-bubble-aniga { border-radius: 20px 20px 20px 4px; border: 1px solid var(--brand-primary); }
+        .listening-ring { position: absolute; border: 2px solid var(--brand-primary); border-radius: 50%; animation: ringExpand 1.5s infinite; opacity: 0; }
+        @keyframes ringExpand { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+
+        /* Countdown Style */
+        .countdown-timer { font-variant-numeric: tabular-nums; letter-spacing: 1px; }
     </style>
 </head>
 <body data-theme="matcha">
 
     <!-- Splash Loader -->
     <div id="splash-screen" class="fixed inset-0 bg-primary flex flex-col items-center justify-center z-[100]">
-        <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" 
-             alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full shadow-2xl">
+        <div class="relative">
+            <img src="https://qaytrfhpqsajgfqedxak.supabase.co/storage/v1/object/public/assets/WhatsApp%20Image%202025-10-08%20at%2009.25.36_1c1533ac.jpg" 
+                 alt="HXOUSE Logo" class="w-48 h-48 object-contain rounded-full shadow-2xl">
+            <div class="listening-ring"></div>
+        </div>
         <div id="splash-status" class="mt-12 flex flex-col items-center text-center">
             <div class="w-10 h-10 border-4 border-t-brand border-secondary rounded-full animate-spin mb-6"></div>
-            <p class="text-secondary text-xs font-bold tracking-[0.4em] animate-pulse uppercase">HXOUSE Engine Loading</p>
+            <p class="text-secondary text-xs font-bold tracking-[0.4em] animate-pulse uppercase">Aniga Engine Initializing</p>
         </div>
     </div>
 
     <!-- Main Container -->
     <div id="app" class="app-container max-w-lg mx-auto shadow-2xl flex flex-col hidden">
-        <main class="flex-grow overflow-y-auto">
+        <main class="flex-grow overflow-y-auto relative">
             <div id="main-interface" class="hidden">
                 <header id="page-header" class="sticky top-0 bg-primary z-20 h-20 px-6 flex justify-between items-center border-b border-custom"></header>
                 <div id="page-content"></div>
             </div>
-            <div class="h-20 flex-shrink-0"></div>
+            <div class="h-24 flex-shrink-0"></div>
         </main>
         
         <!-- Navbar -->
@@ -86,7 +100,7 @@
 <script>
 /**
  * HXOUSE COFFEE CO.
- * MODIFIED CORE LIVE ENGINE v2.1 (Limited Combos Edition)
+ * ANIGA AI ENGINE v3.1 (Countdown & Preview Edition)
  */
 
 const $ = (s) => document.querySelector(s);
@@ -97,9 +111,23 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const PAGES = ['home', 'order', 'cart', 'social', 'cowork', 'more'];
+const PAGES = ['home', 'order', 'cart', 'social', 'cowork', 'aniga', 'more'];
 
-// Hardcoded Combos for the campaign
+const ANIGA_KNOWLEDGE = {
+    captions: [
+        "Grind now, shine later. ☕️✨",
+        "HXOUSE: Where ideas brew and dreams caffeinate. #HxouseCoffee",
+        "Espresso yourself. ☕️🖤",
+        "Fueled by HXOUSE. Built by Hustle.",
+        "A latte focus for the long hustle."
+    ],
+    suggestions: [
+        "Try the Margherita + Peri Peri combo – it's the fan favorite today!",
+        "Feeling creative? Our Art Studio game is a great way to wait for your order.",
+        "If you tag @hxousecoffeeco on IG, you might get a free gift hamper if your order is over ₹799!"
+    ]
+};
+
 const CAMPAIGN_COMBOS = [
     { id: 'combo_1', name: 'Margherita + Peri Peri + Drink', price: 159, description: 'Mini Margherita with Peri Peri fries + choice of mocktail/cold frappe', category: 'OFFERS' },
     { id: 'combo_2', name: 'Paneer Tikka + Peri Peri + Drink', price: 179, description: 'Mini Paneer Tikka with Peri Peri fries + choice of mocktail/cold frappe', category: 'OFFERS' },
@@ -122,7 +150,11 @@ const app = {
         expandedCategory: null,
         searchQuery: '',
         pointsToRedeem: 0,
-        realtimeChannel: null
+        realtimeChannel: null,
+        isListening: false,
+        chatHistory: [{ role: 'aniga', text: "Hey! I'm Aniga. I'm here to guide your HXOUSE experience. Try asking for 'recommendations' or 'Instagram captions'!" }],
+        countdownText: "00d 00h 00m 00s",
+        countdownInterval: null
     },
 
     async init() {
@@ -133,7 +165,30 @@ const app = {
         const initialHash = location.hash.substring(1);
         this.state.currentPage = PAGES.includes(initialHash) ? initialHash : 'home';
         
+        this.startCountdown();
         await this.runStartup();
+    },
+
+    startCountdown() {
+        const target = new Date("March 1, 2026 00:00:00").getTime();
+        this.state.countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const diff = target - now;
+            
+            if (diff <= 0) {
+                this.state.countdownText = "NOW LIVE!";
+                clearInterval(this.state.countdownInterval);
+            } else {
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                this.state.countdownText = `${String(d).padStart(2, '0')}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+            }
+            
+            const el = $('#home-countdown');
+            if (el) el.textContent = this.state.countdownText;
+        }, 1000);
     },
 
     setHeight() { document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`); },
@@ -163,9 +218,7 @@ const app = {
             } else {
                 this.askTable();
             }
-        } catch (e) {
-            console.error("❌ HXOUSE Startup Failure", e);
-        }
+        } catch (e) { console.error("Aniga Error", e); }
     },
 
     async loadProfile() {
@@ -176,18 +229,13 @@ const app = {
     async loadMenu() {
         const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
         if (error) throw error;
-        
-        // Inject the combos into the local menu item pool
         this.state.allMenuItems = [...(data || []), ...CAMPAIGN_COMBOS];
-        
-        // Structure categories including OFFERS
         const groups = this.state.allMenuItems.reduce((acc, item) => {
             let cat = acc.find(c => c.category === item.category);
             if (!cat) { cat = { category: item.category, items: [] }; acc.push(cat); }
             cat.items.push(item);
             return acc;
         }, []);
-
         this.state.menuData = groups;
         if (this.state.menuData.length > 0) this.state.expandedCategory = 'OFFERS';
     },
@@ -212,14 +260,15 @@ const app = {
     onboard() {
         ui.showModal('onboard-ui', `
             <div class="text-center">
-                <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter text-primary">Enter HXOUSE</h2>
-                <p class="text-secondary mb-10 text-sm font-medium">Verify your details to access rewards and order tracking.</p>
+                <div class="w-24 h-24 brand-bg mx-auto rounded-full flex items-center justify-center text-4xl mb-6 shadow-xl aniga-float">A</div>
+                <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter text-primary">HXOUSE ID</h2>
+                <p class="text-secondary mb-10 text-sm font-medium">Verify your profile with Aniga.</p>
                 <div class="space-y-4">
-                    <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold uppercase text-center text-primary" placeholder="Your Full Name">
-                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="10-Digit WhatsApp">
-                    ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="Table Number">` : ''}
+                    <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold uppercase text-center text-primary" placeholder="Full Name">
+                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="WhatsApp Number">
+                    ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="Table #">` : ''}
                 </div>
-                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-12 py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition tracking-widest uppercase">Start Experience</button>
+                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-12 py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase">Join HXOUSE</button>
             </div>
         `);
     },
@@ -228,27 +277,25 @@ const app = {
         const name = $('#ob-name').value.trim();
         const phone = $('#ob-phone').value.trim();
         const table = this.state.tableNumber || parseInt($('#ob-table')?.value);
-        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Incomplete Data");
-
+        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Missing Data");
         try {
             const profile = { id: this.state.user.id, name, whatsapp_number: phone, loyalty_points: 0 };
-            const { error } = await sb.from('customers').upsert(profile);
-            if (error) throw error;
+            await sb.from('customers').upsert(profile);
             this.state.customerProfile = profile;
             this.state.tableNumber = table;
             ui.closeModal('onboard-ui');
             this.launch();
-        } catch (e) { ui.showToast("Onboarding Failed"); }
+        } catch (e) { ui.showToast("Error joining"); }
     },
 
     askTable() {
         ui.showModal('table-ui', `
-            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter text-center text-primary">Your Table?</h2>
+            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter text-center text-primary">Table Number?</h2>
             <div class="grid grid-cols-5 gap-3 mb-10">
-                ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg text-primary transition-colors">${n}</button>`).join('')}
+                ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg text-primary">${n}</button>`).join('')}
             </div>
-            <input type="number" id="manual-table" class="w-full p-6 border border-custom rounded-3xl bg-secondary font-black text-center text-4xl shadow-inner mb-8 text-primary" placeholder="--">
-            <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-widest">Enter Spot</button>
+            <input type="number" id="manual-table" class="w-full p-6 border border-custom rounded-3xl bg-secondary font-black text-center text-4xl text-primary" placeholder="--">
+            <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest mt-4">Confirm Spot</button>
         `);
     },
 
@@ -298,49 +345,64 @@ const app = {
         if (this.state.realtimeChannel) sb.removeChannel(this.state.realtimeChannel);
         this.state.realtimeChannel = sb.channel(`order-${id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, p => {
             this.state.activeOrder = p.new;
-            if (['delivered', 'cancelled'].includes(p.new.status)) {
-                this.state.activeOrder = null;
-                ui.showToast(`Order is ${p.new.status.toUpperCase()}`);
-            }
+            if (['delivered', 'cancelled'].includes(p.new.status)) { this.state.activeOrder = null; ui.showToast(`Order ${p.new.status}`); }
             ui.renderContent();
         }).subscribe();
     },
 
-    async placeOrder(method, btn) {
-        btn.disabled = true; btn.innerHTML = "Submitting...";
-        const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const discount = this.state.pointsToRedeem;
-        const total = (subtotal - discount) * 1.05;
+    startVoice() {
+        if (!('webkitSpeechRecognition' in window)) return ui.showToast("Voice not supported");
+        const rec = new webkitSpeechRecognition();
+        rec.lang = 'en-US';
+        rec.onstart = () => { this.state.isListening = true; ui.renderContent(); };
+        rec.onend = () => { this.state.isListening = false; ui.renderContent(); };
+        rec.onresult = (e) => {
+            const transcript = e.results[0][0].transcript.toLowerCase();
+            this.handleAnigaInput(transcript);
+        };
+        rec.start();
+    },
 
-        try {
-            // Filter out campaign IDs (strings) for the real DB call if necessary, 
-            // but the RPC might handle it if items are registered. 
-            // For now, assuming standard product IDs.
-            const payload = {
-                table_number_input: this.state.tableNumber,
-                special_instructions_input: $('#special-inst')?.value || "",
-                total_amount_input: total,
-                discount_percentage_input: (discount / subtotal) * 100 || 0,
-                source_input: 'Customer',
-                order_items: this.state.cart.map(i => ({ 
-                    product_id: typeof i.id === 'string' ? 1 : i.id, // Fallback for hardcoded combo IDs
-                    quantity: i.quantity, 
-                    price_at_time_of_order: i.price 
-                }))
-            };
-
-            const { data: orderId, error } = await sb.rpc('create_order_with_items', payload);
-            if (error) throw error;
-
-            this.state.cart = [];
-            this.state.pointsToRedeem = 0;
-            ui.closeModal('pay-ui');
-            await this.fetchActiveOrder();
-            this.navigateTo('cart');
-        } catch (e) {
-            ui.showToast("Failed to place order.");
-            btn.disabled = false; btn.innerHTML = "Place Order";
+    handleAnigaInput(input) {
+        this.state.chatHistory.push({ role: 'user', text: input });
+        let reply = "I'm not sure about that, but try asking for recommendations!";
+        
+        if (input.includes('menu') || input.includes('order')) {
+            reply = "Redirecting you to our menu!";
+            setTimeout(() => this.navigateTo('order'), 1000);
+        } else if (input.includes('instagram') || input.includes('social')) {
+            reply = "Heading to our socials!";
+            setTimeout(() => this.navigateTo('social'), 1000);
+        } else if (input.includes('caption')) {
+            reply = "Here's a cool caption: " + ANIGA_KNOWLEDGE.captions[Math.floor(Math.random() * ANIGA_KNOWLEDGE.captions.length)];
+        } else if (input.includes('suggest') || input.includes('recommend')) {
+            reply = ANIGA_KNOWLEDGE.suggestions[Math.floor(Math.random() * ANIGA_KNOWLEDGE.suggestions.length)];
+        } else if (input.includes('hi') || input.includes('hello')) {
+            reply = "Hi there! I'm Aniga, your talented guide. How can I help you hustle today?";
         }
+
+        setTimeout(() => {
+            this.state.chatHistory.push({ role: 'aniga', text: reply });
+            ui.renderContent();
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(reply);
+                window.speechSynthesis.speak(utterance);
+            }
+        }, 600);
+    },
+
+    async placeOrder(method, btn) {
+        btn.disabled = true;
+        btn.innerHTML = "SYSTEM PREVIEW";
+        ui.showToast("Order System Launching March 1st! (Preview Mode)");
+        
+        // Mock success for preview
+        setTimeout(() => {
+            this.state.cart = [];
+            ui.closeModal('pay-ui');
+            ui.showToast("Order Logged in Preview Mode!");
+            this.navigateTo('cart');
+        }, 1500);
     }
 };
 
@@ -348,10 +410,12 @@ const ui = {
     renderHeader() {
         const h = $('#page-header');
         h.innerHTML = `
-            <div><h1 class="text-2xl font-black brand-text tracking-tighter uppercase">H<span class="classy-x">X</span>OUSE</h1></div>
-            <div class="text-right">
-                <p class="font-black text-sm tracking-tighter uppercase text-primary">#${app.state.tableNumber || '?'}</p>
-                <p class="text-[10px] uppercase opacity-40 font-black tracking-widest text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
+            <div onclick="app.navigateTo('home')"><h1 class="text-2xl font-black brand-text tracking-tighter uppercase cursor-pointer">H<span class="classy-x">X</span>OUSE</h1></div>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p class="font-black text-sm tracking-tighter uppercase text-primary">Table #${app.state.tableNumber || '?'}</p>
+                    <p class="text-[9px] uppercase opacity-40 font-black tracking-widest text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
+                </div>
             </div>`;
     },
 
@@ -363,52 +427,79 @@ const ui = {
         else if (p === 'cart') this.cart(c);
         else if (p === 'social') this.social(c);
         else if (p === 'cowork') this.cowork(c);
+        else if (p === 'aniga') this.aniga(c);
         else if (p === 'more') this.more(c);
     },
 
     home(c) {
         c.innerHTML = `
             <div class="space-y-6 fade-in pb-10">
-                <div class="relative h-64 overflow-hidden rounded-b-[3rem] shadow-2xl">
+                <!-- Video/Hero Section -->
+                <div class="relative h-64 overflow-hidden rounded-b-[3rem] shadow-2xl group">
                     <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover opacity-60"></video>
-                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6">
-                        <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center">Fueled for <br> the Hustle</h1>
-                        <p class="text-[10px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">HXOUSE COFFEE CO.</p>
+                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6 transition-all group-hover:bg-black/20">
+                        <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center transform group-hover:scale-105 transition">Fuel the <br> Hustle</h1>
+                        <p class="text-[10px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">AI-Powered Experience</p>
                     </div>
                 </div>
 
+                <!-- Limited Offers Countdown -->
+                <div class="px-6">
+                    <div class="bg-primary border-2 border-custom rounded-3xl p-6 text-center shadow-lg transform scale-[0.98]">
+                        <p class="text-[10px] font-black uppercase text-secondary tracking-[0.4em] mb-2">Limited Offers Ending In:</p>
+                        <div id="home-countdown" class="text-3xl font-black text-primary tracking-tighter countdown-timer">${app.state.countdownText}</div>
+                        <p class="text-[8px] font-black uppercase text-secondary mt-2 opacity-50 tracking-[0.2em]">Full Launch: March 1st, 2026</p>
+                    </div>
+                </div>
+
+                <!-- Mood Selector -->
+                <div class="px-6">
+                    <h2 class="font-black text-[10px] uppercase tracking-[0.3em] text-secondary mb-4">Current Vibe</h2>
+                    <div class="flex space-x-3 overflow-x-auto no-scrollbar pb-2">
+                        ${['☕️ Focused', '🚀 Energetic', '🍵 Calm', '🎨 Creative'].map(m => `
+                            <button onclick="ui.showToast('Vibe set: ${m}')" class="flex-shrink-0 px-4 py-2 bg-secondary border border-custom rounded-full text-[10px] font-black uppercase tracking-widest text-primary hover:brand-bg hover:text-white transition-all">${m}</button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Flash Combos -->
                 <div class="px-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="font-black text-xl uppercase tracking-tighter text-primary">Limited Combos</h2>
-                        <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest">Flash Sale</span>
+                        <div class="flex flex-col">
+                            <h2 class="font-black text-xl uppercase tracking-tighter text-primary">Limited Offers</h2>
+                            <p class="text-[9px] font-bold text-secondary uppercase tracking-widest">Selected by Aniga</p>
+                        </div>
+                        <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest">FLASH SALE</span>
                     </div>
                     <div class="flex overflow-x-auto space-x-4 pb-4 no-scrollbar">
                         ${CAMPAIGN_COMBOS.map(combo => `
-                            <div class="combo-card flex-shrink-0 w-64 p-5 rounded-[2rem] shadow-sm relative border border-custom">
+                            <div class="combo-card flex-shrink-0 w-64 p-5 rounded-[2.5rem] shadow-sm relative border border-custom">
                                 <h3 class="font-black text-sm uppercase leading-tight text-primary mb-1">${combo.name}</h3>
-                                <p class="text-[10px] font-medium text-secondary leading-snug mb-4">${combo.description}</p>
+                                <p class="text-[9px] font-medium text-secondary leading-snug mb-4">${combo.description}</p>
                                 <div class="flex justify-between items-center mt-auto">
                                     <span class="font-black text-xl text-primary tracking-tighter">₹${combo.price}</span>
-                                    <button onclick="app.addCart('${combo.id}', 1); ui.showToast('Added Combo!')" class="brand-bg w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold">+</button>
+                                    <button onclick="app.addCart('${combo.id}', 1); ui.showToast('Added to Cart!')" class="brand-bg w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold active:scale-90 transition">+</button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
 
+                <!-- Rewards & Action -->
                 <div class="p-6 space-y-6">
-                    <div class="bg-yellow-100/80 border-2 border-yellow-200 p-8 rounded-[2.5rem] text-center shadow-sm">
-                        <h2 class="font-black text-lg text-yellow-900 uppercase tracking-tighter">Member Rewards</h2>
-                        <p class="text-yellow-800 text-xs font-bold mt-1">Get 50 pts for every ₹500 spent.</p>
-                        <div class="mt-6 brand-bg text-primary py-3 px-8 inline-block rounded-full font-black text-sm shadow-xl">${app.state.customerProfile?.loyalty_points || 0} POINTS</div>
+                    <div onclick="app.navigateTo('aniga')" class="bg-primary border-4 border-dashed border-custom p-8 rounded-[3rem] text-center shadow-xl cursor-pointer hover:border-brand-primary transition-all">
+                        <p class="text-xs font-black text-secondary uppercase tracking-[0.2em] mb-2">Need Guidance?</p>
+                        <h2 class="font-black text-2xl text-primary uppercase tracking-tighter">Chat with Aniga</h2>
                     </div>
-                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl transform active:scale-95 transition uppercase tracking-tighter">View Full Menu</button>
+                    
+                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl active:scale-95 transition uppercase tracking-tighter">Full Menu</button>
+                    
                     <div class="bg-secondary p-8 rounded-[2.5rem] border border-custom shadow-sm flex justify-between items-center">
                         <div class="pr-4">
-                            <h3 class="font-black text-lg uppercase tracking-tighter leading-none mb-2 text-primary">Free Hamper!</h3>
-                            <p class="text-xs text-secondary leading-relaxed font-bold">Tag us on Instagram for ₹799+ orders to get a gift.</p>
+                            <h3 class="font-black text-lg uppercase tracking-tighter mb-2 text-primary">Rewards</h3>
+                            <p class="text-[10px] text-secondary font-bold uppercase tracking-widest">${app.state.customerProfile?.loyalty_points || 0} Points Balance</p>
                         </div>
-                        <span class="text-4xl">🎁</span>
+                        <span class="text-4xl aniga-float">💎</span>
                     </div>
                 </div>
             </div>`;
@@ -417,7 +508,10 @@ const ui = {
     menu(c) {
         c.innerHTML = `
             <div class="p-6 fade-in">
-                <input type="text" placeholder="Search menu..." class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold shadow-inner mb-6 text-primary" oninput="app.state.searchQuery = this.value; ui.menuList()">
+                <div class="relative mb-6">
+                    <input type="text" placeholder="I want coffee..." class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold shadow-inner text-primary pl-14" oninput="app.state.searchQuery = this.value; ui.menuList()">
+                    <span class="absolute left-5 top-5 opacity-40">🔍</span>
+                </div>
                 <div id="menu-sections" class="space-y-4"></div>
             </div>`;
         this.menuList();
@@ -427,8 +521,6 @@ const ui = {
         const target = $('#menu-sections');
         if (!target) return;
         const q = app.state.searchQuery.toLowerCase();
-        
-        // Ensure "OFFERS" is always at the top
         const sortedMenu = [...app.state.menuData].sort((a,b) => a.category === 'OFFERS' ? -1 : 1);
 
         target.innerHTML = sortedMenu.map(group => {
@@ -436,9 +528,9 @@ const ui = {
             if (filtered.length === 0 && q) return '';
             const isExp = app.state.expandedCategory === group.category || q;
             return `
-                <div class="bg-secondary rounded-[1.5rem] border border-custom overflow-hidden shadow-sm">
-                    <button onclick="app.state.expandedCategory='${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[11px] tracking-widest text-primary">
-                        ${group.category} <span class="text-xl ${isExp ? 'rotate-90' : ''}">→</span>
+                <div class="bg-secondary rounded-[2rem] border border-custom overflow-hidden shadow-sm">
+                    <button onclick="app.state.expandedCategory='${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[10px] tracking-widest text-primary">
+                        ${group.category} <span class="text-xl transition-transform ${isExp ? 'rotate-90' : ''}">→</span>
                     </button>
                     <div class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '2000px' : '0'}">
                         <div class="p-4 space-y-3">
@@ -453,23 +545,22 @@ const ui = {
         const cartItem = app.state.cart.find(ci => ci.id === i.id);
         const isOffer = i.category === 'OFFERS';
         return `
-            <div class="${isOffer ? 'combo-card' : 'bg-primary'} p-5 rounded-2xl shadow-sm flex justify-between items-center border border-custom transform active:scale-95 transition">
+            <div class="${isOffer ? 'combo-card' : 'bg-primary'} p-5 rounded-[1.5rem] shadow-sm flex justify-between items-center border border-custom transition-all active:scale-[0.98]">
                 <div class="flex-grow pr-4">
                     <h4 class="font-black text-sm uppercase leading-tight mb-2 tracking-tighter text-primary">${i.name}</h4>
                     <p class="text-secondary font-black text-xs opacity-50 tracking-widest">₹${i.price}</p>
-                    ${isOffer ? `<p class="text-[9px] font-bold text-secondary uppercase mt-1">Limited Time Combo</p>` : ''}
                 </div>
                 <div>
                     ${cartItem ? `
-                        <div class="quantity-control shadow-sm"><button onclick="app.addCart('${i.id}', -1)" class="px-3">−</button><span>${cartItem.quantity}</span><button onclick="app.addCart('${i.id}', 1)" class="px-3">+</button></div>
-                    ` : `<button onclick="app.addCart('${i.id}', 1)" class="add-to-cart-btn brand-bg font-black text-2xl active:scale-90 transition">+</button>`}
+                        <div class="quantity-control shadow-sm"><button onclick="app.addCart('${i.id}', -1)" class="px-3">−</button><span class="text-xs">${cartItem.quantity}</span><button onclick="app.addCart('${i.id}', 1)" class="px-3">+</button></div>
+                    ` : `<button onclick="app.addCart('${i.id}', 1)" class="add-to-cart-btn brand-bg font-black text-2xl">+</button>`}
                 </div>
             </div>`;
     },
 
     cart(c) {
         if (app.state.activeOrder) return this.track(c);
-        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center opacity-30 h-full flex flex-col justify-center"><p class="text-8xl mb-8">☕️</p><p class="font-black tracking-widest uppercase text-xs">Selection Empty</p></div>`;
+        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center opacity-30 h-full flex flex-col justify-center"><p class="text-8xl mb-8">🛒</p><p class="font-black tracking-widest uppercase text-xs">Selection Empty</p><button onclick="app.navigateTo('order')" class="mt-8 font-black underline text-primary">GO TO MENU</button></div>`;
 
         const subtotal = app.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
         const maxRedeem = Math.min(Math.floor((app.state.customerProfile?.loyalty_points || 0) * 0.8), Math.floor(subtotal));
@@ -478,7 +569,7 @@ const ui = {
 
         c.innerHTML = `
             <div class="p-6 space-y-6 pb-32 fade-in">
-                <h2 class="text-4xl font-black tracking-tighter uppercase mb-8 text-primary">Selection</h2>
+                <h2 class="text-4xl font-black tracking-tighter uppercase mb-8 text-primary">Preview Cart</h2>
                 <div class="space-y-3">${app.state.cart.map(i => `
                     <div class="flex justify-between items-center p-5 bg-secondary rounded-[1.5rem] border border-custom shadow-sm">
                         <div>
@@ -493,62 +584,103 @@ const ui = {
                 ${maxRedeem > 0 ? `
                     <div class="p-8 bg-secondary rounded-[2rem] border border-custom shadow-inner text-center">
                         <p class="text-[10px] font-black uppercase mb-6 opacity-40 tracking-[0.2em] text-primary">Redeem Points</p>
-                        <input type="range" id="loyalty-slider" min="0" max="${maxRedeem}" value="${app.state.pointsToRedeem}" oninput="app.state.pointsToRedeem = parseInt(this.value); ui.cart(document.querySelector('#page-content'))">
-                        <div class="flex justify-between font-black text-[11px] mt-6 uppercase opacity-60 text-primary"><span>Redeem ₹${app.state.pointsToRedeem}</span><span>Balance ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem} pts</span></div>
+                        <input type="range" id="loyalty-slider" min="0" max="${maxRedeem}" value="${app.state.pointsToRedeem}" oninput="app.state.pointsToRedeem = parseInt(this.value); ui.cart($('#page-content'))">
+                        <div class="flex justify-between font-black text-[11px] mt-6 uppercase opacity-60 text-primary"><span>₹${app.state.pointsToRedeem} Off</span><span>Bal: ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem}</span></div>
                     </div>` : ''}
-                <textarea id="special-inst" placeholder="Any requests? (e.g., choice of mocktail for combo...)" class="w-full p-6 bg-secondary border border-custom rounded-2xl h-28 font-bold text-sm shadow-inner focus:bg-primary text-primary"></textarea>
-                <div class="p-10 bg-secondary rounded-[2.5rem] space-y-3 border border-custom shadow-sm text-center uppercase text-primary">
-                    <div class="flex justify-between font-black text-[11px] opacity-40"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
-                    <div class="flex justify-between font-black text-[11px] opacity-40"><span>GST (5%)</span><span>₹${gst.toFixed(2)}</span></div>
-                    <div class="flex justify-between font-black text-3xl pt-5 border-t border-custom tracking-tighter"><span>Grand Total</span><span>₹${total.toFixed(2)}</span></div>
+                <textarea id="special-inst" placeholder="Instructions? Aniga can help if you ask her..." class="w-full p-6 bg-secondary border border-custom rounded-2xl h-28 font-bold text-sm shadow-inner text-primary"></textarea>
+                <div class="p-8 bg-secondary rounded-[2.5rem] space-y-3 border border-custom shadow-sm uppercase text-primary">
+                    <div class="flex justify-between font-black text-[10px] opacity-40"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
+                    <div class="flex justify-between font-black text-[10px] opacity-40"><span>Tax</span><span>₹${gst.toFixed(2)}</span></div>
+                    <div class="flex justify-between font-black text-2xl pt-4 border-t border-custom tracking-tighter"><span>Total</span><span>₹${total.toFixed(2)}</span></div>
                 </div>
-                <button onclick="ui.payModal()" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl tracking-tighter uppercase active:scale-95 transition">Checkout</button>
+                <button onclick="ui.payModal()" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl tracking-tighter uppercase active:scale-95 transition">Preview Checkout</button>
             </div>`;
     },
 
     track(c) {
         const steps = ['received', 'preparing', 'delivered'];
-        const idx = steps.indexOf(app.state.activeOrder.status);
+        const idx = steps.indexOf(app.state.activeOrder?.status || 'received');
         const progress = ((idx + 1) / steps.length) * 100;
         c.innerHTML = `
             <div class="p-10 text-center space-y-16 fade-in h-full flex flex-col justify-center">
-                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none text-primary">Your Order <br> Status</h2>
-                <div class="relative h-6 w-full bg-secondary rounded-full overflow-hidden border border-custom shadow-inner"><div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${progress}%"></div></div>
-                <div class="space-y-12 text-left px-4">
-                    ${steps.map((s, i) => `<div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}"><div class="w-20 h-20 rounded-3xl border-4 border-custom flex items-center justify-center text-4xl shadow-xl bg-secondary">${i === 0 ? '📝' : i === 1 ? '🍳' : '🏁'}</div><div><p class="font-black text-base uppercase tracking-widest leading-none mb-2 text-primary">${s}</p><p class="text-xs font-bold text-secondary uppercase opacity-60 tracking-widest">${i <= idx ? 'Complete' : 'Pending'}</p></div></div>`).join('')}
+                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none text-primary">Live <br> Progress</h2>
+                <div class="relative h-6 w-full bg-secondary rounded-full overflow-hidden border border-custom"><div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${progress}%"></div></div>
+                <div class="space-y-10 text-left px-4">
+                    ${steps.map((s, i) => `<div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}"><div class="w-16 h-16 rounded-3xl border-2 border-custom flex items-center justify-center text-3xl bg-secondary">${i === 0 ? '📝' : i === 1 ? '🍳' : '🏁'}</div><div><p class="font-black text-sm uppercase tracking-widest text-primary">${s}</p><p class="text-[9px] font-bold text-secondary uppercase opacity-60">${i <= idx ? 'Done' : 'Wait'}</p></div></div>`).join('')}
                 </div>
-                <div class="pt-8"><p class="text-[11px] opacity-40 mb-8 font-black uppercase tracking-[0.4em] text-primary">Wait with a mini-game</p><button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest active:scale-95 transition text-primary">Enter Arcade</button></div>
+                <button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest active:scale-95 transition text-primary">Play Arcade</button>
             </div>`;
     },
 
     social(c) {
         c.innerHTML = `
             <div class="p-6 space-y-12 fade-in h-full flex flex-col justify-center text-center">
-                <h2 class="text-4xl font-black uppercase tracking-tighter leading-none text-primary">Join the <br> Inner Circle</h2>
-                <div class="bg-secondary p-12 rounded-[3rem] border border-custom shadow-2xl">
-                    <p class="instagram-card font-black text-3xl mb-10 tracking-tighter">@hxousecoffeeco</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[2.5rem] border-8 border-white p-2 shadow-2xl scale-110">
-                    <p class="text-[11px] font-black uppercase tracking-[0.6em] mt-12 opacity-40 text-primary">Scan to follow</p>
+                <h2 class="text-4xl font-black uppercase tracking-tighter leading-none text-primary">Connect @ <br> HXOUSE</h2>
+                <div class="bg-secondary p-12 rounded-[3.5rem] border border-custom shadow-2xl">
+                    <p class="instagram-card font-black text-3xl mb-10 tracking-tighter cursor-pointer" onclick="window.open('https://instagram.com/hxousecoffeeco', '_blank')">@hxousecoffeeco</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[2.5rem] border-8 border-white p-2 shadow-2xl transition-transform active:rotate-3">
+                    <p class="text-[10px] font-black uppercase tracking-[0.6em] mt-12 opacity-40 text-primary">Tap profile to visit</p>
                 </div>
+                <button onclick="app.navigateTo('aniga')" class="brand-bg py-4 px-10 rounded-full font-black text-[10px] uppercase mx-auto tracking-widest">Ask Aniga for Captions</button>
             </div>`;
     },
 
+    aniga(c) {
+        c.innerHTML = `
+            <div class="p-6 flex flex-col h-full fade-in">
+                <div class="flex-grow overflow-y-auto space-y-4 pr-2 pb-6" id="chat-window">
+                    ${app.state.chatHistory.map(chat => `
+                        <div class="flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}">
+                            <div class="${chat.role === 'user' ? 'chat-bubble-user brand-bg text-primary' : 'chat-bubble-aniga bg-secondary text-primary'} p-5 max-w-[85%] text-sm font-bold shadow-sm">
+                                ${chat.text}
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${app.state.isListening ? `
+                        <div class="flex justify-start">
+                            <div class="chat-bubble-aniga bg-secondary p-5 flex items-center space-x-2">
+                                <div class="w-2 h-2 brand-bg rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 brand-bg rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                <div class="w-2 h-2 brand-bg rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="mt-auto space-y-4">
+                    <div class="flex space-x-2">
+                        <input type="text" id="chat-input" placeholder="Ask Aniga..." class="flex-grow p-6 bg-secondary border border-custom rounded-[2rem] font-bold text-sm text-primary shadow-inner">
+                        <button onclick="app.handleAnigaInput($('#chat-input').value); $('#chat-input').value=''" class="brand-bg w-16 h-16 rounded-[2rem] flex items-center justify-center text-xl">➔</button>
+                    </div>
+                    <button onclick="app.startVoice()" class="w-full flex items-center justify-center space-x-3 py-6 rounded-[2rem] bg-secondary border-2 border-custom font-black uppercase text-xs tracking-widest text-primary active:scale-95 transition">
+                        <span class="text-xl">🎙️</span>
+                        <span>${app.state.isListening ? 'Listening...' : 'Tap for Voice'}</span>
+                    </button>
+                </div>
+            </div>`;
+        const win = $('#chat-window');
+        win.scrollTop = win.scrollHeight;
+    },
+
     cowork(c) {
-        c.innerHTML = `<div class="p-10 text-center space-y-12 fade-in h-full flex flex-col justify-center"><span class="text-[10rem] mb-6 drop-shadow-2xl">🏢</span><h2 class="text-6xl font-black tracking-tighter uppercase leading-none text-primary">Creative <br> Studio</h2><p class="text-secondary font-medium leading-relaxed px-10 text-base">High-speed Wi-Fi, premium beans, and a community of builders. Inquire for membership or seat availability.</p><button onclick="ui.showToast('Staff Notified!')" class="brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Inquire Seat</button></div>`;
+        c.innerHTML = `<div class="p-10 text-center space-y-12 fade-in h-full flex flex-col justify-center"><span class="text-[10rem] mb-6 drop-shadow-2xl">🏛️</span><h2 class="text-6xl font-black tracking-tighter uppercase leading-none text-primary">Creative <br> Studio</h2><p class="text-secondary font-medium px-10 text-sm">Gigabit fiber, premium roasts, and a global collective of builders.</p><button onclick="ui.showToast('Agent Dispatched!')" class="brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Secure Workspace</button></div>`;
     },
 
     more(c) {
         c.innerHTML = `
             <div class="p-8 space-y-6 fade-in">
-                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">Member</h2>
-                <div class="bg-secondary p-12 rounded-[2.5rem] border border-custom shadow-xl mb-12">
-                    <p class="text-[11px] font-black uppercase opacity-40 mb-3 tracking-[0.4em] text-primary">Verified HXOUSE ID</p>
-                    <p class="font-black text-3xl tracking-tighter uppercase mb-2 text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
-                    <p class="text-sm opacity-50 font-black tracking-widest text-primary">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
+                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">HXOUSE Profile</h2>
+                <div class="bg-secondary p-12 rounded-[3rem] border border-custom shadow-xl mb-12">
+                    <p class="text-[9px] font-black uppercase opacity-40 mb-3 tracking-[0.4em] text-primary">Digital Identity</p>
+                    <p class="font-black text-3xl tracking-tighter uppercase mb-2 text-primary">${app.state.customerProfile?.name || 'Guest User'}</p>
+                    <p class="text-xs opacity-50 font-black tracking-widest text-primary">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
                 </div>
-                <button onclick="ui.gameModal()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition text-primary"><span>Arcade Center</span><span>🎮</span></button>
-                <button onclick="location.reload()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition text-primary"><span>Refresh System</span><span>⟳</span></button>
-                <p class="text-center text-[9px] font-black uppercase opacity-20 mt-20 tracking-[0.8em] text-primary">HXOUSE LIVE ENGINE v2.1.0</p>
+                <div class="space-y-4">
+                    <button onclick="ui.gameModal()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Arcade Center</span><span>🎮</span></button>
+                    <button onclick="location.reload()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Reset Engine</span><span>⟳</span></button>
+                    <button onclick="app.navigateTo('aniga')" class="w-full p-7 brand-bg rounded-[1.5rem] text-left font-black flex justify-between shadow-xl text-primary"><span>Chat with Aniga</span><span>✨</span></button>
+                </div>
+                <p class="text-center text-[8px] font-black uppercase opacity-20 mt-20 tracking-[1em] text-primary">ANIGA AI CORE v3.1.0</p>
             </div>`;
     },
 
@@ -556,21 +688,22 @@ const ui = {
         ui.showModal('pay-ui', `
             <h2 class="text-4xl font-black mb-12 uppercase tracking-tighter text-primary">Checkout</h2>
             <div class="space-y-5">
-                <button onclick="app.placeOrder('Counter', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors text-primary"><span>Counter Pay</span><span>💵</span></button>
-                <button onclick="app.placeOrder('UPI', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors text-primary"><span>Digital Payment</span><span>📱</span></button>
+                <button onclick="app.placeOrder('Preview', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Simulate Pay</span><span>🖥️</span></button>
+                <button onclick="app.placeOrder('Preview', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Table Pay</span><span>💵</span></button>
             </div>
-            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-[0.4em] text-primary">Return</button>
+            <p class="text-center text-[9px] uppercase font-black opacity-40 mt-6 tracking-widest text-primary">System Launching March 1st</p>
+            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-6 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Return</button>
         `);
     },
 
     gameModal() {
         ui.showModal('games-ui', `
-            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter text-primary">Arcade Center</h2>
+            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter text-primary text-center">Arcade</h2>
             <div class="space-y-5">
-                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest text-primary">Tic-Tac-Toe</p><button onclick="GAMES.ttt.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Play</button></div>
-                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest text-primary">Art Studio</p><button onclick="GAMES.art.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Enter</button></div>
+                <div class="bg-secondary p-10 rounded-[2.5rem] border border-custom flex justify-between items-center shadow-lg text-primary"><p class="font-black uppercase text-xs tracking-widest">Tic-Tac-Toe</p><button onclick="GAMES.ttt.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[10px] uppercase shadow-xl">PLAY</button></div>
+                <div class="bg-secondary p-10 rounded-[2.5rem] border border-custom flex justify-between items-center shadow-lg text-primary"><p class="font-black uppercase text-xs tracking-widest">Art Studio</p><button onclick="GAMES.art.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[10px] uppercase shadow-xl">ENTER</button></div>
             </div>
-            <button onclick="ui.closeModal('games-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-widest text-primary">Close</button>
+            <button onclick="ui.closeModal('games-ui')" class="w-full mt-10 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">CLOSE</button>
         `);
     },
 
@@ -590,25 +723,19 @@ const ui = {
 
     renderNav() {
         const nav = $('#bottom-nav');
-        const items = [{ id: 'home', l: 'Home', i: '🏠' }, { id: 'order', l: 'Menu', i: '☕' }, { id: 'cart', l: 'Live', i: '🛒' }, { id: 'more', l: 'User', i: '☰' }];
+        const items = [{ id: 'home', l: 'Home', i: '🏠' }, { id: 'order', l: 'Menu', i: '☕' }, { id: 'aniga', l: 'Aniga', i: '✨' }, { id: 'cart', l: 'Live', i: '🛒' }, { id: 'more', l: 'User', i: '☰' }];
         nav.innerHTML = items.map(item => `
             <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all duration-300" id="nav-${item.id}">
-                <div class="mb-2 text-2xl">${item.i}</div>
-                <span class="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 text-primary">${item.l}</span>
+                <div class="mb-2 text-2xl">${item.i === '✨' ? '<span class="aniga-float">✨</span>' : item.i}</div>
+                <span class="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 text-primary">${item.l}</span>
             </button>
         `).join('');
     },
 
     updateNav() {
-        $$('.nav-btn').forEach(btn => { 
-            btn.classList.remove('brand-text', 'scale-110'); 
-            btn.querySelector('span').classList.replace('opacity-100', 'opacity-40'); 
-        });
+        $$('.nav-btn').forEach(btn => { btn.classList.remove('brand-text', 'scale-110'); btn.querySelector('span').classList.replace('opacity-100', 'opacity-40'); });
         const active = $(`#nav-${app.state.currentPage}`);
-        if (active) { 
-            active.classList.add('brand-text', 'scale-110'); 
-            active.querySelector('span').classList.replace('opacity-40', 'opacity-100'); 
-        }
+        if (active) { active.classList.add('brand-text', 'scale-110'); active.querySelector('span').classList.replace('opacity-40', 'opacity-100'); }
     }
 };
 
@@ -617,28 +744,28 @@ const GAMES = {
         board: Array(9).fill(null), p: 'X', win: null,
         start() {
             this.board.fill(null); this.p = 'X'; this.win = null;
-            ui.showModal('ttt-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Tic-Tac-Toe</h2><div class="grid grid-cols-3 gap-4 w-80 mx-auto mb-12">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-24 h-24 bg-secondary rounded-[2rem] flex items-center justify-center text-5xl font-black border-2 border-custom shadow-xl transition active:scale-90 text-primary" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[12px] tracking-[0.6em] opacity-40 mb-12 text-primary">PLAYER ${this.p} TURN</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Quit Game</button>`);
+            ui.showModal('ttt-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Match</h2><div class="grid grid-cols-3 gap-4 w-72 mx-auto mb-12">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-20 h-20 bg-secondary rounded-[1.5rem] flex items-center justify-center text-4xl font-black border-2 border-custom shadow-xl text-primary" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[10px] tracking-[0.6em] opacity-40 mb-12 text-primary">TURN: ${this.p}</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">QUIT</button>`);
         },
         play(i) {
             if (this.board[i] || this.win) return;
             this.board[i] = this.p;
             $(`#ttt-${i}`).textContent = this.p;
             if (this.check()) { this.win = this.p; $('#ttt-status').textContent = `PLAYER ${this.p} WINS!`; $('#ttt-status').classList.add('brand-text'); }
-            else if (this.board.every(b => b)) { $('#ttt-status').textContent = `STALEMATE!`; }
-            else { this.p = this.p === 'X' ? 'O' : 'X'; $('#ttt-status').textContent = `PLAYER ${this.p} TURN`; }
+            else if (this.board.every(b => b)) { $('#ttt-status').textContent = `DRAW!`; }
+            else { this.p = this.p === 'X' ? 'O' : 'X'; $('#ttt-status').textContent = `TURN: ${this.p}`; }
         },
         check() { const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return w.some(l => this.board[l[0]] && this.board[l[0]] === this.board[l[1]] && this.board[l[0]] === this.board[l[2]]); }
     },
     art: {
         painting: false,
         start() {
-            ui.showModal('art-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Studio Art</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[4rem] border-[12px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Complete Masterpiece</button>`);
+            ui.showModal('art-run', `<h2 class="text-3xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Studio</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[3.5rem] border-[8px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Export</button>`);
             this.run();
         },
         run() {
             const c = $('#art-canvas'); const ctx = c.getContext('2d');
             c.width = c.clientWidth; c.height = c.clientWidth;
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 15; ctx.lineCap = 'round';
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 12; ctx.lineCap = 'round';
             const draw = (e) => {
                 if(!this.painting) return;
                 const rect = c.getBoundingClientRect();
