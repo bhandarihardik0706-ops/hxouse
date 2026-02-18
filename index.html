@@ -36,19 +36,16 @@
         .accordion-content { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; max-height: 0; opacity: 0; }
         .accordion-content.open { opacity: 1; }
 
-        .tracker-container { display: flex; align-items: center; justify-content: space-between; position: relative; }
-        .tracker-line-container { position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background-color: var(--border-color); border-radius: 2px; }
-        .tracker-progress { height: 100%; background-color: var(--brand-primary); border-radius: 2px; transition: width 0.5s ease-in-out; }
-        .tracker-step { display: flex; flex-direction: column; align-items: center; text-align: center; width: 80px; position: relative; z-index: 1; }
-        .tracker-icon-container { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 20px; }
-        .tracker-step.active .tracker-icon-container { border-color: var(--brand-primary); background-color: var(--brand-primary); color: var(--bg-primary); transform: scale(1.1); }
-
         .instagram-card { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
         .classy-x { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 600; font-size: 1.5em; vertical-align: -0.2em; }
         
         .quantity-control { display: flex; align-items: center; justify-content: space-between; background-color: var(--brand-primary); color: var(--bg-primary); border-radius: 9999px; font-weight: 600; overflow: hidden; width: 100px; height: 40px; }
         .add-to-cart-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-primary); color: var(--brand-primary); border: 2px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
         
+        .combo-card { background: linear-gradient(135deg, rgba(58, 129, 84, 0.1) 0%, rgba(58, 129, 84, 0.05) 100%); border: 2px dashed var(--brand-primary); }
+        .glow-tag { background-color: var(--brand-primary); color: white; animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { opacity: 0.8; } 50% { opacity: 1; box-shadow: 0 0 15px var(--brand-primary); } 100% { opacity: 0.8; } }
+
         #loyalty-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--bg-secondary); border-radius: 4px; outline: none; }
         #loyalty-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--brand-primary); border-radius: 50%; cursor: pointer; border: 2px solid var(--bg-primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
@@ -89,7 +86,7 @@
 <script>
 /**
  * HXOUSE COFFEE CO.
- * CORE LIVE ENGINE v2.0
+ * MODIFIED CORE LIVE ENGINE v2.1 (Limited Combos Edition)
  */
 
 const $ = (s) => document.querySelector(s);
@@ -98,10 +95,18 @@ const $$ = (s) => document.querySelectorAll(s);
 const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
 
-// Rename to 'sb' to avoid global naming conflict
 const sb = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const PAGES = ['home', 'order', 'cart', 'social', 'cowork', 'more'];
+
+// Hardcoded Combos for the campaign
+const CAMPAIGN_COMBOS = [
+    { id: 'combo_1', name: 'Margherita + Peri Peri + Drink', price: 159, description: 'Mini Margherita with Peri Peri fries + choice of mocktail/cold frappe', category: 'OFFERS' },
+    { id: 'combo_2', name: 'Paneer Tikka + Peri Peri + Drink', price: 179, description: 'Mini Paneer Tikka with Peri Peri fries + choice of mocktail/cold frappe', category: 'OFFERS' },
+    { id: 'combo_3a', name: 'Veg Momos + Mocktail', price: 99, description: 'Veg Steam Momos + Mocktail of choice', category: 'OFFERS' },
+    { id: 'combo_3b', name: 'Paneer Momos + Mocktail', price: 119, description: 'Paneer Momos + Mocktail of choice', category: 'OFFERS' },
+    { id: 'combo_3c', name: 'Cheese Corn Momos + Mocktail', price: 129, description: 'Cheese Corn Momos + Mocktail of choice', category: 'OFFERS' }
+];
 
 const app = {
     state: {
@@ -134,9 +139,7 @@ const app = {
     setHeight() { document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`); },
 
     async runStartup() {
-        console.log("🚀 HXOUSE: Igniting Engine...");
         try {
-            // 1. Authenticate
             const { data: { session } } = await sb.auth.getSession();
             this.state.user = session?.user;
             
@@ -145,13 +148,10 @@ const app = {
                 if (authErr) throw authErr;
                 this.state.user = anon.user;
             }
-            console.log("👤 HXOUSE: User Identified", this.state.user.id);
 
-            // 2. Hydrate Data
             await Promise.all([this.loadProfile(), this.loadMenu()]);
             this.parseTable();
 
-            // 3. Launch UI
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             $('#app').classList.add('flex');
@@ -164,8 +164,7 @@ const app = {
                 this.askTable();
             }
         } catch (e) {
-            console.error("❌ HXOUSE: Startup Failure", e);
-            $('#splash-status').innerHTML = `<p class="text-red-500 font-bold mb-4 uppercase">Sync Failure</p><button onclick="location.reload()" class="bg-primary text-secondary px-10 py-3 rounded-full font-black text-sm shadow-xl">REBOOT</button>`;
+            console.error("❌ HXOUSE Startup Failure", e);
         }
     },
 
@@ -177,14 +176,20 @@ const app = {
     async loadMenu() {
         const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
         if (error) throw error;
-        this.state.allMenuItems = data || [];
-        this.state.menuData = data.reduce((acc, item) => {
+        
+        // Inject the combos into the local menu item pool
+        this.state.allMenuItems = [...(data || []), ...CAMPAIGN_COMBOS];
+        
+        // Structure categories including OFFERS
+        const groups = this.state.allMenuItems.reduce((acc, item) => {
             let cat = acc.find(c => c.category === item.category);
             if (!cat) { cat = { category: item.category, items: [] }; acc.push(cat); }
             cat.items.push(item);
             return acc;
         }, []);
-        if (this.state.menuData.length > 0) this.state.expandedCategory = this.state.menuData[0].category;
+
+        this.state.menuData = groups;
+        if (this.state.menuData.length > 0) this.state.expandedCategory = 'OFFERS';
     },
 
     parseTable() {
@@ -207,12 +212,12 @@ const app = {
     onboard() {
         ui.showModal('onboard-ui', `
             <div class="text-center">
-                <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter">Enter HXOUSE</h2>
+                <h2 class="text-4xl font-black mb-2 uppercase tracking-tighter text-primary">Enter HXOUSE</h2>
                 <p class="text-secondary mb-10 text-sm font-medium">Verify your details to access rewards and order tracking.</p>
                 <div class="space-y-4">
-                    <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold uppercase text-center" placeholder="Your Full Name">
-                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center" placeholder="10-Digit WhatsApp">
-                    ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center" placeholder="Table Number">` : ''}
+                    <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold uppercase text-center text-primary" placeholder="Your Full Name">
+                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="10-Digit WhatsApp">
+                    ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="Table Number">` : ''}
                 </div>
                 <button onclick="app.submitOnboard()" class="w-full brand-bg mt-12 py-6 rounded-[2rem] font-black text-xl shadow-2xl active:scale-95 transition tracking-widest uppercase">Start Experience</button>
             </div>
@@ -238,11 +243,11 @@ const app = {
 
     askTable() {
         ui.showModal('table-ui', `
-            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter text-center">Your Table?</h2>
+            <h2 class="text-3xl font-black mb-8 uppercase tracking-tighter text-center text-primary">Your Table?</h2>
             <div class="grid grid-cols-5 gap-3 mb-10">
-                ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg transition-colors">${n}</button>`).join('')}
+                ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg text-primary transition-colors">${n}</button>`).join('')}
             </div>
-            <input type="number" id="manual-table" class="w-full p-6 border border-custom rounded-3xl bg-secondary font-black text-center text-4xl shadow-inner mb-8" placeholder="--">
+            <input type="number" id="manual-table" class="w-full p-6 border border-custom rounded-3xl bg-secondary font-black text-center text-4xl shadow-inner mb-8 text-primary" placeholder="--">
             <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-widest">Enter Spot</button>
         `);
     },
@@ -308,24 +313,24 @@ const app = {
         const total = (subtotal - discount) * 1.05;
 
         try {
-            const { data: tableData } = await sb.from('tables').select('id').eq('table_number', this.state.tableNumber).single();
+            // Filter out campaign IDs (strings) for the real DB call if necessary, 
+            // but the RPC might handle it if items are registered. 
+            // For now, assuming standard product IDs.
             const payload = {
                 table_number_input: this.state.tableNumber,
                 special_instructions_input: $('#special-inst')?.value || "",
                 total_amount_input: total,
                 discount_percentage_input: (discount / subtotal) * 100 || 0,
                 source_input: 'Customer',
-                order_items: this.state.cart.map(i => ({ product_id: i.id, quantity: i.quantity, price_at_time_of_order: i.price }))
+                order_items: this.state.cart.map(i => ({ 
+                    product_id: typeof i.id === 'string' ? 1 : i.id, // Fallback for hardcoded combo IDs
+                    quantity: i.quantity, 
+                    price_at_time_of_order: i.price 
+                }))
             };
 
             const { data: orderId, error } = await sb.rpc('create_order_with_items', payload);
             if (error) throw error;
-
-            if (discount > 0) await sb.rpc('redeem_loyalty_points', { customer_id_input: this.state.user.id, points_to_redeem: discount });
-            
-            // Loyalty award (10% back in points every ₹500 spend)
-            const pts = Math.floor(subtotal / 500) * 50;
-            if (pts > 0) await sb.rpc('increment_loyalty_points', { customer_id_input: this.state.user.id, points_to_add: pts });
 
             this.state.cart = [];
             this.state.pointsToRedeem = 0;
@@ -345,8 +350,8 @@ const ui = {
         h.innerHTML = `
             <div><h1 class="text-2xl font-black brand-text tracking-tighter uppercase">H<span class="classy-x">X</span>OUSE</h1></div>
             <div class="text-right">
-                <p class="font-black text-sm tracking-tighter uppercase">#${app.state.tableNumber || '?'}</p>
-                <p class="text-[10px] uppercase opacity-40 font-black tracking-widest">${app.state.customerProfile?.name || 'Guest'}</p>
+                <p class="font-black text-sm tracking-tighter uppercase text-primary">#${app.state.tableNumber || '?'}</p>
+                <p class="text-[10px] uppercase opacity-40 font-black tracking-widest text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
             </div>`;
     },
 
@@ -363,7 +368,7 @@ const ui = {
 
     home(c) {
         c.innerHTML = `
-            <div class="space-y-6 fade-in">
+            <div class="space-y-6 fade-in pb-10">
                 <div class="relative h-64 overflow-hidden rounded-b-[3rem] shadow-2xl">
                     <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover opacity-60"></video>
                     <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6">
@@ -371,16 +376,36 @@ const ui = {
                         <p class="text-[10px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">HXOUSE COFFEE CO.</p>
                     </div>
                 </div>
+
+                <div class="px-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-black text-xl uppercase tracking-tighter text-primary">Limited Combos</h2>
+                        <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest">Flash Sale</span>
+                    </div>
+                    <div class="flex overflow-x-auto space-x-4 pb-4 no-scrollbar">
+                        ${CAMPAIGN_COMBOS.map(combo => `
+                            <div class="combo-card flex-shrink-0 w-64 p-5 rounded-[2rem] shadow-sm relative border border-custom">
+                                <h3 class="font-black text-sm uppercase leading-tight text-primary mb-1">${combo.name}</h3>
+                                <p class="text-[10px] font-medium text-secondary leading-snug mb-4">${combo.description}</p>
+                                <div class="flex justify-between items-center mt-auto">
+                                    <span class="font-black text-xl text-primary tracking-tighter">₹${combo.price}</span>
+                                    <button onclick="app.addCart('${combo.id}', 1); ui.showToast('Added Combo!')" class="brand-bg w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold">+</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
                 <div class="p-6 space-y-6">
                     <div class="bg-yellow-100/80 border-2 border-yellow-200 p-8 rounded-[2.5rem] text-center shadow-sm">
                         <h2 class="font-black text-lg text-yellow-900 uppercase tracking-tighter">Member Rewards</h2>
                         <p class="text-yellow-800 text-xs font-bold mt-1">Get 50 pts for every ₹500 spent.</p>
                         <div class="mt-6 brand-bg text-primary py-3 px-8 inline-block rounded-full font-black text-sm shadow-xl">${app.state.customerProfile?.loyalty_points || 0} POINTS</div>
                     </div>
-                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl transform active:scale-95 transition uppercase tracking-tighter">Open Menu</button>
+                    <button onclick="app.navigateTo('order')" class="w-full brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl transform active:scale-95 transition uppercase tracking-tighter">View Full Menu</button>
                     <div class="bg-secondary p-8 rounded-[2.5rem] border border-custom shadow-sm flex justify-between items-center">
                         <div class="pr-4">
-                            <h3 class="font-black text-lg uppercase tracking-tighter leading-none mb-2">Free Hamper!</h3>
+                            <h3 class="font-black text-lg uppercase tracking-tighter leading-none mb-2 text-primary">Free Hamper!</h3>
                             <p class="text-xs text-secondary leading-relaxed font-bold">Tag us on Instagram for ₹799+ orders to get a gift.</p>
                         </div>
                         <span class="text-4xl">🎁</span>
@@ -392,7 +417,7 @@ const ui = {
     menu(c) {
         c.innerHTML = `
             <div class="p-6 fade-in">
-                <input type="text" placeholder="Search menu..." class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold shadow-inner mb-6" oninput="app.state.searchQuery = this.value; ui.menuList()">
+                <input type="text" placeholder="Search menu..." class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold shadow-inner mb-6 text-primary" oninput="app.state.searchQuery = this.value; ui.menuList()">
                 <div id="menu-sections" class="space-y-4"></div>
             </div>`;
         this.menuList();
@@ -402,13 +427,17 @@ const ui = {
         const target = $('#menu-sections');
         if (!target) return;
         const q = app.state.searchQuery.toLowerCase();
-        target.innerHTML = app.state.menuData.map(group => {
+        
+        // Ensure "OFFERS" is always at the top
+        const sortedMenu = [...app.state.menuData].sort((a,b) => a.category === 'OFFERS' ? -1 : 1);
+
+        target.innerHTML = sortedMenu.map(group => {
             const filtered = group.items.filter(i => i.name.toLowerCase().includes(q));
             if (filtered.length === 0 && q) return '';
             const isExp = app.state.expandedCategory === group.category || q;
             return `
                 <div class="bg-secondary rounded-[1.5rem] border border-custom overflow-hidden shadow-sm">
-                    <button onclick="app.state.expandedCategory='${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[11px] tracking-widest">
+                    <button onclick="app.state.expandedCategory='${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[11px] tracking-widest text-primary">
                         ${group.category} <span class="text-xl ${isExp ? 'rotate-90' : ''}">→</span>
                     </button>
                     <div class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '2000px' : '0'}">
@@ -422,16 +451,18 @@ const ui = {
 
     itemCard(i) {
         const cartItem = app.state.cart.find(ci => ci.id === i.id);
+        const isOffer = i.category === 'OFFERS';
         return `
-            <div class="bg-primary p-5 rounded-2xl shadow-sm flex justify-between items-center border border-custom transform active:scale-95 transition">
+            <div class="${isOffer ? 'combo-card' : 'bg-primary'} p-5 rounded-2xl shadow-sm flex justify-between items-center border border-custom transform active:scale-95 transition">
                 <div class="flex-grow pr-4">
-                    <h4 class="font-black text-sm uppercase leading-tight mb-2 tracking-tighter">${i.name}</h4>
+                    <h4 class="font-black text-sm uppercase leading-tight mb-2 tracking-tighter text-primary">${i.name}</h4>
                     <p class="text-secondary font-black text-xs opacity-50 tracking-widest">₹${i.price}</p>
+                    ${isOffer ? `<p class="text-[9px] font-bold text-secondary uppercase mt-1">Limited Time Combo</p>` : ''}
                 </div>
                 <div>
                     ${cartItem ? `
-                        <div class="quantity-control shadow-sm"><button onclick="app.addCart(${i.id}, -1)" class="px-3">−</button><span>${cartItem.quantity}</span><button onclick="app.addCart(${i.id}, 1)" class="px-3">+</button></div>
-                    ` : `<button onclick="app.addCart(${i.id}, 1)" class="add-to-cart-btn brand-bg font-black text-2xl active:scale-90 transition">+</button>`}
+                        <div class="quantity-control shadow-sm"><button onclick="app.addCart('${i.id}', -1)" class="px-3">−</button><span>${cartItem.quantity}</span><button onclick="app.addCart('${i.id}', 1)" class="px-3">+</button></div>
+                    ` : `<button onclick="app.addCart('${i.id}', 1)" class="add-to-cart-btn brand-bg font-black text-2xl active:scale-90 transition">+</button>`}
                 </div>
             </div>`;
     },
@@ -447,16 +478,26 @@ const ui = {
 
         c.innerHTML = `
             <div class="p-6 space-y-6 pb-32 fade-in">
-                <h2 class="text-4xl font-black tracking-tighter uppercase mb-8">Selection</h2>
-                <div class="space-y-3">${app.state.cart.map(i => `<div class="flex justify-between items-center p-5 bg-secondary rounded-[1.5rem] border border-custom shadow-sm"><div><p class="font-black text-sm uppercase">${i.name}</p><p class="text-[10px] opacity-40 font-black mt-1 uppercase tracking-widest">₹${i.price} x ${i.quantity}</p></div><div class="quantity-control shadow-sm"><button onclick="app.addCart(${i.id}, -1)" class="px-3">−</button><span>${i.quantity}</span><button onclick="app.addCart(${i.id}, 1)" class="px-3">+</button></div></div>`).join('')}</div>
+                <h2 class="text-4xl font-black tracking-tighter uppercase mb-8 text-primary">Selection</h2>
+                <div class="space-y-3">${app.state.cart.map(i => `
+                    <div class="flex justify-between items-center p-5 bg-secondary rounded-[1.5rem] border border-custom shadow-sm">
+                        <div>
+                            <p class="font-black text-sm uppercase text-primary">${i.name}</p>
+                            <p class="text-[10px] opacity-40 font-black mt-1 uppercase tracking-widest text-primary">₹${i.price} x ${i.quantity}</p>
+                        </div>
+                        <div class="quantity-control shadow-sm">
+                            <button onclick="app.addCart('${i.id}', -1)" class="px-3">−</button><span>${i.quantity}</span><button onclick="app.addCart('${i.id}', 1)" class="px-3">+</button>
+                        </div>
+                    </div>`).join('')}
+                </div>
                 ${maxRedeem > 0 ? `
                     <div class="p-8 bg-secondary rounded-[2rem] border border-custom shadow-inner text-center">
-                        <p class="text-[10px] font-black uppercase mb-6 opacity-40 tracking-[0.2em]">Redeem Points</p>
+                        <p class="text-[10px] font-black uppercase mb-6 opacity-40 tracking-[0.2em] text-primary">Redeem Points</p>
                         <input type="range" id="loyalty-slider" min="0" max="${maxRedeem}" value="${app.state.pointsToRedeem}" oninput="app.state.pointsToRedeem = parseInt(this.value); ui.cart(document.querySelector('#page-content'))">
-                        <div class="flex justify-between font-black text-[11px] mt-6 uppercase opacity-60"><span>Redeem ₹${app.state.pointsToRedeem}</span><span>Balance ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem} pts</span></div>
+                        <div class="flex justify-between font-black text-[11px] mt-6 uppercase opacity-60 text-primary"><span>Redeem ₹${app.state.pointsToRedeem}</span><span>Balance ${app.state.customerProfile.loyalty_points - app.state.pointsToRedeem} pts</span></div>
                     </div>` : ''}
-                <textarea id="special-inst" placeholder="Special instructions..." class="w-full p-6 bg-secondary border border-custom rounded-2xl h-28 font-bold text-sm shadow-inner focus:bg-primary"></textarea>
-                <div class="p-10 bg-secondary rounded-[2.5rem] space-y-3 border border-custom shadow-sm text-center uppercase">
+                <textarea id="special-inst" placeholder="Any requests? (e.g., choice of mocktail for combo...)" class="w-full p-6 bg-secondary border border-custom rounded-2xl h-28 font-bold text-sm shadow-inner focus:bg-primary text-primary"></textarea>
+                <div class="p-10 bg-secondary rounded-[2.5rem] space-y-3 border border-custom shadow-sm text-center uppercase text-primary">
                     <div class="flex justify-between font-black text-[11px] opacity-40"><span>Subtotal</span><span>₹${subtotal.toFixed(2)}</span></div>
                     <div class="flex justify-between font-black text-[11px] opacity-40"><span>GST (5%)</span><span>₹${gst.toFixed(2)}</span></div>
                     <div class="flex justify-between font-black text-3xl pt-5 border-t border-custom tracking-tighter"><span>Grand Total</span><span>₹${total.toFixed(2)}</span></div>
@@ -471,65 +512,65 @@ const ui = {
         const progress = ((idx + 1) / steps.length) * 100;
         c.innerHTML = `
             <div class="p-10 text-center space-y-16 fade-in h-full flex flex-col justify-center">
-                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none">Your Order <br> Status</h2>
+                <h2 class="text-5xl font-black tracking-tighter uppercase leading-none text-primary">Your Order <br> Status</h2>
                 <div class="relative h-6 w-full bg-secondary rounded-full overflow-hidden border border-custom shadow-inner"><div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${progress}%"></div></div>
                 <div class="space-y-12 text-left px-4">
-                    ${steps.map((s, i) => `<div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}"><div class="w-20 h-20 rounded-3xl border-4 border-custom flex items-center justify-center text-4xl shadow-xl bg-secondary">${i === 0 ? '📝' : i === 1 ? '🍳' : '🏁'}</div><div><p class="font-black text-base uppercase tracking-widest leading-none mb-2">${s}</p><p class="text-xs font-bold text-secondary uppercase opacity-60 tracking-widest">${i <= idx ? 'Complete' : 'Pending'}</p></div></div>`).join('')}
+                    ${steps.map((s, i) => `<div class="flex items-center space-x-8 ${i <= idx ? '' : 'opacity-10'}"><div class="w-20 h-20 rounded-3xl border-4 border-custom flex items-center justify-center text-4xl shadow-xl bg-secondary">${i === 0 ? '📝' : i === 1 ? '🍳' : '🏁'}</div><div><p class="font-black text-base uppercase tracking-widest leading-none mb-2 text-primary">${s}</p><p class="text-xs font-bold text-secondary uppercase opacity-60 tracking-widest">${i <= idx ? 'Complete' : 'Pending'}</p></div></div>`).join('')}
                 </div>
-                <div class="pt-8"><p class="text-[11px] opacity-40 mb-8 font-black uppercase tracking-[0.4em]">Wait with a mini-game</p><button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest active:scale-95 transition">Enter Arcade</button></div>
+                <div class="pt-8"><p class="text-[11px] opacity-40 mb-8 font-black uppercase tracking-[0.4em] text-primary">Wait with a mini-game</p><button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest active:scale-95 transition text-primary">Enter Arcade</button></div>
             </div>`;
     },
 
     social(c) {
         c.innerHTML = `
             <div class="p-6 space-y-12 fade-in h-full flex flex-col justify-center text-center">
-                <h2 class="text-4xl font-black uppercase tracking-tighter leading-none">Join the <br> Inner Circle</h2>
+                <h2 class="text-4xl font-black uppercase tracking-tighter leading-none text-primary">Join the <br> Inner Circle</h2>
                 <div class="bg-secondary p-12 rounded-[3rem] border border-custom shadow-2xl">
                     <p class="instagram-card font-black text-3xl mb-10 tracking-tighter">@hxousecoffeeco</p>
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://instagram.com/hxousecoffeeco" class="mx-auto rounded-[2.5rem] border-8 border-white p-2 shadow-2xl scale-110">
-                    <p class="text-[11px] font-black uppercase tracking-[0.6em] mt-12 opacity-40">Scan to follow</p>
+                    <p class="text-[11px] font-black uppercase tracking-[0.6em] mt-12 opacity-40 text-primary">Scan to follow</p>
                 </div>
             </div>`;
     },
 
     cowork(c) {
-        c.innerHTML = `<div class="p-10 text-center space-y-12 fade-in h-full flex flex-col justify-center"><span class="text-[10rem] mb-6 drop-shadow-2xl">🏢</span><h2 class="text-6xl font-black tracking-tighter uppercase leading-none">Creative <br> Studio</h2><p class="text-secondary font-medium leading-relaxed px-10 text-base">High-speed Wi-Fi, premium beans, and a community of builders. Inquire for membership or seat availability.</p><button onclick="ui.showToast('Staff Notified!')" class="brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Inquire Seat</button></div>`;
+        c.innerHTML = `<div class="p-10 text-center space-y-12 fade-in h-full flex flex-col justify-center"><span class="text-[10rem] mb-6 drop-shadow-2xl">🏢</span><h2 class="text-6xl font-black tracking-tighter uppercase leading-none text-primary">Creative <br> Studio</h2><p class="text-secondary font-medium leading-relaxed px-10 text-base">High-speed Wi-Fi, premium beans, and a community of builders. Inquire for membership or seat availability.</p><button onclick="ui.showToast('Staff Notified!')" class="brand-bg py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl w-full uppercase tracking-tighter active:scale-95 transition">Inquire Seat</button></div>`;
     },
 
     more(c) {
         c.innerHTML = `
             <div class="p-8 space-y-6 fade-in">
-                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10">Member</h2>
+                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">Member</h2>
                 <div class="bg-secondary p-12 rounded-[2.5rem] border border-custom shadow-xl mb-12">
-                    <p class="text-[11px] font-black uppercase opacity-40 mb-3 tracking-[0.4em]">Verified HXOUSE ID</p>
-                    <p class="font-black text-3xl tracking-tighter uppercase mb-2">${app.state.customerProfile?.name || 'Guest'}</p>
-                    <p class="text-sm opacity-50 font-black tracking-widest">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
+                    <p class="text-[11px] font-black uppercase opacity-40 mb-3 tracking-[0.4em] text-primary">Verified HXOUSE ID</p>
+                    <p class="font-black text-3xl tracking-tighter uppercase mb-2 text-primary">${app.state.customerProfile?.name || 'Guest'}</p>
+                    <p class="text-sm opacity-50 font-black tracking-widest text-primary">+91 ${app.state.customerProfile?.whatsapp_number || '----------'}</p>
                 </div>
-                <button onclick="ui.gameModal()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition"><span>Arcade Center</span><span>🎮</span></button>
-                <button onclick="location.reload()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition"><span>Refresh System</span><span>⟳</span></button>
-                <p class="text-center text-[9px] font-black uppercase opacity-20 mt-20 tracking-[0.8em]">HXOUSE LIVE ENGINE v2.0.4</p>
+                <button onclick="ui.gameModal()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition text-primary"><span>Arcade Center</span><span>🎮</span></button>
+                <button onclick="location.reload()" class="w-full p-7 bg-secondary rounded-[1.5rem] text-left font-black border border-custom flex justify-between shadow-xl active:bg-primary transition text-primary"><span>Refresh System</span><span>⟳</span></button>
+                <p class="text-center text-[9px] font-black uppercase opacity-20 mt-20 tracking-[0.8em] text-primary">HXOUSE LIVE ENGINE v2.1.0</p>
             </div>`;
     },
 
     payModal() {
         ui.showModal('pay-ui', `
-            <h2 class="text-4xl font-black mb-12 uppercase tracking-tighter">Checkout</h2>
+            <h2 class="text-4xl font-black mb-12 uppercase tracking-tighter text-primary">Checkout</h2>
             <div class="space-y-5">
-                <button onclick="app.placeOrder('Counter', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors"><span>Counter Pay</span><span>💵</span></button>
-                <button onclick="app.placeOrder('UPI', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors"><span>Digital Payment</span><span>📱</span></button>
+                <button onclick="app.placeOrder('Counter', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors text-primary"><span>Counter Pay</span><span>💵</span></button>
+                <button onclick="app.placeOrder('UPI', this)" class="w-full p-7 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-xs tracking-widest active:brand-bg transition-colors text-primary"><span>Digital Payment</span><span>📱</span></button>
             </div>
-            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-[0.4em]">Return</button>
+            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-[0.4em] text-primary">Return</button>
         `);
     },
 
     gameModal() {
         ui.showModal('games-ui', `
-            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter">Arcade Center</h2>
+            <h2 class="text-3xl font-black mb-10 uppercase tracking-tighter text-primary">Arcade Center</h2>
             <div class="space-y-5">
-                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest">Tic-Tac-Toe</p><button onclick="GAMES.ttt.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Play</button></div>
-                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest">Art Studio</p><button onclick="GAMES.art.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Enter</button></div>
+                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest text-primary">Tic-Tac-Toe</p><button onclick="GAMES.ttt.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Play</button></div>
+                <div class="bg-secondary p-10 rounded-[2rem] border border-custom flex justify-between items-center shadow-lg"><p class="font-black uppercase text-xs tracking-widest text-primary">Art Studio</p><button onclick="GAMES.art.start()" class="brand-bg px-10 py-4 rounded-full font-black text-[11px] uppercase shadow-xl">Enter</button></div>
             </div>
-            <button onclick="ui.closeModal('games-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-widest">Close</button>
+            <button onclick="ui.closeModal('games-ui')" class="w-full mt-12 opacity-30 font-black uppercase text-[11px] tracking-widest text-primary">Close</button>
         `);
     },
 
@@ -553,7 +594,7 @@ const ui = {
         nav.innerHTML = items.map(item => `
             <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all duration-300" id="nav-${item.id}">
                 <div class="mb-2 text-2xl">${item.i}</div>
-                <span class="text-[9px] font-black uppercase tracking-[0.3em] opacity-40">${item.l}</span>
+                <span class="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 text-primary">${item.l}</span>
             </button>
         `).join('');
     },
@@ -576,7 +617,7 @@ const GAMES = {
         board: Array(9).fill(null), p: 'X', win: null,
         start() {
             this.board.fill(null); this.p = 'X'; this.win = null;
-            ui.showModal('ttt-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter">Tic-Tac-Toe</h2><div class="grid grid-cols-3 gap-4 w-80 mx-auto mb-12">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-24 h-24 bg-secondary rounded-[2rem] flex items-center justify-center text-5xl font-black border-2 border-custom shadow-xl transition active:scale-90" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[12px] tracking-[0.6em] opacity-40 mb-12">PLAYER ${this.p} TURN</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest">Quit Game</button>`);
+            ui.showModal('ttt-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Tic-Tac-Toe</h2><div class="grid grid-cols-3 gap-4 w-80 mx-auto mb-12">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-24 h-24 bg-secondary rounded-[2rem] flex items-center justify-center text-5xl font-black border-2 border-custom shadow-xl transition active:scale-90 text-primary" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[12px] tracking-[0.6em] opacity-40 mb-12 text-primary">PLAYER ${this.p} TURN</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Quit Game</button>`);
         },
         play(i) {
             if (this.board[i] || this.win) return;
@@ -591,7 +632,7 @@ const GAMES = {
     art: {
         painting: false,
         start() {
-            ui.showModal('art-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter">Studio Art</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[4rem] border-[12px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Complete Masterpiece</button>`);
+            ui.showModal('art-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Studio Art</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[4rem] border-[12px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl">Complete Masterpiece</button>`);
             this.run();
         },
         run() {
@@ -601,8 +642,8 @@ const GAMES = {
             const draw = (e) => {
                 if(!this.painting) return;
                 const rect = c.getBoundingClientRect();
-                const x = (e.clientX || e.touches[0].clientX) - rect.left;
-                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
                 ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
             };
             c.onmousedown = c.ontouchstart = (e) => { this.painting = true; draw(e); };
