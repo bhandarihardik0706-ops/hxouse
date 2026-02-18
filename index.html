@@ -93,7 +93,7 @@
 <script>
 /**
  * HXOUSE COFFEE CO.
- * ANIGA AI ENGINE v3.4.2 (Official Logo Update)
+ * ANIGA AI ENGINE v3.4.3 (Dynamic Pricing Update)
  */
 
 const $ = (s) => document.querySelector(s);
@@ -109,16 +109,24 @@ const PAGES = ['home', 'order', 'cart', 'social', 'cowork', 'aniga', 'more'];
 
 const LOGO_URL = "https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/Untitled%20design_20251008_093211_0000.png";
 
+const SNACK_PRICES = {
+    'Margherita': 159,
+    'Paneer Tikka': 179,
+    'Veg Momos': 99,
+    'Paneer Momos': 119,
+    'Cheese Corn Momos': 129
+};
+
 const ANIGA_PROMPT = `You are Aniga, the super-talented and friendly female AI assistant for HXOUSE Coffee Co. 
 You are an expert on coffee, the HXOUSE creative community, and our specific cafe menu. 
 Your personality: Cheerful, modern, creative, and extremely helpful. 
 Cafe Specialties: 
-1. Build Your Own Meal (₹189): Includes a choice of Margherita, Paneer Tikka, or Momos + a choice of 2 Mojitos or 1 Cold Frappe + Peri Peri Fries.
-2. Our roasts are premium and built for the creative hustle.
-3. We are located in the heart of the creative studio.
+1. Build Your Own Meal: You pick a snack, a drink choice, and get Peri Peri Fries.
+   Pricing depends on the snack: Margherita (₹159), Paneer Tikka (₹179), Veg Momos (₹99), Paneer Momos (₹119), Cheese Corn Momos (₹129).
+2. Choice of Drink: 2x Mojitos or 1x Cold Frappe.
+3. Our roasts are premium and built for the creative hustle.
 4. Ordering is currently in live tracking mode for our admin side.
-You can help with navigating the app, suggesting Instagram captions (coffee-themed), and explaining the menu.
-If someone asks for a combo, guide them to our 'Build Your Own Meal'.`;
+You can help with navigating the app, suggesting Instagram captions (coffee-themed), and explaining the menu.`;
 
 const app = {
     state: {
@@ -134,9 +142,9 @@ const app = {
         expandedCategory: null,
         searchQuery: '',
         isListening: false,
-        chatHistory: [{ role: 'aniga', text: "Hey! I'm Aniga. I've been upgraded with Gemini intelligence. Ask me anything about the menu or building your perfect meal!" }],
+        chatHistory: [{ role: 'aniga', text: "Hey! I'm Aniga. Need help building your meal? Margherita starts at ₹159, while Momos start at just ₹99!" }],
         countdownText: "00d 00h 00m 00s",
-        builder: { snack: null, drink: null, fries: 'Peri Peri' }
+        builder: { snack: null, drink: null, fries: 'Peri Peri', price: 0 }
     },
 
     async init() {
@@ -298,12 +306,12 @@ const app = {
     },
 
     addCustomCombo() {
-        const { snack, drink, fries } = this.state.builder;
+        const { snack, drink, fries, price } = this.state.builder;
         if (!snack || !drink) return ui.showToast("Select all choices!");
         const comboItem = {
             id: `combo_${Date.now()}`,
             name: `Meal: ${snack} + ${drink}`,
-            price: 189,
+            price: price,
             quantity: 1,
             description: `Inc: ${fries} Fries.`
         };
@@ -443,7 +451,7 @@ const ui = {
                             <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase mb-4">EXCLUSIVE COMBO</span>
                             <h2 class="text-3xl font-black text-primary uppercase tracking-tighter leading-none mb-2">Build Your <br> Own Meal</h2>
                             <p class="text-[10px] text-secondary font-bold uppercase mt-2">Pick Snack + Drink + Peri Peri Fries!</p>
-                            <h3 class="mt-4 font-black text-2xl text-primary">₹189</h3>
+                            <h3 class="mt-4 font-black text-2xl text-primary">Starts at ₹99</h3>
                             <button class="mt-8 brand-bg px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl">Start Building</button>
                         </div>
                     </div>
@@ -452,17 +460,20 @@ const ui = {
     },
 
     builderModal() {
-        app.state.builder = { snack: null, drink: null, fries: 'Peri Peri' };
+        app.state.builder = { snack: null, drink: null, fries: 'Peri Peri', price: 0 };
         ui.showModal('builder-ui', `
             <div class="text-center">
                 <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter text-primary uppercase">HXOUSE MEAL</h2>
-                <p class="text-secondary text-[10px] font-black uppercase tracking-widest mb-10 text-primary">Select your choices below</p>
+                <p class="text-secondary text-[10px] font-black uppercase tracking-widest mb-10 text-primary">Dynamic Pricing Enabled</p>
                 
                 <div class="space-y-10">
                     <div>
                         <p class="text-[9px] font-black text-secondary uppercase tracking-[0.4em] mb-4 text-left px-2">1. PICK SNACK</p>
                         <div class="flex flex-wrap justify-center gap-2" id="snack-opts">
-                            ${['Margherita', 'Paneer Tikka', 'Momos'].map(s => `<button data-val="${s}" onclick="ui.setBuilder('snack', '${s}')" class="option-button flex-grow p-4 bg-secondary border border-custom rounded-2xl font-black uppercase text-[10px] text-primary transition-all">${s}</button>`).join('')}
+                            ${Object.keys(SNACK_PRICES).map(s => `<button data-val="${s}" onclick="ui.setBuilder('snack', '${s}')" class="option-button flex-grow p-4 bg-secondary border border-custom rounded-2xl font-black uppercase text-[10px] text-primary transition-all flex flex-col items-center">
+                                <span>${s}</span>
+                                <span class="text-[8px] opacity-40">₹${SNACK_PRICES[s]}</span>
+                            </button>`).join('')}
                         </div>
                     </div>
 
@@ -472,19 +483,17 @@ const ui = {
                             <button data-val="2x Mojitos" onclick="ui.setBuilder('drink', '2x Mojitos')" class="option-button p-6 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center transition-all">
                                 <span class="text-2xl mb-2">🍹🍹</span>
                                 <span class="font-black uppercase text-[9px] text-primary">2x Mojitos</span>
-                                <span class="text-[8px] opacity-40 uppercase font-black mt-1">Duo Pack</span>
                             </button>
                             <button data-val="1x Cold Frappe" onclick="ui.setBuilder('drink', '1x Cold Frappe')" class="option-button p-6 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center transition-all">
                                 <span class="text-2xl mb-2">🥤</span>
                                 <span class="font-black uppercase text-[9px] text-primary">Cold Frappe</span>
-                                <span class="text-[8px] opacity-40 uppercase font-black mt-1">Solo Chill</span>
                             </button>
                         </div>
                     </div>
 
                     <div class="bg-primary border-2 border-custom border-dashed p-6 rounded-3xl flex justify-between items-center">
                         <div class="text-left">
-                            <p class="text-[8px] font-black text-secondary uppercase tracking-widest">AUTO ADD-ON</p>
+                            <p class="text-[8px] font-black text-secondary uppercase tracking-widest">INCLUDED</p>
                             <h3 class="font-black uppercase text-sm text-primary">Peri Peri Fries</h3>
                         </div>
                         <span class="text-2xl">🔥</span>
@@ -494,7 +503,7 @@ const ui = {
                 <div class="mt-12">
                     <div class="flex justify-between items-center mb-6 px-4">
                         <span class="font-black uppercase text-secondary text-[10px] tracking-widest">Meal Total</span>
-                        <span class="font-black text-3xl text-primary tracking-tighter">₹189</span>
+                        <span id="builder-total-price" class="font-black text-3xl text-primary tracking-tighter">₹--</span>
                     </div>
                     <button onclick="app.addCustomCombo()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-widest">Finalize Meal</button>
                     <button onclick="ui.closeModal('builder-ui')" class="mt-6 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Cancel</button>
@@ -510,6 +519,11 @@ const ui = {
             if (btn.getAttribute('data-val') === val) btn.classList.add('active');
             else btn.classList.remove('active');
         });
+
+        if (type === 'snack') {
+            app.state.builder.price = SNACK_PRICES[val];
+            if ($('#builder-total-price')) $('#builder-total-price').textContent = `₹${app.state.builder.price}`;
+        }
     },
 
     menu(c) {
@@ -531,10 +545,10 @@ const ui = {
                     <div>
                         <p class="text-[8px] font-black uppercase text-brand-primary tracking-[0.2em] mb-1">LIMITED OFFER</p>
                         <h4 class="font-black text-lg uppercase text-primary leading-none">BUILD YOUR MEAL</h4>
-                        <p class="text-xs text-secondary font-black uppercase mt-1">Snack + Drink + Fries</p>
+                        <p class="text-xs text-secondary font-black uppercase mt-1">Pick a Snack + Drink + Fries</p>
                     </div>
                     <div class="text-right">
-                        <span class="font-black text-2xl text-primary tracking-tighter">₹189</span>
+                        <span class="font-black text-xl text-primary tracking-tighter">Starts ₹99</span>
                     </div>
                 </div>
             </div>
@@ -641,7 +655,7 @@ const ui = {
                     <button onclick="ui.gameModal()" class="w-full p-8 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Arcade</span><span>🎮</span></button>
                     <button onclick="location.reload()" class="w-full p-8 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Restart App</span><span>⟳</span></button>
                 </div>
-                <p class="text-center text-[8px] font-black uppercase opacity-20 mt-20 tracking-[1em] text-primary">HXOUSE v3.4.1</p>
+                <p class="text-center text-[8px] font-black uppercase opacity-20 mt-20 tracking-[1em] text-primary">HXOUSE v3.4.3</p>
             </div>`;
     },
 
