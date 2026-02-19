@@ -37,7 +37,7 @@
         .loyalty-card-container { perspective: 1000px; }
         .loyalty-card-inner { position: relative; width: 100%; height: 200px; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
         .loyalty-card-inner.flipped { transform: rotateY(180deg); }
-        .loyalty-card-front, .loyalty-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 2rem; }
+        .loyalty-card-front, .loyalty-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 2rem; background: var(--bg-secondary); border: 1px solid var(--border-color); }
         .loyalty-card-back { transform: rotateY(180deg); }
 
         .ticker-wrap { width: 100%; overflow: hidden; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); height: 30px; display: flex; align-items: center; }
@@ -53,6 +53,9 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .accordion-content { overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .add-to-cart-btn { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body data-theme="matcha">
@@ -79,7 +82,6 @@
         <main class="flex-grow overflow-y-auto no-scrollbar relative">
             <div id="main-interface">
                 <header id="page-header" class="sticky top-0 bg-primary z-20 h-20 px-6 flex justify-between items-center border-b border-custom">
-                    <!-- Logo / Header Logic -->
                 </header>
                 <div id="page-content"></div>
             </div>
@@ -98,7 +100,7 @@
 <script>
 /**
  * HXOUSE COFFEE CO.
- * VERSION 4.0 - THE COLLECTIVE ENGINE
+ * VERSION 4.1 - ENGINE FIX & PRODUCTION SYNC
  */
 
 const $ = (s) => document.querySelector(s);
@@ -106,7 +108,7 @@ const $$ = (s) => document.querySelectorAll(s);
 
 const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
-const sb = self.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const LOGO_URL = "https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/Untitled%20design_20251008_093211_0000.png";
 
@@ -138,9 +140,7 @@ const app = {
         allMenuItems: [],
         expandedCategory: null,
         searchQuery: '',
-        countdownText: "",
         builder: { snack: null, drink: null, fries: 'Peri Peri', price: 0 },
-        vibe: 'focused',
         theme: 'matcha'
     },
 
@@ -152,7 +152,6 @@ const app = {
         const initialHash = location.hash.substring(1);
         this.state.currentPage = ['home', 'order', 'arcade', 'cart', 'more'].includes(initialHash) ? initialHash : 'home';
         
-        // Loader Simulation
         let progress = 0;
         const interval = setInterval(() => {
             progress += Math.random() * 30;
@@ -162,40 +161,52 @@ const app = {
                 this.runStartup();
             }
             $('#loader-bar').style.width = progress + '%';
-        }, 200);
+        }, 150);
     },
 
     setHeight() { document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`); },
 
     async runStartup() {
         try {
-            const { data: { session } } = await sb.auth.getSession();
+            // Force dynamic auth check
+            const { data: { session }, error: sessionError } = await sb.auth.getSession();
+            if (sessionError) throw sessionError;
+            
             this.state.user = session?.user;
             if (!this.state.user) {
-                const { data: anon } = await sb.auth.signInAnonymously();
+                const { data: anon, error: anonError } = await sb.auth.signInAnonymously();
+                if (anonError) throw anonError;
                 this.state.user = anon.user;
             }
+
             await Promise.all([this.loadProfile(), this.loadMenu()]);
             this.parseTable();
             
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             
-            if (!this.state.customerProfile?.name) this.onboard();
-            else if (this.state.tableNumber) this.launch();
-            else this.askTable();
-
-            this.startCountdown();
-        } catch (e) { console.error("HXOUSE System Error", e); }
+            if (!this.state.customerProfile?.name) {
+                this.onboard();
+            } else if (this.state.tableNumber) {
+                this.launch();
+            } else {
+                this.askTable();
+            }
+        } catch (e) { 
+            console.error("HXOUSE System Error", e);
+            ui.showToast("Connection Syncing...");
+            setTimeout(() => location.reload(), 3000);
+        }
     },
 
     async loadProfile() {
-        const { data } = await sb.from('customers').select('*').eq('id', this.state.user.id).maybeSingle();
-        this.state.customerProfile = data;
+        const { data, error } = await sb.from('customers').select('*').eq('id', this.state.user.id).maybeSingle();
+        if (data) this.state.customerProfile = data;
     },
 
     async loadMenu() {
-        const { data } = await sb.from('products').select('*').eq('is_available', true).order('id');
+        const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
+        if (error) return;
         this.state.allMenuItems = data || [];
         this.state.menuData = (data || []).reduce((acc, item) => {
             let cat = acc.find(c => c.category === item.category);
@@ -220,33 +231,16 @@ const app = {
         this.navigateTo(this.state.currentPage, false);
     },
 
-    startCountdown() {
-        const target = new Date("March 1, 2026 00:00:00").getTime();
-        setInterval(() => {
-            const diff = target - new Date().getTime();
-            if (diff <= 0) this.state.countdownText = "NOW LIVE";
-            else {
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-                this.state.countdownText = `${d}d ${h}h ${m}m ${s}s`;
-            }
-            if ($('#home-countdown')) $('#home-countdown').textContent = this.state.countdownText;
-        }, 1000);
-    },
-
     onboard() {
         ui.showModal('onboard-ui', `
             <div class="text-center">
-                <img src="${LOGO_URL}" class="h-20 mx-auto mb-10">
-                <h2 class="text-3xl font-black mb-10 text-primary uppercase">HXOUSE ID</h2>
+                <img src="${LOGO_URL}" class="h-20 mx-auto mb-8">
+                <h2 class="text-3xl font-black mb-6 text-primary uppercase">HXOUSE ID</h2>
                 <div class="space-y-4">
                     <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="Full Name">
-                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="Phone Number">
-                    ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="Table #">` : ''}
+                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="WhatsApp Number">
                 </div>
-                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-12 py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-tighter active:scale-95 transition">Join Collective</button>
+                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-8 py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-tighter active:scale-95 transition">Join Collective</button>
             </div>
         `);
     },
@@ -254,26 +248,28 @@ const app = {
     async submitOnboard() {
         const name = $('#ob-name').value.trim();
         const phone = $('#ob-phone').value.trim();
-        const table = this.state.tableNumber || parseInt($('#ob-table')?.value);
-        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Incomplete Identity");
+        if (!name || phone.length < 10) return ui.showToast("Incomplete Identity");
+        
         try {
             const profile = { id: this.state.user.id, name, whatsapp_number: phone, loyalty_points: 0 };
-            await sb.from('customers').upsert(profile);
+            const { error } = await sb.from('customers').upsert(profile);
+            if (error) throw error;
+            
             this.state.customerProfile = profile;
-            this.state.tableNumber = table;
             ui.closeModal('onboard-ui');
-            this.launch();
-        } catch (e) { ui.showToast("Sync Failed"); }
+            if (this.state.tableNumber) this.launch();
+            else this.askTable();
+        } catch (e) { ui.showToast("Registry Failed"); }
     },
 
     askTable() {
         ui.showModal('table-ui', `
-            <h2 class="text-2xl font-black mb-10 text-center text-primary uppercase">Current Spot?</h2>
+            <h2 class="text-2xl font-black mb-10 text-center text-primary uppercase">Select Table</h2>
             <div class="grid grid-cols-5 gap-3 mb-10">
                 ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg text-primary transition-all">${n}</button>`).join('')}
             </div>
             <input type="number" id="manual-table" class="w-full p-6 border border-custom rounded-3xl bg-secondary font-black text-center text-4xl text-primary" placeholder="--">
-            <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl uppercase mt-4 active:scale-95 transition">Verify Spot</button>
+            <button onclick="app.submitTable()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl uppercase mt-4 active:scale-95 transition">Confirm Table</button>
         `);
     },
 
@@ -301,78 +297,110 @@ const app = {
     },
 
     addCart(id, change) {
-        const item = this.state.allMenuItems.find(i => i.id === id);
-        let cartItem = this.state.cart.find(i => i.id === id);
-        if (!cartItem && change > 0) { this.state.cart.push({ ...item, quantity: 1 }); }
-        else if (cartItem) {
+        const item = this.state.allMenuItems.find(i => i.id == id);
+        let cartItem = this.state.cart.find(i => i.id == id);
+        if (!cartItem && change > 0) { 
+            this.state.cart.push({ ...item, quantity: 1 }); 
+        } else if (cartItem) {
             cartItem.quantity += change;
-            if (cartItem.quantity <= 0) this.state.cart = this.state.cart.filter(i => i.id !== id);
+            if (cartItem.quantity <= 0) this.state.cart = this.state.cart.filter(i => i.id != id);
         }
         ui.renderContent();
     },
 
     addCustomCombo() {
         const { snack, drink, fries, price } = this.state.builder;
-        if (!snack || !drink) return ui.showToast("Choose your snack and drink!");
+        if (!snack || !drink) return ui.showToast("Choose components!");
         const comboItem = {
-            id: `combo_${Date.now()}`,
-            name: `Meal: ${snack} + ${drink}`,
+            id: `999${Date.now()}`, // High ID for dynamic items
+            name: `${snack} + ${drink}`,
             price: price,
             quantity: 1,
-            description: `Inc: ${fries} Fries.`
+            category: 'COMBO'
         };
         this.state.cart.push(comboItem);
         ui.closeModal('builder-ui');
-        ui.showToast("Selection Bagged!");
+        ui.showToast("Combo Ready!");
         this.navigateTo('cart');
     },
 
     async fetchActiveOrder() {
-        const { data } = await sb.from('orders').select('*, order_items(*, products(*))').eq('customer_id', this.state.user.id).in('status', ['received', 'preparing']).order('created_at', { ascending: false }).limit(1).maybeSingle();
-        this.state.activeOrder = data;
-        if (data) this.subscribeRealtime(data.id);
+        const { data, error } = await sb.from('orders')
+            .select('*, order_items(*)')
+            .eq('customer_id', this.state.user.id)
+            .in('status', ['received', 'preparing'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        
+        if (data) {
+            this.state.activeOrder = data;
+            this.subscribeRealtime(data.id);
+        } else {
+            this.state.activeOrder = null;
+        }
         ui.renderContent();
     },
 
     subscribeRealtime(id) {
-        sb.channel(`order-${id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, p => {
+        sb.channel(`order-${id}`).on('postgres_changes', { 
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'orders', 
+            filter: `id=eq.${id}` 
+        }, p => {
             this.state.activeOrder = p.new;
-            if (['delivered', 'cancelled'].includes(p.new.status)) { this.state.activeOrder = null; ui.showToast(`Hustle Status: ${p.new.status.toUpperCase()}`); }
+            if (['delivered', 'cancelled'].includes(p.new.status)) { 
+                this.state.activeOrder = null; 
+                ui.showToast(`Order Status: ${p.new.status.toUpperCase()}`); 
+            }
             ui.renderContent();
         }).subscribe();
     },
 
     async placeOrder(btn) {
+        if (!this.state.tableNumber) return this.askTable();
+        
         btn.disabled = true;
         btn.innerHTML = `<span class="animate-pulse">DISPATCHING...</span>`;
         
         const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const total = subtotal * 1.05;
+        const total = Math.round(subtotal * 1.05);
 
         try {
-            const { error } = await sb.rpc('create_order_with_items', {
-                table_number_input: this.state.tableNumber,
-                total_amount_input: total,
-                source_input: 'Customer-Live',
-                order_items: this.state.cart.map(i => ({ 
-                    product_id: isNaN(i.id) ? 1 : parseInt(i.id), 
-                    quantity: i.quantity, 
-                    price_at_time_of_order: i.price 
-                }))
-            });
+            // Step 1: Create Order
+            const { data: order, error: orderErr } = await sb.from('orders').insert({
+                customer_id: this.state.user.id,
+                table_number: this.state.tableNumber,
+                total_amount: total,
+                status: 'received',
+                source: 'HXOUSE-Live-Engine'
+            }).select().single();
 
-            if (error) throw error;
+            if (orderErr) throw orderErr;
+
+            // Step 2: Add Items
+            const itemsToInsert = this.state.cart.map(i => ({
+                order_id: order.id,
+                product_id: isNaN(i.id) ? 1 : parseInt(i.id),
+                quantity: i.quantity,
+                price_at_time_of_order: i.price
+            }));
+
+            const { error: itemsErr } = await sb.from('order_items').insert(itemsToInsert);
+            if (itemsErr) throw itemsErr;
 
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3A8154', '#111827'] });
             this.state.cart = [];
             ui.closeModal('pay-ui');
-            ui.showToast("Admin side updated!");
+            ui.showToast("Transmitted to Admin");
             await this.fetchActiveOrder();
             this.navigateTo('cart');
         } catch (e) {
-            ui.showToast("Engine Link Failure");
+            console.error(e);
+            ui.showToast("Engine Error: Retry");
             btn.disabled = false;
-            btn.innerHTML = "Retry Order";
+            btn.innerHTML = "Retry Transmission";
         }
     }
 };
@@ -385,10 +413,10 @@ const ui = {
                 <img src="${LOGO_URL}" class="h-10 w-auto object-contain" alt="HXOUSE Logo">
             </div>
             <div class="flex items-center space-x-4">
-                <div class="h-8 w-[1px] bg-border-color"></div>
+                <div class="h-8 w-[1px] bg-border-color opacity-20"></div>
                 <div class="text-right">
-                    <p class="font-black text-xs tracking-tighter uppercase text-primary">Table #${app.state.tableNumber || '?'}</p>
-                    <p class="text-[8px] uppercase opacity-40 font-black text-primary">${app.state.customerProfile?.name || 'User'}</p>
+                    <p class="font-black text-xs tracking-tighter uppercase text-primary">T #${app.state.tableNumber || '?'}</p>
+                    <p class="text-[7px] uppercase opacity-40 font-black text-primary truncate max-w-[80px]">${app.state.customerProfile?.name || 'User'}</p>
                 </div>
             </div>`;
     },
@@ -407,125 +435,79 @@ const ui = {
         const prompt = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
         c.innerHTML = `
             <div class="space-y-6 fade-in pb-10">
-                <div class="relative h-72 overflow-hidden rounded-b-[4rem] shadow-2xl">
-                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover opacity-70"></video>
-                    <div class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-white p-6">
+                <div class="relative h-64 overflow-hidden rounded-b-[4rem] shadow-2xl">
+                    <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover opacity-60"></video>
+                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6">
                         <h1 class="text-5xl font-black tracking-tighter uppercase leading-none text-center transform scale-105">Fuel the <br> Hustle</h1>
-                        <p class="text-[10px] font-bold tracking-[0.5em] mt-6 opacity-60 uppercase">COLLECTIVE SYSTEM v4.0</p>
+                        <p class="text-[9px] font-bold tracking-[0.5em] mt-6 opacity-60 uppercase">HXOUSE ENGINE v4.1</p>
                     </div>
                 </div>
 
-                <!-- Daily Prompt -->
                 <div class="px-6">
-                    <div class="bg-secondary p-8 rounded-[3rem] border border-custom relative overflow-hidden">
+                    <div class="bg-secondary p-8 rounded-[3rem] border border-custom relative overflow-hidden shadow-sm">
                         <div class="relative z-10">
-                            <p class="text-[8px] font-black uppercase text-secondary tracking-[0.4em] mb-2">Daily Prompt</p>
+                            <p class="text-[8px] font-black uppercase text-secondary tracking-[0.4em] mb-2">Creative Prompt</p>
                             <h4 class="text-sm font-black italic text-primary leading-tight">"${prompt}"</h4>
                         </div>
-                        <div class="absolute -right-4 -bottom-4 text-6xl opacity-5 rotate-12">☕</div>
+                        <div class="absolute -right-4 -bottom-4 text-6xl opacity-5 rotate-12">🎨</div>
                     </div>
                 </div>
 
-                <!-- Pulse Meter -->
                 <div class="px-6">
-                    <div class="bg-primary border-2 border-custom rounded-[2.5rem] p-6 flex items-center justify-between shadow-lg">
-                        <div>
-                            <p class="text-[9px] font-black uppercase text-secondary tracking-widest mb-1">Cafe Pulse</p>
-                            <div class="flex items-center space-x-2">
-                                <div class="pulse-ring"></div>
-                                <span class="text-xs font-black uppercase text-primary">Vibrant & Busy</span>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[9px] font-black uppercase text-secondary tracking-widest mb-1">Brewed Today</p>
-                            <span class="text-lg font-black text-primary tabular-nums" id="brewed-count">412</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Featured Build -->
-                <div class="px-6">
-                    <div onclick="ui.builderModal()" class="combo-card p-12 rounded-[3.5rem] text-center shadow-2xl cursor-pointer transform hover:scale-[1.02] active:scale-95 transition-all">
-                        <span class="glow-tag text-[8px] px-4 py-1 rounded-full font-black uppercase mb-4 inline-block">MEMBER ONLY</span>
+                    <div onclick="ui.builderModal()" class="combo-card p-10 rounded-[3.5rem] text-center shadow-2xl cursor-pointer transform hover:scale-[1.01] active:scale-95 transition-all">
+                        <span class="bg-brand-primary text-white text-[8px] px-4 py-1 rounded-full font-black uppercase mb-4 inline-block">MEMBER BUILD</span>
                         <h2 class="text-4xl font-black text-primary uppercase tracking-tighter leading-none mb-2">Build Your <br> Own Meal</h2>
-                        <p class="text-[10px] text-secondary font-bold uppercase mt-2">Pick Snack Choice + Drink Choice</p>
-                        <h3 class="mt-6 font-black text-3xl text-primary tracking-tighter">Starts ₹99</h3>
-                        <button class="mt-8 brand-bg px-14 py-5 rounded-full font-black text-xs uppercase shadow-xl tracking-widest">Construct Meal</button>
+                        <h3 class="mt-4 font-black text-2xl text-primary tracking-tighter">Starts ₹99</h3>
+                        <button class="mt-6 brand-bg px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl tracking-widest">Construct</button>
                     </div>
                 </div>
 
-                <!-- Vibe Selector -->
                 <div class="px-6">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-secondary mb-4 ml-2">App Mood</h4>
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-secondary mb-4 ml-2">Engine Themes</h4>
                     <div class="flex space-x-3 overflow-x-auto no-scrollbar pb-2">
-                        <button onclick="document.body.dataset.theme='matcha'; app.state.theme='matcha'; ui.showToast('Vibe: Matcha')" class="flex-shrink-0 px-6 py-3 bg-secondary border border-custom rounded-full text-[10px] font-black uppercase text-primary">🍵 Matcha</button>
-                        <button onclick="document.body.dataset.theme='dark'; app.state.theme='dark'; ui.showToast('Vibe: Midnight')" class="flex-shrink-0 px-6 py-3 bg-secondary border border-custom rounded-full text-[10px] font-black uppercase text-primary">🌚 Midnight</button>
-                        <button onclick="document.body.dataset.theme='light'; app.state.theme='light'; ui.showToast('Vibe: Studio')" class="flex-shrink-0 px-6 py-3 bg-secondary border border-custom rounded-full text-[10px] font-black uppercase text-primary">🎨 Studio</button>
+                        <button onclick="document.body.dataset.theme='matcha'; ui.showToast('Vibe: Matcha')" class="flex-shrink-0 px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">🍵 Matcha</button>
+                        <button onclick="document.body.dataset.theme='dark'; ui.showToast('Vibe: Dark')" class="flex-shrink-0 px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">🌚 Night</button>
+                        <button onclick="document.body.dataset.theme='light'; ui.showToast('Vibe: Light')" class="flex-shrink-0 px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">🎨 Studio</button>
                     </div>
                 </div>
             </div>`;
-            
-        // Brew counter animation
-        setTimeout(() => {
-            let start = 412;
-            const el = $('#brewed-count');
-            const loop = setInterval(() => {
-                start += Math.floor(Math.random() * 2);
-                if (el) el.textContent = start;
-                if (Math.random() > 0.95) clearInterval(loop);
-            }, 3000);
-        }, 100);
     },
 
     builderModal() {
         app.state.builder = { snack: null, drink: null, fries: 'Peri Peri', price: 0 };
         ui.showModal('builder-ui', `
             <div class="text-center">
-                <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter text-primary">COLLECTIVE BUILD</h2>
-                <p class="text-secondary text-[10px] font-black uppercase tracking-widest mb-10 text-primary">Choose Your Components</p>
+                <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter text-primary">Collective Build</h2>
+                <p class="text-secondary text-[9px] font-black uppercase tracking-widest mb-8">Component Selection</p>
                 
-                <div class="space-y-10">
+                <div class="space-y-8 max-h-[60vh] overflow-y-auto no-scrollbar pr-1">
                     <div>
-                        <p class="text-[9px] font-black text-secondary uppercase tracking-[0.4em] mb-4 text-left">1. Select Snack Base</p>
-                        <div class="grid grid-cols-2 gap-3" id="snack-opts">
-                            ${Object.keys(SNACK_PRICES).map(s => `<button data-val="${s}" onclick="ui.setBuilder('snack', '${s}')" class="option-button p-5 bg-secondary border border-custom rounded-2xl font-black uppercase text-[10px] text-primary flex flex-col items-center">
+                        <p class="text-[8px] font-black text-secondary uppercase tracking-[0.4em] mb-3 text-left">1. Select Snack</p>
+                        <div class="grid grid-cols-2 gap-2" id="snack-opts">
+                            ${Object.keys(SNACK_PRICES).map(s => `<button data-val="${s}" onclick="ui.setBuilder('snack', '${s}')" class="option-button p-4 bg-secondary border border-custom rounded-2xl font-black uppercase text-[9px] text-primary flex flex-col items-center">
                                 <span>${s}</span>
-                                <span class="price-badge mt-2">₹${SNACK_PRICES[s]}</span>
+                                <span class="opacity-40 mt-1">₹${SNACK_PRICES[s]}</span>
                             </button>`).join('')}
                         </div>
                     </div>
 
                     <div>
-                        <p class="text-[9px] font-black text-secondary uppercase tracking-[0.4em] mb-4 text-left">2. Select Drink Variant</p>
-                        <div class="grid grid-cols-2 gap-3" id="drink-opts">
-                            <button data-val="2x Mojitos" onclick="ui.setBuilder('drink', '2x Mojitos')" class="option-button p-6 bg-secondary border border-custom rounded-[2.5rem] flex flex-col items-center">
-                                <span class="text-2xl mb-2">🍹🍹</span>
+                        <p class="text-[8px] font-black text-secondary uppercase tracking-[0.4em] mb-3 text-left">2. Select Drink</p>
+                        <div class="grid grid-cols-2 gap-2" id="drink-opts">
+                            <button data-val="2x Mojitos" onclick="ui.setBuilder('drink', '2x Mojitos')" class="option-button p-5 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center">
+                                <span class="text-xl mb-1">🍹</span>
                                 <span class="font-black uppercase text-[9px]">2x Mojitos</span>
-                                <span class="text-[8px] opacity-40 uppercase">(Duo Pack)</span>
                             </button>
-                            <button data-val="1x Cold Frappe" onclick="ui.setBuilder('drink', '1x Cold Frappe')" class="option-button p-6 bg-secondary border border-custom rounded-[2.5rem] flex flex-col items-center">
-                                <span class="text-2xl mb-2">🥤</span>
+                            <button data-val="1x Cold Frappe" onclick="ui.setBuilder('drink', '1x Cold Frappe')" class="option-button p-5 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center">
+                                <span class="text-xl mb-1">🥤</span>
                                 <span class="font-black uppercase text-[9px]">Cold Frappe</span>
-                                <span class="text-[8px] opacity-40 uppercase">(Studio Chill)</span>
                             </button>
                         </div>
-                    </div>
-
-                    <div class="bg-primary border-2 border-custom border-dashed p-6 rounded-3xl flex justify-between items-center shadow-inner">
-                        <div class="text-left">
-                            <p class="text-[8px] font-black text-secondary uppercase tracking-widest">INCLUDED AUTOMATICALLY</p>
-                            <h3 class="font-black uppercase text-sm text-primary">Peri Peri Fries</h3>
-                        </div>
-                        <span class="text-2xl">🍟</span>
                     </div>
                 </div>
 
-                <div class="mt-12 bg-secondary p-8 rounded-[3rem] border border-custom">
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="font-black uppercase text-secondary text-[10px] tracking-widest">Bag Total</span>
-                        <span id="builder-total-price" class="font-black text-4xl text-primary tracking-tighter">₹--</span>
-                    </div>
-                    <button onclick="app.addCustomCombo()" class="w-full brand-bg py-6 rounded-3xl font-black text-xl shadow-2xl uppercase tracking-widest active:scale-95 transition">Add to Bag</button>
+                <div class="mt-8">
+                    <button onclick="app.addCustomCombo()" class="w-full brand-bg py-5 rounded-3xl font-black text-xl shadow-2xl uppercase tracking-widest active:scale-95 transition">Add Combo: <span id="builder-total-price">₹--</span></button>
                 </div>
             </div>
         `);
@@ -547,8 +529,8 @@ const ui = {
 
     menu(c) {
         c.innerHTML = `
-            <div class="p-6 fade-in">
-                <div class="relative mb-10">
+            <div class="p-6 fade-in pb-10">
+                <div class="relative mb-8">
                     <input type="text" placeholder="I'm craving..." class="w-full p-6 bg-secondary border border-custom rounded-[2rem] font-bold shadow-inner text-primary outline-none focus:border-brand-primary transition-all" oninput="app.state.searchQuery = this.value; ui.menuList()">
                     <span class="absolute right-6 top-6 opacity-20 text-xl">🔍</span>
                 </div>
@@ -561,20 +543,7 @@ const ui = {
         const target = $('#menu-sections'); if (!target) return;
         const q = app.state.searchQuery.toLowerCase();
         
-        let html = `
-            <div class="bg-secondary rounded-[3rem] border-2 border-brand-primary border-dashed overflow-hidden shadow-md mb-8 p-10 cursor-pointer transform active:scale-[0.98] transition group" onclick="ui.builderModal()">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-[9px] font-black uppercase text-brand-primary tracking-[0.3em] mb-2">DYNAMIC SELECTION</p>
-                        <h4 class="font-black text-2xl uppercase text-primary leading-none mb-1">BUILD YOUR MEAL</h4>
-                        <p class="text-xs text-secondary font-black uppercase mt-1">Snack + Choice of Drink + Fries</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="font-black text-2xl text-primary tracking-tighter brand-text">₹99+</span>
-                    </div>
-                </div>
-            </div>
-        `;
+        let html = '';
 
         html += app.state.menuData.map(group => {
             const filtered = group.items.filter(i => i.name.toLowerCase().includes(q));
@@ -582,17 +551,17 @@ const ui = {
             const isExp = app.state.expandedCategory === group.category || q;
             return `
                 <div class="bg-secondary rounded-[2.5rem] border border-custom overflow-hidden mb-4 shadow-sm">
-                    <button onclick="app.state.expandedCategory='${group.category}'; ui.menuList()" class="w-full p-7 flex justify-between items-center font-black uppercase text-[10px] tracking-widest text-primary">
+                    <button onclick="app.state.expandedCategory = app.state.expandedCategory === '${group.category}' ? null : '${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[10px] tracking-widest text-primary">
                         ${group.category} <span class="text-xl transition-transform ${isExp ? 'rotate-180' : ''}">↓</span>
                     </button>
-                    <div class="accordion-content ${isExp ? 'open' : ''}" style="max-height: ${isExp ? '1500px' : '0'}">
-                        <div class="p-5 space-y-3">
-                            ${filtered.map(i => `<div class="bg-primary p-6 rounded-[2rem] shadow-sm flex justify-between items-center border border-custom hover:border-brand-primary transition">
-                                <div class="pr-4">
-                                    <h4 class="font-black text-sm uppercase leading-tight text-primary">${i.name}</h4>
-                                    <p class="text-secondary font-black text-[10px] opacity-50 tracking-widest mt-1">₹${i.price}</p>
+                    <div class="accordion-content" style="max-height: ${isExp ? '2000px' : '0'}">
+                        <div class="p-4 space-y-3">
+                            ${filtered.map(i => `<div class="bg-primary p-5 rounded-[2rem] shadow-sm flex justify-between items-center border border-custom">
+                                <div class="pr-2">
+                                    <h4 class="font-black text-xs uppercase text-primary">${i.name}</h4>
+                                    <p class="text-secondary font-black text-[9px] opacity-50 mt-1">₹${i.price}</p>
                                 </div>
-                                <button onclick="app.addCart('${i.id}', 1); ui.showToast('Added: ${i.name}')" class="add-to-cart-btn brand-bg font-black text-2xl active:scale-90 transition shadow-lg">+</button>
+                                <button onclick="app.addCart('${i.id}', 1); ui.showToast('Added: ${i.name}')" class="add-to-cart-btn brand-bg font-black text-2xl active:scale-90 transition">+</button>
                             </div>`).join('')}
                         </div>
                     </div>
@@ -604,32 +573,19 @@ const ui = {
     arcade(c) {
         c.innerHTML = `
             <div class="p-6 h-full flex flex-col fade-in">
-                <h2 class="text-4xl font-black uppercase tracking-tighter mb-4 text-primary">Arcade</h2>
-                <p class="text-secondary font-bold text-xs uppercase tracking-widest mb-10">Creative Play Center</p>
-                
-                <div class="grid grid-cols-1 gap-6">
-                    <div onclick="GAMES.ttt.start()" class="bg-secondary p-10 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer active:scale-95 transition shadow-lg">
-                        <div>
-                            <h4 class="font-black uppercase text-lg text-primary">Tic-Tac-Toe</h4>
-                            <p class="text-[9px] font-bold text-secondary uppercase tracking-widest">Beat the machine</p>
-                        </div>
-                        <span class="text-4xl">❌</span>
+                <h2 class="text-4xl font-black uppercase tracking-tighter mb-8 text-primary">Arcade</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div onclick="GAMES.ttt.start()" class="bg-secondary p-8 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer shadow-lg">
+                        <h4 class="font-black uppercase text-lg text-primary">Tic-Tac-Toe</h4>
+                        <span class="text-3xl">❌</span>
                     </div>
-                    
-                    <div onclick="GAMES.art.start()" class="bg-secondary p-10 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer active:scale-95 transition shadow-lg">
-                        <div>
-                            <h4 class="font-black uppercase text-lg text-primary">Studio Art</h4>
-                            <p class="text-[9px] font-bold text-secondary uppercase tracking-widest">Sketch your vibe</p>
-                        </div>
-                        <span class="text-4xl">🎨</span>
+                    <div onclick="GAMES.art.start()" class="bg-secondary p-8 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer shadow-lg">
+                        <h4 class="font-black uppercase text-lg text-primary">Studio Art</h4>
+                        <span class="text-3xl">🎨</span>
                     </div>
-
-                    <div onclick="GAMES.reaction.start()" class="bg-secondary p-10 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer active:scale-95 transition shadow-lg">
-                        <div>
-                            <h4 class="font-black uppercase text-lg text-primary">Quick React</h4>
-                            <p class="text-[9px] font-bold text-secondary uppercase tracking-widest">Speed Test</p>
-                        </div>
-                        <span class="text-4xl">⚡</span>
+                    <div onclick="GAMES.reaction.start()" class="bg-secondary p-8 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer shadow-lg">
+                        <h4 class="font-black uppercase text-lg text-primary">Quick React</h4>
+                        <span class="text-3xl">⚡</span>
                     </div>
                 </div>
             </div>`;
@@ -637,30 +593,30 @@ const ui = {
 
     cart(c) {
         if (app.state.activeOrder) return this.track(c);
-        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center h-full flex flex-col justify-center items-center"><span class="text-[120px] opacity-10 mb-10">🛒</span><p class="font-black uppercase tracking-[0.4em] text-[10px] text-secondary opacity-30">Selection is empty</p><button onclick="app.navigateTo('order')" class="mt-10 font-black border-b-2 border-brand-primary text-primary text-xs uppercase tracking-widest">Browse Menu</button></div>`;
+        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center h-full flex flex-col justify-center items-center"><span class="text-[100px] opacity-10 mb-8">🛒</span><p class="font-black uppercase tracking-widest text-[9px] text-secondary opacity-40">Hustle Bag is Empty</p><button onclick="app.navigateTo('order')" class="mt-8 font-black border-b-2 border-brand-primary text-primary text-[10px] uppercase tracking-widest">Open Menu</button></div>`;
         const subtotal = app.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
         c.innerHTML = `
-            <div class="p-6 space-y-6 pb-32 fade-in">
-                <h2 class="text-5xl font-black tracking-tighter uppercase mb-10 text-primary">Hustle Bag</h2>
+            <div class="p-6 space-y-6 pb-24 fade-in">
+                <h2 class="text-4xl font-black tracking-tighter uppercase mb-6 text-primary">Current Bag</h2>
                 <div class="space-y-4">${app.state.cart.map(i => `
-                    <div class="flex justify-between items-center p-7 bg-secondary rounded-[2.5rem] border border-custom shadow-sm">
-                        <div class="flex-grow pr-4">
-                            <p class="font-black text-sm uppercase text-primary leading-tight">${i.name}</p>
-                            <p class="text-[9px] opacity-40 font-black mt-2 uppercase text-primary tracking-widest">₹${i.price} x ${i.quantity}</p>
+                    <div class="flex justify-between items-center p-6 bg-secondary rounded-[2.5rem] border border-custom">
+                        <div class="flex-grow pr-3">
+                            <p class="font-black text-xs uppercase text-primary truncate">${i.name}</p>
+                            <p class="text-[8px] opacity-40 font-black mt-1 uppercase text-primary">₹${i.price} x ${i.quantity}</p>
                         </div>
-                        <div class="quantity-control shadow-xl">
-                            <button onclick="app.addCart('${i.id}', -1)" class="active:opacity-50">−</button>
-                            <span class="px-3 font-black text-sm">${i.quantity}</span>
-                            <button onclick="app.addCart('${i.id}', 1)" class="active:opacity-50">+</button>
+                        <div class="quantity-control">
+                            <button onclick="app.addCart('${i.id}', -1)">−</button>
+                            <span class="px-2 font-black text-xs">${i.quantity}</span>
+                            <button onclick="app.addCart('${i.id}', 1)">+</button>
                         </div>
                     </div>`).join('')}
                 </div>
-                <div class="p-12 bg-secondary rounded-[4rem] border border-custom shadow-lg uppercase text-primary">
-                    <div class="flex justify-between font-black text-[10px] opacity-30 tracking-[0.3em] mb-4"><span>Subtotal</span><span>₹${subtotal}</span></div>
-                    <div class="flex justify-between font-black text-[10px] opacity-30 tracking-[0.3em] mb-10"><span>Service tax</span><span>₹${(subtotal * 0.05).toFixed(0)}</span></div>
-                    <div class="flex justify-between font-black text-4xl tracking-tighter uppercase"><span>Total</span><span>₹${Math.round(subtotal * 1.05)}</span></div>
+                <div class="p-10 bg-secondary rounded-[3.5rem] border border-custom shadow-lg text-primary">
+                    <div class="flex justify-between font-black text-[9px] opacity-30 uppercase mb-2"><span>Subtotal</span><span>₹${subtotal}</span></div>
+                    <div class="flex justify-between font-black text-[9px] opacity-30 uppercase mb-6"><span>Service Tax</span><span>₹${(subtotal * 0.05).toFixed(0)}</span></div>
+                    <div class="flex justify-between font-black text-3xl tracking-tighter uppercase"><span>Total</span><span>₹${Math.round(subtotal * 1.05)}</span></div>
                 </div>
-                <button onclick="ui.payModal()" class="w-full brand-bg py-8 rounded-[3rem] font-black text-2xl shadow-2xl uppercase tracking-tighter active:scale-95 transition">Send to Admin</button>
+                <button onclick="ui.payModal()" class="w-full brand-bg py-7 rounded-[3rem] font-black text-xl shadow-2xl uppercase tracking-widest active:scale-95 transition">Submit Order</button>
             </div>`;
     },
 
@@ -668,33 +624,33 @@ const ui = {
         const s = app.state.activeOrder?.status || 'received';
         const prog = s === 'received' ? '33%' : s === 'preparing' ? '66%' : '100%';
         c.innerHTML = `
-            <div class="p-10 text-center h-full flex flex-col justify-center items-center space-y-16">
-                <h2 class="text-6xl font-black uppercase leading-none text-primary transform -rotate-1">Live <br> Status</h2>
+            <div class="p-10 text-center h-full flex flex-col justify-center items-center space-y-12">
+                <h2 class="text-6xl font-black uppercase text-primary leading-none">Order <br> Status</h2>
                 
-                <div class="w-full space-y-10">
-                    <div class="relative h-4 w-full bg-secondary rounded-full border border-custom overflow-hidden shadow-inner">
-                        <div class="absolute h-full brand-bg transition-all duration-[2000ms] shadow-[0_0_20px_var(--brand-primary)]" style="width: ${prog}"></div>
+                <div class="w-full space-y-8">
+                    <div class="relative h-3 w-full bg-secondary rounded-full overflow-hidden shadow-inner border border-custom">
+                        <div class="absolute h-full brand-bg transition-all duration-[1500ms]" style="width: ${prog}"></div>
                     </div>
                     
                     <div class="flex justify-between px-2">
-                        <div class="flex flex-col items-center space-y-2 ${s === 'received' ? 'brand-text' : 'opacity-20'}">
+                        <div class="flex flex-col items-center ${s === 'received' ? 'brand-text' : 'opacity-20'}">
                             <span class="text-xl">📝</span>
-                            <span class="text-[8px] font-black uppercase tracking-widest">Received</span>
+                            <span class="text-[7px] font-black uppercase mt-1">Logged</span>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 ${s === 'preparing' ? 'brand-text' : 'opacity-20'}">
+                        <div class="flex flex-col items-center ${s === 'preparing' ? 'brand-text' : 'opacity-20'}">
                             <span class="text-xl">🔥</span>
-                            <span class="text-[8px] font-black uppercase tracking-widest">Preparing</span>
+                            <span class="text-[7px] font-black uppercase mt-1">Prepped</span>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 ${s === 'delivered' ? 'brand-text' : 'opacity-20'}">
+                        <div class="flex flex-col items-center ${s === 'delivered' ? 'brand-text' : 'opacity-20'}">
                             <span class="text-xl">✅</span>
-                            <span class="text-[8px] font-black uppercase tracking-widest">Ready</span>
+                            <span class="text-[7px] font-black uppercase mt-1">Ready</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-secondary p-10 rounded-[3rem] border border-custom w-full">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-secondary mb-2">Member Note</p>
-                    <p class="text-xs font-bold text-primary italic">"Your hustle fuel is being prepared by our creative team."</p>
+                <div class="bg-secondary p-8 rounded-[3rem] border border-custom w-full">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-secondary mb-2">Notice</p>
+                    <p class="text-xs font-bold text-primary italic">"Preparing your fuel. Relax and create."</p>
                 </div>
             </div>`;
     },
@@ -702,69 +658,68 @@ const ui = {
     more(c) {
         c.innerHTML = `
             <div class="p-8 space-y-6 fade-in">
-                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">Member Identity</h2>
+                <h2 class="text-3xl font-black uppercase tracking-tighter mb-8 text-primary">Member</h2>
                 
-                <div class="loyalty-card-container mb-12" onclick="this.children[0].classList.toggle('flipped')">
+                <div class="loyalty-card-container mb-10" onclick="this.children[0].classList.toggle('flipped')">
                     <div class="loyalty-card-inner">
-                        <!-- Front -->
-                        <div class="loyalty-card-front loyalty-card p-10 flex flex-col justify-between shadow-2xl">
+                        <div class="loyalty-card-front p-8 flex flex-col justify-between">
                             <div class="flex justify-between items-start">
                                 <div class="text-left">
-                                    <p class="text-[8px] font-black uppercase opacity-60 tracking-[0.4em] mb-2">Digital Member</p>
-                                    <h3 class="text-2xl font-black uppercase tracking-tighter">${app.state.customerProfile?.name || 'Collective User'}</h3>
+                                    <p class="text-[7px] font-black uppercase opacity-40 tracking-widest mb-1">Identity</p>
+                                    <h3 class="text-xl font-black uppercase truncate max-w-[150px]">${app.state.customerProfile?.name || 'User'}</h3>
                                 </div>
-                                <img src="${LOGO_URL}" class="h-8 grayscale invert brightness-200">
+                                <img src="${LOGO_URL}" class="h-6 grayscale invert brightness-200">
                             </div>
                             <div class="flex justify-between items-end">
                                 <div class="text-left">
-                                    <p class="text-[8px] font-black opacity-40 uppercase tracking-widest">Balance</p>
-                                    <h4 class="text-4xl font-black tracking-tighter">${app.state.customerProfile?.loyalty_points || 0} <span class="text-xs opacity-50 uppercase tracking-widest">pts</span></h4>
+                                    <p class="text-[7px] font-black opacity-40 uppercase">Loyalty</p>
+                                    <h4 class="text-3xl font-black tracking-tighter">${app.state.customerProfile?.loyalty_points || 0} pts</h4>
                                 </div>
-                                <div class="p-3 bg-white/10 rounded-2xl"><span class="text-2xl">✨</span></div>
+                                <div class="p-2 bg-white/10 rounded-xl">✨</div>
                             </div>
                         </div>
-                        <!-- Back -->
-                        <div class="loyalty-card-back loyalty-card p-10 flex flex-col justify-center items-center shadow-2xl">
-                             <div class="p-4 bg-white rounded-2xl shadow-xl mb-4">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${app.state.user.id}" class="w-32 h-32">
+                        <div class="loyalty-card-back p-8 flex flex-col justify-center items-center">
+                             <div class="p-3 bg-white rounded-xl mb-4">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${app.state.user.id}" class="w-24 h-24">
                              </div>
-                             <p class="text-[8px] font-black uppercase opacity-60 tracking-[0.4em]">Scan to redeem</p>
+                             <p class="text-[8px] font-black uppercase opacity-40">Scan to Verify</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <button onclick="app.navigateTo('order')" class="w-full p-8 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between shadow-lg text-primary uppercase text-[10px] tracking-widest active:scale-[0.98] transition"><span>Collective Menu</span><span>☕</span></button>
-                    <button onclick="location.reload()" class="w-full p-8 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between shadow-lg text-primary uppercase text-[10px] tracking-widest active:scale-[0.98] transition"><span>Reload System</span><span>⟳</span></button>
-                </div>
-                
-                <p class="text-center text-[8px] font-black uppercase opacity-10 mt-20 tracking-[1em] text-primary">HXOUSE CORE ENGINE v4.0.0</p>
+                <button onclick="location.reload()" class="w-full p-6 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between items-center text-primary uppercase text-[9px] tracking-widest shadow-sm">
+                    <span>Re-sync System</span>
+                    <span>⟳</span>
+                </button>
             </div>`;
     },
 
     payModal() {
         ui.showModal('pay-ui', `
-            <h2 class="text-4xl font-black mb-12 uppercase text-primary leading-none">Complete <br> Order</h2>
+            <h2 class="text-4xl font-black mb-8 uppercase text-primary leading-none">Confirm <br> Order</h2>
             <div class="space-y-4">
-                <button onclick="app.placeOrder(this)" class="w-full p-10 bg-secondary rounded-[2.5rem] text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Pay at Desk</span><span>💵</span></button>
-                <button onclick="app.placeOrder(this)" class="w-full p-10 bg-secondary rounded-[2.5rem] text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Scan to Pay (UPI)</span><span>📱</span></button>
+                <button onclick="app.placeOrder(this)" class="w-full p-8 bg-secondary rounded-[2.5rem] text-left font-black border border-custom flex justify-between items-center text-primary uppercase text-[10px] tracking-widest active:brand-bg transition shadow-md"><span>Pay at Desk</span><span>💵</span></button>
+                <button onclick="app.placeOrder(this)" class="w-full p-8 bg-secondary rounded-[2.5rem] text-left font-black border border-custom flex justify-between items-center text-primary uppercase text-[10px] tracking-widest active:brand-bg transition shadow-md"><span>Scan & Pay (UPI)</span><span>📱</span></button>
             </div>
-            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-10 opacity-20 font-black uppercase text-[10px] tracking-widest text-primary">Cancel Dispatch</button>
+            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-8 opacity-20 font-black uppercase text-[10px] tracking-widest text-primary">Cancel</button>
         `);
     },
 
     showModal(id, content) {
-        const m = document.createElement('div'); m.id = id; m.className = "modal-overlay fixed inset-0 bg-black/95 z-[60] flex items-end p-4 backdrop-blur-xl";
-        m.innerHTML = `<div class="modal-content w-full bg-primary p-12 rounded-[4.5rem] shadow-2xl border border-custom">${content}</div>`;
+        const m = document.createElement('div'); 
+        m.id = id; 
+        m.className = "modal-overlay fixed inset-0 bg-black/90 z-[60] flex items-end p-4 backdrop-blur-md";
+        m.innerHTML = `<div class="modal-content w-full bg-primary p-10 rounded-[4rem] shadow-2xl border border-custom overflow-hidden">${content}</div>`;
         $('#modal-container').appendChild(m);
     },
 
     closeModal(id) { $(`#${id}`)?.remove(); },
 
     showToast(msg) {
-        const t = $('#toast'); $('#toast-message').textContent = msg.toUpperCase();
+        const t = $('#toast'); 
+        $('#toast-message').textContent = msg.toUpperCase();
         t.classList.remove('hidden', 'fade-in'); 
-        void t.offsetWidth; // Trigger reflow
+        void t.offsetWidth;
         t.classList.add('fade-in');
         setTimeout(() => t.classList.add('hidden'), 2500);
     },
@@ -773,14 +728,14 @@ const ui = {
         const nav = $('#bottom-nav');
         const items = [
             { id: 'home', l: 'Home', i: '🏠' }, 
-            { id: 'order', l: 'Orders', i: '☕' }, 
-            { id: 'arcade', l: 'Arcade', i: '🎮' }, 
-            { id: 'cart', l: 'Live', i: '🛒' }, 
-            { id: 'more', l: 'User', i: '☰' }
+            { id: 'order', l: 'Menu', i: '☕' }, 
+            { id: 'arcade', l: 'Play', i: '🎮' }, 
+            { id: 'cart', l: 'Bag', i: '🛒' }, 
+            { id: 'more', l: 'ID', i: '☰' }
         ];
         nav.innerHTML = items.map(item => `
-            <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all duration-300" id="nav-${item.id}">
-                <div class="mb-2 text-2xl">${item.i}</div>
+            <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all" id="nav-${item.id}">
+                <div class="mb-1 text-2xl">${item.i}</div>
                 <span class="text-[7px] font-black uppercase tracking-widest opacity-30 text-primary">${item.l}</span>
             </button>
         `).join('');
@@ -789,7 +744,8 @@ const ui = {
     updateNav() {
         $$('.nav-btn').forEach(btn => { 
             btn.classList.remove('brand-text', 'scale-110'); 
-            btn.querySelector('span').classList.replace('opacity-100', 'opacity-30'); 
+            btn.querySelector('span').classList.add('opacity-30');
+            btn.querySelector('span').classList.remove('opacity-100');
         });
         const active = $(`#nav-${app.state.currentPage}`);
         if (active) { 
@@ -804,13 +760,13 @@ const GAMES = {
         board: Array(9).fill(null), p: 'X', win: null,
         start() {
             this.board.fill(null); this.p = 'X'; this.win = null;
-            ui.showModal('ttt-run', `<h2 class="text-4xl font-black mb-12 text-center uppercase tracking-tighter text-primary">HX-Match</h2><div class="grid grid-cols-3 gap-4 w-72 mx-auto mb-12">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-20 h-20 bg-secondary rounded-[1.5rem] flex items-center justify-center text-4xl font-black border-2 border-custom shadow-xl text-primary" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[10px] tracking-widest opacity-40 mb-12 text-primary">Turn: ${this.p}</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Quit Game</button>`);
+            ui.showModal('ttt-run', `<h2 class="text-3xl font-black mb-10 text-center uppercase text-primary">Match</h2><div class="grid grid-cols-3 gap-3 w-64 mx-auto mb-10">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-20 h-20 bg-secondary rounded-[1rem] flex items-center justify-center text-3xl font-black border border-custom text-primary" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[10px] tracking-widest opacity-40 mb-8 text-primary">Turn: ${this.p}</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Quit</button>`);
         },
         play(i) {
             if (this.board[i] || this.win) return;
             this.board[i] = this.p;
             $(`#ttt-${i}`).textContent = this.p;
-            if (this.check()) { this.win = this.p; $('#ttt-status').textContent = `Winner: ${this.p}`; $('#ttt-status').classList.add('brand-text'); }
+            if (this.check()) { this.win = this.p; $('#ttt-status').textContent = `Winner: ${this.p}`; }
             else if (this.board.every(b => b)) { $('#ttt-status').textContent = `Draw!`; }
             else { this.p = this.p === 'X' ? 'O' : 'X'; $('#ttt-status').textContent = `Turn: ${this.p}`; }
         },
@@ -819,21 +775,22 @@ const GAMES = {
     art: {
         painting: false,
         start() {
-            ui.showModal('art-run', `<h2 class="text-3xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Studio Art</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[3.5rem] border-[10px] border-custom shadow-2xl mb-12"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-6 rounded-3xl font-black uppercase text-xs tracking-widest">Complete Art</button>`);
+            ui.showModal('art-run', `<h2 class="text-3xl font-black mb-10 text-center uppercase text-primary">Art</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[2rem] border-4 border-custom bg-white mb-10"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-5 rounded-3xl font-black uppercase text-xs tracking-widest">Done</button>`);
             this.run();
         },
         run() {
             const c = $('#art-canvas'); const ctx = c.getContext('2d');
-            c.width = c.clientWidth; c.height = c.clientWidth;
-            ctx.strokeStyle = app.state.theme === 'dark' ? '#fff' : '#000'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+            const box = c.getBoundingClientRect();
+            c.width = 600; c.height = 600;
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 10; ctx.lineCap = 'round';
             const draw = (e) => {
                 if(!this.painting) return;
                 const rect = c.getBoundingClientRect();
-                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                const x = ((e.clientX || e.touches[0].clientX) - rect.left) * (c.width / rect.width);
+                const y = ((e.clientY || e.touches[0].clientY) - rect.top) * (c.height / rect.height);
                 ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
             };
-            c.onmousedown = c.ontouchstart = (e) => { this.painting = true; draw(e); };
+            c.onmousedown = c.ontouchstart = (e) => { this.painting = true; draw(e); e.preventDefault(); };
             c.onmouseup = c.ontouchend = () => { this.painting = false; ctx.beginPath(); };
             c.onmousemove = c.ontouchmove = draw;
         }
@@ -841,24 +798,25 @@ const GAMES = {
     reaction: {
         timer: null, startTime: null,
         start() {
-            ui.showModal('react-run', `<h2 class="text-3xl font-black mb-12 text-center uppercase tracking-tighter text-primary">Reaction</h2><div id="react-box" onclick="GAMES.reaction.hit()" class="w-full aspect-square bg-secondary rounded-[4rem] border-4 border-custom flex items-center justify-center cursor-pointer transition-all duration-75"><p class="font-black text-xs uppercase tracking-widest text-secondary text-center">Wait for Green...</p></div><button onclick="ui.closeModal('react-run')" class="w-full mt-10 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Cancel</button>`);
+            ui.showModal('react-run', `<h2 class="text-3xl font-black mb-10 text-center uppercase text-primary">React</h2><div id="react-box" onclick="GAMES.reaction.hit()" class="w-full aspect-square bg-secondary rounded-[3rem] border border-custom flex items-center justify-center cursor-pointer transition-all"><p class="font-black text-xs uppercase tracking-widest text-secondary text-center">Wait for Green...</p></div><button onclick="ui.closeModal('react-run')" class="w-full mt-10 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Cancel</button>`);
             this.begin();
         },
         begin() {
-            const box = $('#react-box'); box.className = "w-full aspect-square bg-secondary rounded-[4rem] border-4 border-custom flex items-center justify-center";
-            box.innerHTML = `<p class="font-black text-xs tracking-widest text-secondary">WAIT...</p>`;
+            const box = $('#react-box'); 
+            box.classList.replace('brand-bg', 'bg-secondary');
+            box.innerHTML = `<p class="font-black text-xs text-secondary">WAIT...</p>`;
             this.timer = setTimeout(() => {
-                box.className = "w-full aspect-square brand-bg rounded-[4rem] flex items-center justify-center";
-                box.innerHTML = `<p class="font-black text-4xl tracking-widest">HIT!</p>`;
+                box.classList.replace('bg-secondary', 'brand-bg');
+                box.innerHTML = `<p class="font-black text-4xl text-white">HIT!</p>`;
                 this.startTime = Date.now();
-            }, 2000 + Math.random() * 3000);
+            }, 1500 + Math.random() * 3000);
         },
         hit() {
             if (!this.startTime) {
-                clearTimeout(this.timer); ui.showToast("Too Early!"); this.begin(); return;
+                clearTimeout(this.timer); ui.showToast("Early!"); this.begin(); return;
             }
             const time = Date.now() - this.startTime;
-            $('#react-box').innerHTML = `<p class="font-black text-5xl tracking-tighter text-center">${time}ms</p><p class="text-[8px] font-black uppercase mt-4 tracking-widest opacity-60">Tap to replay</p>`;
+            $('#react-box').innerHTML = `<p class="font-black text-5xl text-white">${time}ms</p>`;
             this.startTime = null;
         }
     }
