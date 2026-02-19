@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-primary-light: #FFFFFF; --bg-secondary-light: #F8F9FA; --text-primary-light: #111827; --text-secondary-light: #6B7280; --border-light: #E5E7EB; --brand-primary-light: #111827;
+            --bg-primary-light: #FFFFFF; --bg-secondary-light: #F4F7F5; --text-primary-light: #111827; --text-secondary-light: #6B7280; --border-light: #E5E7EB; --brand-primary-light: #111827;
             --bg-primary-dark: #0A0A0A; --bg-secondary-dark: #141414; --text-primary-dark: #F9FAFB; --text-secondary-dark: #9CA3AF; --border-dark: #1F1F1F; --brand-primary-dark: #FFFFFF;
             --bg-primary-matcha: #F4FAF6; --bg-secondary-matcha: #E8F5EE; --text-primary-matcha: #2F4858; --text-secondary-matcha: #5C7A89; --border-matcha: #D1E7D9; --brand-primary-matcha: #3A8154;
         }
@@ -20,11 +20,10 @@
         [data-theme="dark"] { --bg-primary: var(--bg-primary-dark); --bg-secondary: var(--bg-secondary-dark); --text-primary: var(--text-primary-dark); --text-secondary: var(--text-secondary-dark); --border-color: var(--border-dark); --brand-primary: var(--brand-primary-dark); }
         [data-theme="matcha"] { --bg-primary: var(--bg-primary-matcha); --bg-secondary: var(--bg-secondary-matcha); --text-primary: var(--text-primary-matcha); --text-secondary: var(--text-secondary-matcha); --border-color: var(--border-matcha); --brand-primary: var(--brand-primary-matcha); }
 
-        html, body { height: 100%; overflow: hidden; margin: 0; background-color: var(--bg-secondary-light); }
+        html, body { height: 100%; overflow: hidden; margin: 0; background-color: #FFFFFF; }
         body { font-family: 'Poppins', sans-serif; color: var(--text-primary); -webkit-tap-highlight-color: transparent; transition: background 0.4s ease; }
         .app-container { background-color: var(--bg-primary); height: 100vh; display: flex; flex-direction: column; position: relative; }
         
-        /* Fixed Splash Screen Color */
         #splash-screen { background-color: #FFFFFF; }
 
         .fade-in { animation: fadeIn 0.4s ease-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -34,108 +33,102 @@
         .brand-bg { background-color: var(--brand-primary); color: var(--bg-primary); }
         .border-custom { border-color: var(--border-color); }
         
-        .combo-card { background: linear-gradient(135deg, rgba(58, 129, 84, 0.1) 0%, rgba(58, 129, 84, 0.02) 100%); border: 2px dashed var(--brand-primary); }
-        .option-button.active { background-color: var(--brand-primary) !important; color: var(--bg-primary) !important; transform: scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        
         .ticker-wrap { width: 100%; overflow: hidden; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); height: 30px; display: flex; align-items: center; }
         .ticker { display: inline-block; white-space: nowrap; animation: ticker 25s linear infinite; }
         @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        .quantity-pill { display: flex; align-items: center; background: var(--brand-primary); color: var(--bg-primary); border-radius: 99px; padding: 4px; gap: 12px; }
-        .quantity-pill button { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: 900; }
+        .quantity-pill { display: flex; align-items: center; background: var(--brand-primary); color: var(--bg-primary); border-radius: 99px; padding: 4px; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .quantity-pill button { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-weight: 900; transition: background 0.2s; }
+        .quantity-pill button:active { background: rgba(255,255,255,0.3); }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .accordion-content { overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .menu-item-card { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .menu-item-card.in-cart { border-color: var(--brand-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .menu-item-card { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }
+        .menu-item-card.in-cart { border-color: var(--brand-primary); background: var(--bg-secondary); }
+        
+        .combo-card { background: linear-gradient(135deg, rgba(58, 129, 84, 0.1) 0%, rgba(58, 129, 84, 0.02) 100%); border: 2px dashed var(--brand-primary); }
+        .option-button.active { background-color: var(--brand-primary) !important; color: var(--bg-primary) !important; transform: scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        .loyalty-card-container { perspective: 1000px; }
+        .loyalty-card-inner { position: relative; width: 100%; height: 180px; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
+        .loyalty-card-inner.flipped { transform: rotateY(180deg); }
+        .loyalty-card-front, .loyalty-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 2.5rem; }
+        .loyalty-card-front { background: linear-gradient(135deg, var(--brand-primary) 0%, #111827 100%); color: white; }
+        .loyalty-card-back { transform: rotateY(180deg); background: var(--bg-secondary); border: 2px solid var(--border-color); }
+        
+        .white-modal-overlay { background-color: rgba(255, 255, 255, 0.95) !important; backdrop-filter: blur(10px); }
+        .white-modal-content { background-color: #FFFFFF !important; border: 1px solid #E5E7EB !important; color: #111827 !important; }
     </style>
 </head>
 <body data-theme="matcha">
 
-    <!-- Splash Loader (White Background) -->
+    <!-- Splash Loader -->
     <div id="splash-screen" class="fixed inset-0 flex flex-col items-center justify-center z-[100]">
         <img src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/Untitled%20design_20251008_093211_0000.png" 
              alt="HXOUSE Logo" class="w-32 h-32 object-contain mb-8 animate-pulse">
-        <div class="w-40 h-1 bg-gray-100 rounded-full overflow-hidden">
+        <div class="w-44 h-1 bg-gray-100 rounded-full overflow-hidden">
             <div id="loader-bar" class="h-full bg-black transition-all duration-300" style="width: 0%"></div>
         </div>
-        <p class="mt-4 text-[8px] font-black uppercase tracking-[0.5em] text-gray-400">HXOUSE CORE v4.2</p>
+        <p class="mt-4 text-[8px] font-black uppercase tracking-[0.5em] text-gray-400">HXOUSE CORE ENGINE v4.4.0</p>
     </div>
 
     <!-- Main App -->
     <div id="app" class="app-container max-w-lg mx-auto shadow-2xl hidden">
-        
-        <!-- Interactive Ticker -->
         <div class="ticker-wrap">
             <div class="ticker text-[9px] font-black uppercase tracking-widest text-secondary">
-                SYST-ONLINE • CREATIVE COLLECTIVE BREWING • MARGHERITA COMBO POPULAR TODAY • STAY FOCUSED • NEW MUSIC PLAYING IN STUDIO • SYST-ONLINE •
+                STUDIO DIGITAL MENU • CREATIVE COLLECTIVE BREWING • MARGHERITA COMBO POPULAR TODAY • SELECT ITEMS & SHOW AT COUNTER •
             </div>
         </div>
-
         <main class="flex-grow overflow-y-auto no-scrollbar relative">
             <div id="main-interface">
-                <header id="page-header" class="sticky top-0 bg-primary z-20 h-20 px-6 flex justify-between items-center border-b border-custom">
-                </header>
+                <header id="page-header" class="sticky top-0 bg-primary z-20 h-20 px-6 flex justify-between items-center border-b border-custom"></header>
                 <div id="page-content"></div>
             </div>
             <div class="h-28 flex-shrink-0"></div>
         </main>
-        
-        <!-- Navbar -->
         <nav id="bottom-nav" class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-lg w-full bg-primary border-t border-custom flex justify-around items-center h-20 z-30 pb-4 shadow-2xl"></nav>
     </div>
 
     <div id="modal-container"></div>
-    <div id="toast" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 brand-bg py-3 px-8 rounded-full shadow-2xl z-[70] whitespace-nowrap text-white font-black text-[10px] uppercase tracking-widest">
+    <div id="toast" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 bg-black text-white py-3 px-8 rounded-full shadow-2xl z-[70] whitespace-nowrap font-black text-[10px] uppercase tracking-widest">
         <p id="toast-message"></p>
     </div>
 
 <script>
-/**
- * HXOUSE COFFEE CO.
- * VERSION 4.2 - ENGINE HARDENING & QUANTITY SYNC
- */
-
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
-// Supabase Connection
 const SUPABASE_URL = 'https://ttdnlatylcqrevzlyrru.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0ZG5sYXR5bGNxcmV2emx5cnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNzAyMDEsImV4cCI6MjA3NTc0NjIwMX0.aiQ1_viA1JrugEyMWxA2e5f2Aqrao9BNgCTb70NWyCc';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const LOGO_URL = "https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/Untitled%20design_20251008_093211_0000.png";
 
-// Simple Audio Feedback
+const SNACK_PRICES = {
+    'Margherita': 159, 'Paneer Tikka': 179, 'Veg Momos': 99, 'Paneer Momos': 119, 'Cheese Corn Momos': 129
+};
+
 const sound = {
     click: () => {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
-            gain.gain.setValueAtTime(0.05, ctx.currentTime);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(900, ctx.currentTime);
+            gain.gain.setValueAtTime(0.04, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.1);
+            osc.start(); osc.stop(ctx.currentTime + 0.1);
         } catch(e) {}
     }
-};
-
-const SNACK_PRICES = {
-    'Margherita': 159, 'Paneer Tikka': 179, 'Veg Momos': 99, 'Paneer Momos': 119, 'Cheese Corn Momos': 129
 };
 
 const app = {
     state: {
         currentPage: 'home',
         cart: [],
-        activeOrder: null,
         tableNumber: null,
         user: null,
         customerProfile: null,
@@ -149,7 +142,6 @@ const app = {
     async init() {
         this.setHeight();
         window.addEventListener('popstate', (e) => this.handleBack(e));
-        
         const initialHash = location.hash.substring(1);
         this.state.currentPage = ['home', 'order', 'arcade', 'cart', 'more'].includes(initialHash) ? initialHash : 'home';
         
@@ -162,7 +154,7 @@ const app = {
                 this.runStartup();
             }
             $('#loader-bar').style.width = progress + '%';
-        }, 100);
+        }, 80);
     },
 
     setHeight() { document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`); },
@@ -175,19 +167,15 @@ const app = {
                 const { data: anon } = await sb.auth.signInAnonymously();
                 this.state.user = anon.user;
             }
-
             await Promise.all([this.loadProfile(), this.loadMenu()]);
             this.parseTable();
-            
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
-            
             if (!this.state.customerProfile?.name) this.onboard();
             else if (this.state.tableNumber) this.launch();
             else this.askTable();
         } catch (e) { 
-            console.error("Engine Start Fail:", e);
-            ui.showToast("Engine Sync Error");
+            ui.showToast("Menu Syncing...");
         }
     },
 
@@ -217,7 +205,6 @@ const app = {
     },
 
     launch() {
-        this.fetchActiveOrder();
         ui.renderNav();
         this.navigateTo(this.state.currentPage, false);
     },
@@ -226,12 +213,12 @@ const app = {
         ui.showModal('onboard-ui', `
             <div class="text-center p-4">
                 <img src="${LOGO_URL}" class="h-16 mx-auto mb-6">
-                <h2 class="text-2xl font-black mb-6 text-primary uppercase tracking-tighter">HXOUSE ID</h2>
-                <div class="space-y-3">
-                    <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary focus:border-brand-primary outline-none" placeholder="Enter Full Name">
-                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary focus:border-brand-primary outline-none" placeholder="WhatsApp Number">
+                <h2 class="text-2xl font-black mb-6 text-primary uppercase">Digital Guest ID</h2>
+                <div class="space-y-4">
+                    <input type="text" id="ob-name" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary outline-none" placeholder="Full Name">
+                    <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary outline-none" placeholder="WhatsApp #">
                 </div>
-                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-8 py-5 rounded-3xl font-black text-lg uppercase tracking-widest shadow-xl active:scale-95 transition">Join Collective</button>
+                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-8 py-5 rounded-3xl font-black text-lg uppercase tracking-widest shadow-xl active:scale-95 transition">Enter Studio</button>
             </div>
         `);
     },
@@ -239,14 +226,14 @@ const app = {
     async submitOnboard() {
         const name = $('#ob-name').value.trim();
         const phone = $('#ob-phone').value.trim();
-        if (!name || phone.length < 10) return ui.showToast("Incomplete Identity");
+        if (!name || phone.length < 10) return ui.showToast("Incomplete Data");
         try {
             const profile = { id: this.state.user.id, name, whatsapp_number: phone, loyalty_points: 0 };
             await sb.from('customers').upsert(profile);
             this.state.customerProfile = profile;
             ui.closeModal('onboard-ui');
             if (this.state.tableNumber) this.launch(); else this.askTable();
-        } catch (e) { ui.showToast("Identity Error"); }
+        } catch (e) { ui.showToast("Sync Error"); }
     },
 
     askTable() {
@@ -256,7 +243,7 @@ const app = {
                 ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-4 bg-secondary rounded-xl font-black border border-custom active:brand-bg text-primary transition-all">${n}</button>`).join('')}
             </div>
             <input type="number" id="manual-table" class="w-full p-5 border border-custom rounded-2xl bg-secondary font-black text-center text-3xl text-primary" placeholder="--">
-            <button onclick="app.submitTable()" class="w-full brand-bg py-5 rounded-3xl font-black text-lg uppercase mt-4 active:scale-95 transition">Verify Table</button>
+            <button onclick="app.submitTable()" class="w-full brand-bg py-5 rounded-3xl font-black text-lg uppercase mt-4 active:scale-95 transition">Select Table</button>
         `);
     },
 
@@ -293,80 +280,29 @@ const app = {
             cartItem.quantity += change;
             if (cartItem.quantity <= 0) this.state.cart = this.state.cart.filter(i => i.id != id);
         }
-        
-        // Dynamic UI update: Refresh menu or cart list
-        if (this.state.currentPage === 'order') this.menuList();
+        if (this.state.currentPage === 'order') ui.menuList();
         else ui.renderContent();
     },
 
-    async fetchActiveOrder() {
-        const { data } = await sb.from('orders')
-            .select('*, order_items(*)')
-            .eq('customer_id', this.state.user.id)
-            .in('status', ['received', 'preparing'])
-            .order('created_at', { ascending: false }).limit(1).maybeSingle();
-        
-        if (data) {
-            this.state.activeOrder = data;
-            this.subscribeRealtime(data.id);
-        } else {
-            this.state.activeOrder = null;
-        }
-        ui.renderContent();
+    addCustomCombo() {
+        const { snack, drink, fries, price } = this.state.builder;
+        if (!snack || !drink) return ui.showToast("Select Components!");
+        const comboItem = {
+            id: `999${Date.now()}`,
+            name: `${snack} + ${drink}`,
+            price: price,
+            quantity: 1,
+            category: 'COMBO'
+        };
+        this.state.cart.push(comboItem);
+        ui.closeModal('builder-ui');
+        ui.showToast("Combo Ready!");
+        this.navigateTo('cart');
     },
 
-    subscribeRealtime(id) {
-        sb.channel(`order-${id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, p => {
-            this.state.activeOrder = p.new;
-            if (['delivered', 'cancelled'].includes(p.new.status)) { 
-                this.state.activeOrder = null; 
-                ui.showToast(`Order: ${p.new.status.toUpperCase()}`); 
-            }
-            ui.renderContent();
-        }).subscribe();
-    },
-
-    async placeOrder(btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="animate-pulse">COMMUNICATING...</span>`;
-        
-        const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
-        const total = Math.round(subtotal * 1.05);
-
-        try {
-            // 1. Create Order (Using basic fields to avoid Engine Errors)
-            const { data: order, error: orderErr } = await sb.from('orders').insert({
-                customer_id: this.state.user.id,
-                table_number: this.state.tableNumber,
-                total_amount: total,
-                status: 'received'
-            }).select().single();
-
-            if (orderErr) throw orderErr;
-
-            // 2. Add Order Items
-            const items = this.state.cart.map(i => ({
-                order_id: order.id,
-                product_id: isNaN(i.id) ? 1 : parseInt(i.id),
-                quantity: i.quantity,
-                price_at_time_of_order: i.price
-            }));
-
-            const { error: itemErr } = await sb.from('order_items').insert(items);
-            if (itemErr) throw itemErr;
-
-            confetti({ particleCount: 150, spread: 60, origin: { y: 0.7 } });
-            this.state.cart = [];
-            ui.closeModal('pay-ui');
-            ui.showToast("Order Dispatched");
-            await this.fetchActiveOrder();
-            this.navigateTo('cart');
-        } catch (e) {
-            console.error("Supabase Error:", e);
-            ui.showToast("Engine Error: Retry");
-            btn.disabled = false;
-            btn.innerHTML = "Retry Order";
-        }
+    // PLACE ORDER IS NOW REMOVED TO PREVENT DATABASE WRITE AS PER USER REQUEST
+    async showCounterModal() {
+        ui.payModal();
     }
 };
 
@@ -374,14 +310,12 @@ const ui = {
     renderHeader() {
         const h = $('#page-header');
         h.innerHTML = `
-            <div onclick="app.navigateTo('home')" class="cursor-pointer">
+            <div onclick="app.navigateTo('home')" class="cursor-pointer active:scale-95 transition">
                 <img src="${LOGO_URL}" class="h-10 w-auto object-contain">
             </div>
-            <div class="flex items-center space-x-3">
-                <div class="text-right">
-                    <p class="font-black text-xs uppercase text-primary">Table #${app.state.tableNumber || '?'}</p>
-                    <p class="text-[7px] uppercase opacity-40 font-black text-primary truncate max-w-[70px]">${app.state.customerProfile?.name || 'HX-User'}</p>
-                </div>
+            <div class="flex flex-col items-end">
+                <p class="font-black text-[10px] uppercase text-primary">T #${app.state.tableNumber || '?'}</p>
+                <p class="text-[8px] uppercase opacity-40 font-black text-primary truncate max-w-[80px]">${app.state.customerProfile?.name || 'User'}</p>
             </div>`;
     },
 
@@ -402,24 +336,25 @@ const ui = {
                     <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover opacity-60"></video>
                     <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6">
                         <h1 class="text-5xl font-black tracking-tighter uppercase leading-none text-center">Fuel the <br> Hustle</h1>
-                        <p class="text-[9px] font-bold tracking-[0.5em] mt-6 opacity-60 uppercase">STUDIO EDITION</p>
+                        <p class="text-[9px] font-bold tracking-[0.5em] mt-6 opacity-60 uppercase">STUDIO DIGITAL MENU</p>
                     </div>
                 </div>
 
+                <!-- COMBO BUILDER CARD ON HOME -->
                 <div class="px-6">
                     <div onclick="ui.builderModal()" class="combo-card p-10 rounded-[3.5rem] text-center shadow-lg cursor-pointer transform hover:scale-[1.01] active:scale-95 transition">
-                        <span class="bg-black text-white text-[8px] px-4 py-1 rounded-full font-black uppercase mb-4 inline-block">MEMBER ONLY</span>
-                        <h2 class="text-3xl font-black text-primary uppercase tracking-tighter leading-none mb-1">Construct <br> Your Meal</h2>
-                        <h3 class="mt-4 font-black text-xl text-primary opacity-60 tracking-tighter">Starts ₹99</h3>
+                        <span class="bg-black text-white text-[8px] px-4 py-1 rounded-full font-black uppercase mb-4 inline-block">MEMBER BUILD</span>
+                        <h2 class="text-3xl font-black text-primary uppercase tracking-tighter leading-none mb-1">Make Your <br> Own Combo</h2>
+                        <h3 class="mt-4 font-black text-xl text-primary opacity-60 tracking-tighter">Snack + Drink + Fries</h3>
                     </div>
                 </div>
 
                 <div class="px-6 pb-10">
-                    <h4 class="text-[9px] font-black uppercase tracking-widest text-secondary mb-4 ml-1">App Atmosphere</h4>
+                    <h4 class="text-[9px] font-black uppercase tracking-widest text-secondary mb-4 ml-1">Environment Mood</h4>
                     <div class="flex space-x-2 overflow-x-auto no-scrollbar">
-                        <button onclick="document.body.dataset.theme='matcha'; sound.click();" class="px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">🍵 Matcha</button>
-                        <button onclick="document.body.dataset.theme='dark'; sound.click();" class="px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">🌚 Night</button>
-                        <button onclick="document.body.dataset.theme='light'; sound.click();" class="px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">🎨 Light</button>
+                        <button onclick="document.body.dataset.theme='matcha'; sound.click();" class="px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">Matcha</button>
+                        <button onclick="document.body.dataset.theme='dark'; sound.click();" class="px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">Midnight</button>
+                        <button onclick="document.body.dataset.theme='light'; sound.click();" class="px-6 py-3 bg-secondary border border-custom rounded-full text-[9px] font-black uppercase text-primary">Studio</button>
                     </div>
                 </div>
             </div>`;
@@ -428,9 +363,9 @@ const ui = {
     menu(c) {
         c.innerHTML = `
             <div class="p-6 fade-in pb-10">
-                <div class="relative mb-6">
-                    <input type="text" placeholder="I'm looking for..." class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-primary outline-none focus:border-brand-primary" oninput="app.state.searchQuery = this.value; ui.menuList()">
-                    <span class="absolute right-5 top-5 opacity-20 text-lg">🔍</span>
+                <div class="relative mb-8">
+                    <input type="text" placeholder="I'm looking for..." class="w-full p-6 bg-secondary border border-custom rounded-3xl font-bold text-primary outline-none focus:border-brand-primary shadow-inner" oninput="app.state.searchQuery = this.value; ui.menuList()">
+                    <span class="absolute right-6 top-6 opacity-20 text-xl">🔍</span>
                 </div>
                 <div id="menu-sections" class="space-y-4"></div>
             </div>`;
@@ -441,35 +376,46 @@ const ui = {
         const target = $('#menu-sections'); if (!target) return;
         const q = app.state.searchQuery.toLowerCase();
         
-        target.innerHTML = app.state.menuData.map(group => {
+        let html = `
+            <div class="bg-secondary rounded-[3rem] border-2 border-brand-primary border-dashed overflow-hidden shadow-md mb-8 p-10 cursor-pointer transform active:scale-[0.98] transition group" onclick="ui.builderModal()">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-[9px] font-black uppercase text-brand-primary tracking-[0.3em] mb-2">DYNAMIC SELECTION</p>
+                        <h4 class="font-black text-2xl uppercase text-primary leading-none mb-1">BUILD YOUR MEAL</h4>
+                        <p class="text-xs text-secondary font-black uppercase mt-1">Snack + Choice of Drink + Fries</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        html += app.state.menuData.map(group => {
             const filtered = group.items.filter(i => i.name.toLowerCase().includes(q));
             if (filtered.length === 0 && q) return '';
             const isExp = app.state.expandedCategory === group.category || q;
-            
             return `
-                <div class="bg-secondary rounded-[2.5rem] border border-custom overflow-hidden mb-4">
-                    <button onclick="app.state.expandedCategory = app.state.expandedCategory === '${group.category}' ? null : '${group.category}'; ui.menuList()" class="w-full p-6 flex justify-between items-center font-black uppercase text-[10px] tracking-widest text-primary">
-                        ${group.category} <span class="text-lg transition-transform ${isExp ? 'rotate-180' : ''}">↓</span>
+                <div class="bg-secondary rounded-[3rem] border border-custom overflow-hidden mb-4 shadow-sm">
+                    <button onclick="app.state.expandedCategory = app.state.expandedCategory === '${group.category}' ? null : '${group.category}'; ui.menuList()" class="w-full p-7 flex justify-between items-center font-black uppercase text-[11px] tracking-widest text-primary">
+                        ${group.category} <span class="text-xl transition-transform ${isExp ? 'rotate-180' : ''}">↓</span>
                     </button>
-                    <div class="accordion-content" style="max-height: ${isExp ? '2000px' : '0'}">
-                        <div class="p-3 space-y-2">
+                    <div class="accordion-content" style="max-height: ${isExp ? '2500px' : '0'}">
+                        <div class="p-4 space-y-4">
                             ${filtered.map(i => {
                                 const inCart = app.state.cart.find(c => c.id == i.id);
                                 return `
-                                <div class="menu-item-card bg-primary p-5 rounded-[2rem] flex justify-between items-center border border-custom ${inCart ? 'in-cart' : ''}">
+                                <div class="menu-item-card bg-primary p-6 rounded-[2.5rem] flex justify-between items-center border-2 border-transparent shadow-sm ${inCart ? 'in-cart border-brand-primary' : 'border-custom'}">
                                     <div class="pr-2 truncate">
-                                        <h4 class="font-black text-xs uppercase text-primary truncate">${i.name}</h4>
-                                        <p class="text-secondary font-black text-[9px] opacity-50 mt-1">₹${i.price}</p>
+                                        <h4 class="font-black text-sm uppercase text-primary truncate mb-1">${i.name}</h4>
+                                        <p class="text-secondary font-black text-[10px] opacity-60">₹${i.price}</p>
                                     </div>
                                     <div class="flex items-center">
                                         ${inCart ? `
-                                            <div class="quantity-pill">
+                                            <div class="quantity-pill fade-in">
                                                 <button onclick="app.addCart('${i.id}', -1)">−</button>
-                                                <span class="text-[10px] font-black">${inCart.quantity}</span>
+                                                <span class="text-xs font-black min-w-[12px] text-center">${inCart.quantity}</span>
                                                 <button onclick="app.addCart('${i.id}', 1)">+</button>
                                             </div>
                                         ` : `
-                                            <button onclick="app.addCart('${i.id}', 1)" class="w-10 h-10 brand-bg rounded-full flex items-center justify-center font-black text-xl active:scale-90 transition">+</button>
+                                            <button onclick="app.addCart('${i.id}', 1)" class="w-14 h-14 brand-bg rounded-full flex items-center justify-center font-black text-2xl active:scale-90 transition shadow-lg">+</button>
                                         `}
                                     </div>
                                 </div>`;
@@ -478,21 +424,103 @@ const ui = {
                     </div>
                 </div>`;
         }).join('');
+        target.innerHTML = html;
+    },
+
+    builderModal() {
+        app.state.builder = { snack: null, drink: null, fries: 'Peri Peri', price: 0 };
+        ui.showModal('builder-ui', `
+            <div class="text-center">
+                <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter text-primary">Collective Build</h2>
+                <p class="text-secondary text-[9px] font-black uppercase tracking-widest mb-8">Component Selection</p>
+                
+                <div class="space-y-8 max-h-[60vh] overflow-y-auto no-scrollbar pr-1">
+                    <div>
+                        <p class="text-[8px] font-black text-secondary uppercase tracking-[0.4em] mb-3 text-left">1. Select Snack</p>
+                        <div class="grid grid-cols-2 gap-2" id="snack-opts">
+                            ${Object.keys(SNACK_PRICES).map(s => `<button data-val="${s}" onclick="ui.setBuilder('snack', '${s}')" class="option-button p-4 bg-secondary border border-custom rounded-2xl font-black uppercase text-[9px] text-primary flex flex-col items-center">
+                                <span>${s}</span>
+                                <span class="opacity-40 mt-1">₹${SNACK_PRICES[s]}</span>
+                            </button>`).join('')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-[8px] font-black text-secondary uppercase tracking-[0.4em] mb-3 text-left">2. Select Drink</p>
+                        <div class="grid grid-cols-2 gap-2" id="drink-opts">
+                            <button data-val="2x Mojitos" onclick="ui.setBuilder('drink', '2x Mojitos')" class="option-button p-5 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center">
+                                <span class="text-xl mb-1">🍹🍹</span>
+                                <span class="font-black uppercase text-[9px]">2x Mojitos</span>
+                            </button>
+                            <button data-val="1x Cold Frappe" onclick="ui.setBuilder('drink', '1x Cold Frappe')" class="option-button p-5 bg-secondary border border-custom rounded-[2rem] flex flex-col items-center">
+                                <span class="text-xl mb-1">🥤</span>
+                                <span class="font-black uppercase text-[9px]">Cold Frappe</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-secondary/50 p-6 rounded-3xl flex justify-between items-center border border-dashed border-custom">
+                        <div class="text-left">
+                            <p class="text-[7px] font-black text-gray-400 uppercase">Automatic Side</p>
+                            <p class="text-[10px] font-black uppercase text-primary">Peri Peri Fries Included</p>
+                        </div>
+                        <span class="text-xl">🍟</span>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <button onclick="app.addCustomCombo()" class="w-full brand-bg py-5 rounded-3xl font-black text-xl shadow-2xl uppercase tracking-widest active:scale-95 transition">Add Combo: <span id="builder-total-price">₹--</span></button>
+                </div>
+            </div>
+        `);
+    },
+
+    setBuilder(type, val) {
+        app.state.builder[type] = val;
+        const selector = type === 'snack' ? '#snack-opts' : '#drink-opts';
+        $$(selector + ' .option-button').forEach(btn => {
+            if (btn.getAttribute('data-val') === val) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        if (type === 'snack') {
+            app.state.builder.price = SNACK_PRICES[val];
+            if ($('#builder-total-price')) $('#builder-total-price').textContent = `₹${app.state.builder.price}`;
+        }
+    },
+
+    arcade(c) {
+        c.innerHTML = `
+            <div class="p-6 h-full flex flex-col fade-in">
+                <h2 class="text-4xl font-black uppercase tracking-tighter mb-8 text-primary">Play Center</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div onclick="GAMES.ttt.start()" class="bg-secondary p-8 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer shadow-lg active:scale-95 transition">
+                        <h4 class="font-black uppercase text-lg text-primary">Tic-Tac-Toe</h4>
+                        <span class="text-3xl">❌</span>
+                    </div>
+                    <div onclick="GAMES.art.start()" class="bg-secondary p-8 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer shadow-lg active:scale-95 transition">
+                        <h4 class="font-black uppercase text-lg text-primary">Studio Art</h4>
+                        <span class="text-3xl">🎨</span>
+                    </div>
+                    <div onclick="GAMES.reaction.start()" class="bg-secondary p-8 rounded-[3rem] border border-custom flex justify-between items-center cursor-pointer shadow-lg active:scale-95 transition">
+                        <h4 class="font-black uppercase text-lg text-primary">Quick React</h4>
+                        <span class="text-3xl">⚡</span>
+                    </div>
+                </div>
+            </div>`;
     },
 
     cart(c) {
-        if (app.state.activeOrder) return this.track(c);
-        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center h-full flex flex-col justify-center items-center"><span class="text-[80px] opacity-10 mb-6">🛒</span><p class="font-black uppercase tracking-widest text-[9px] text-secondary">Bag is empty</p><button onclick="app.navigateTo('order')" class="mt-8 font-black border-b-2 border-brand-primary text-primary text-[10px] uppercase tracking-widest">Open Menu</button></div>`;
-        
+        if (app.state.cart.length === 0) return c.innerHTML = `<div class="p-20 text-center h-full flex flex-col justify-center items-center"><span class="text-[90px] opacity-10 mb-8">🛒</span><p class="font-black uppercase tracking-widest text-[10px] text-secondary opacity-50">Nothing selected yet</p><button onclick="app.navigateTo('order')" class="mt-8 font-black border-b-2 border-brand-primary text-primary text-[10px] uppercase tracking-widest">Browse Menu</button></div>`;
         const subtotal = app.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
         c.innerHTML = `
             <div class="p-6 space-y-6 pb-24 fade-in">
-                <h2 class="text-4xl font-black uppercase text-primary">Your Bag</h2>
-                <div class="space-y-3">${app.state.cart.map(i => `
-                    <div class="flex justify-between items-center p-5 bg-secondary rounded-[2rem] border border-custom">
-                        <div class="flex-grow pr-3 truncate">
-                            <p class="font-black text-xs uppercase text-primary truncate">${i.name}</p>
-                            <p class="text-[8px] opacity-40 font-black mt-1 uppercase text-primary">₹${i.price} x ${i.quantity}</p>
+                <h2 class="text-5xl font-black uppercase text-primary tracking-tighter">My Cart</h2>
+                <div class="space-y-4">${app.state.cart.map(i => `
+                    <div class="flex justify-between items-center p-6 bg-secondary rounded-[2.5rem] border border-custom shadow-sm">
+                        <div class="flex-grow pr-4 truncate">
+                            <p class="font-black text-sm uppercase text-primary truncate mb-1">${i.name}</p>
+                            <p class="text-[9px] opacity-40 font-black uppercase">₹${i.price} x ${i.quantity}</p>
                         </div>
                         <div class="quantity-pill">
                             <button onclick="app.addCart('${i.id}', -1)">−</button>
@@ -501,52 +529,98 @@ const ui = {
                         </div>
                     </div>`).join('')}
                 </div>
-                <div class="p-8 bg-secondary rounded-[3rem] border border-custom shadow-md text-primary">
-                    <div class="flex justify-between font-black text-[9px] opacity-40 mb-2 uppercase"><span>Subtotal</span><span>₹${subtotal}</span></div>
-                    <div class="flex justify-between font-black text-[9px] opacity-40 mb-6 uppercase"><span>Tax (5%)</span><span>₹${(subtotal * 0.05).toFixed(0)}</span></div>
-                    <div class="flex justify-between font-black text-3xl tracking-tighter uppercase"><span>Total</span><span>₹${Math.round(subtotal * 1.05)}</span></div>
+                <div class="p-10 bg-secondary rounded-[3.5rem] border border-custom shadow-inner text-primary">
+                    <div class="flex justify-between font-black text-[10px] opacity-40 mb-3 uppercase tracking-widest"><span>Subtotal</span><span>₹${subtotal}</span></div>
+                    <div class="flex justify-between font-black text-[10px] opacity-40 mb-8 uppercase tracking-widest"><span>Est. Tax (5%)</span><span>₹${(subtotal * 0.05).toFixed(0)}</span></div>
+                    <div class="flex justify-between font-black text-4xl tracking-tighter uppercase"><span>Total</span><span>₹${Math.round(subtotal * 1.05)}</span></div>
                 </div>
-                <button onclick="ui.payModal()" class="w-full brand-bg py-6 rounded-[2.5rem] font-black text-xl shadow-xl uppercase tracking-widest active:scale-95 transition">Check Out</button>
+                <button onclick="app.showCounterModal()" class="w-full brand-bg py-8 rounded-[3rem] font-black text-2xl shadow-2xl uppercase tracking-tighter active:scale-95 transition">Finalize Items</button>
             </div>`;
     },
 
-    track(c) {
-        const s = app.state.activeOrder?.status || 'received';
-        const prog = s === 'received' ? '33%' : s === 'preparing' ? '66%' : '100%';
+    more(c) {
         c.innerHTML = `
-            <div class="p-10 text-center h-full flex flex-col justify-center items-center space-y-10">
-                <h2 class="text-6xl font-black uppercase text-primary leading-none">Order <br> Pulse</h2>
-                <div class="w-full space-y-6">
-                    <div class="relative h-3 w-full bg-secondary rounded-full border border-custom overflow-hidden">
-                        <div class="absolute h-full brand-bg transition-all duration-[1000ms]" style="width: ${prog}"></div>
-                    </div>
-                    <div class="flex justify-between text-[7px] font-black uppercase tracking-widest opacity-40">
-                        <span class="${s === 'received' ? 'opacity-100 brand-text' : ''}">Received</span>
-                        <span class="${s === 'preparing' ? 'opacity-100 brand-text' : ''}">Cooking</span>
-                        <span class="${s === 'delivered' ? 'opacity-100 brand-text' : ''}">Ready</span>
+            <div class="p-8 space-y-6 fade-in">
+                <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">Guest ID</h2>
+                <div class="loyalty-card-container mb-10" onclick="this.children[0].classList.toggle('flipped')">
+                    <div class="loyalty-card-inner">
+                        <div class="loyalty-card-front p-8 flex flex-col justify-between shadow-2xl">
+                            <div class="flex justify-between items-start">
+                                <div class="text-left">
+                                    <p class="text-[8px] font-black uppercase opacity-60 tracking-[0.4em] mb-1">Creative Hub</p>
+                                    <h3 class="text-2xl font-black uppercase tracking-tighter">${app.state.customerProfile?.name || 'Guest'}</h3>
+                                </div>
+                                <img src="${LOGO_URL}" class="h-8 grayscale invert brightness-200">
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <div class="text-left">
+                                    <p class="text-[8px] font-black opacity-40 uppercase tracking-widest">Balance</p>
+                                    <h4 class="text-4xl font-black tracking-tighter">${app.state.customerProfile?.loyalty_points || 0} <span class="text-xs opacity-50 uppercase">pts</span></h4>
+                                </div>
+                                <div class="p-3 bg-white/10 rounded-2xl"><span class="text-2xl">✨</span></div>
+                            </div>
+                        </div>
+                        <div class="loyalty-card-back p-8 flex flex-col justify-center items-center shadow-2xl">
+                             <div class="p-4 bg-white rounded-3xl shadow-xl mb-4">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${app.state.user.id}" class="w-24 h-24">
+                             </div>
+                             <p class="text-[8px] font-black uppercase opacity-40 tracking-widest">Digital Menu ID</p>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-secondary p-8 rounded-[3rem] border border-custom w-full">
-                    <p class="text-xs font-bold text-primary italic">"Preparing your brew. Get back to creating."</p>
-                </div>
+                <button onclick="location.reload()" class="w-full p-6 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between items-center text-primary uppercase text-[10px] tracking-widest shadow-sm">
+                    <span>Refresh Menu</span>
+                    <span>⟳</span>
+                </button>
             </div>`;
     },
 
     payModal() {
+        const subtotal = app.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
+        const total = Math.round(subtotal * 1.05);
+        
         ui.showModal('pay-ui', `
-            <h2 class="text-3xl font-black mb-8 uppercase text-primary text-center">Payment Method</h2>
-            <div class="space-y-3">
-                <button onclick="app.placeOrder(this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center text-primary uppercase text-[10px] tracking-widest active:brand-bg transition"><span>Pay at Counter</span><span>💴</span></button>
-                <button onclick="app.placeOrder(this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center text-primary uppercase text-[10px] tracking-widest active:brand-bg transition"><span>Scan & Pay (UPI)</span><span>📱</span></button>
+            <div class="text-center">
+                <h2 class="text-4xl font-black mb-2 uppercase text-gray-900 tracking-tighter">Selection List</h2>
+                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-8">Show this at the Counter</p>
+                
+                <div class="max-h-[35vh] overflow-y-auto mb-8 pr-2 text-left space-y-3 no-scrollbar border-y border-gray-100 py-6">
+                    ${app.state.cart.map(i => `
+                        <div class="flex justify-between items-center">
+                            <div class="truncate pr-4">
+                                <p class="text-[11px] font-black uppercase text-gray-800 truncate">${i.name}</p>
+                                <p class="text-[9px] font-bold text-gray-400">Quantity: ${i.quantity}</p>
+                            </div>
+                            <span class="text-[11px] font-black text-gray-900">₹${i.price * i.quantity}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="flex justify-between items-center mb-10 px-2">
+                    <span class="text-sm font-black uppercase text-gray-400">Estimated Total</span>
+                    <span class="text-4xl font-black text-gray-900 tracking-tighter">₹${total}</span>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-[2.5rem] mb-6 border border-blue-100">
+                    <p class="text-[11px] font-black text-blue-600 leading-relaxed uppercase tracking-wider">
+                        ⚡ Billing is handled at the counter. <br> Show this selection to the staff.
+                    </p>
+                </div>
+
+                <button onclick="ui.closeModal('pay-ui')" class="w-full bg-black text-white py-8 rounded-[2.5rem] font-black text-xl shadow-xl uppercase tracking-tighter active:scale-95 transition">
+                    Done
+                </button>
             </div>
-            <button onclick="ui.closeModal('pay-ui')" class="w-full mt-8 opacity-20 font-black uppercase text-[9px] tracking-widest text-primary text-center">Cancel Order</button>
-        `);
+        `, true); 
     },
 
-    showModal(id, content) {
+    showModal(id, content, forceWhite = false) {
         const m = document.createElement('div'); m.id = id; 
-        m.className = "modal-overlay fixed inset-0 bg-black/80 z-[60] flex items-end p-4 backdrop-blur-sm";
-        m.innerHTML = `<div class="modal-content w-full bg-primary p-10 rounded-[4rem] shadow-2xl border border-custom overflow-hidden">${content}</div>`;
+        const overlayClass = forceWhite ? 'white-modal-overlay' : 'modal-overlay backdrop-blur-sm bg-black/80';
+        const contentClass = forceWhite ? 'white-modal-content' : 'modal-content bg-primary';
+        
+        m.className = `${overlayClass} fixed inset-0 z-[60] flex items-end p-4`;
+        m.innerHTML = `<div class="${contentClass} w-full p-12 rounded-[4.5rem] shadow-2xl overflow-hidden">${content}</div>`;
         $('#modal-container').appendChild(m);
     },
 
@@ -563,10 +637,10 @@ const ui = {
         const nav = $('#bottom-nav');
         const items = [
             { id: 'home', l: 'Studio', i: '🏠' }, { id: 'order', l: 'Menu', i: '☕' }, 
-            { id: 'arcade', l: 'Play', i: '🎮' }, { id: 'cart', l: 'Bag', i: '🛒' }, { id: 'more', l: 'ID', i: '☰' }
+            { id: 'arcade', l: 'Play', i: '🎮' }, { id: 'cart', l: 'Cart', i: '🛒' }, { id: 'more', l: 'ID', i: '☰' }
         ];
         nav.innerHTML = items.map(item => `
-            <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1" id="nav-${item.id}">
+            <button onclick="app.navigateTo('${item.id}')" class="nav-btn flex flex-col items-center flex-1 py-1 transition-all duration-300" id="nav-${item.id}">
                 <div class="mb-1 text-2xl">${item.i}</div>
                 <span class="text-[7px] font-black uppercase tracking-widest opacity-30 text-primary">${item.l}</span>
             </button>
@@ -582,6 +656,73 @@ const ui = {
         if (active) { 
             active.classList.add('brand-text', 'scale-110'); 
             active.querySelector('span').classList.replace('opacity-30', 'opacity-100'); 
+        }
+    }
+};
+
+const GAMES = {
+    ttt: {
+        board: Array(9).fill(null), p: 'X', win: null,
+        start() {
+            this.board.fill(null); this.p = 'X'; this.win = null;
+            ui.showModal('ttt-run', `<h2 class="text-3xl font-black mb-10 text-center uppercase text-primary">Match</h2><div class="grid grid-cols-3 gap-3 w-64 mx-auto mb-10">${this.board.map((_, i) => `<div onclick="GAMES.ttt.play(${i})" class="w-20 h-20 bg-secondary rounded-[1rem] flex items-center justify-center text-3xl font-black border border-custom text-primary" id="ttt-${i}"></div>`).join('')}</div><p id="ttt-status" class="text-center font-black uppercase text-[10px] tracking-widest opacity-40 mb-8 text-primary">Turn: ${this.p}</p><button onclick="ui.closeModal('ttt-run')" class="w-full opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Quit</button>`);
+        },
+        play(i) {
+            if (this.board[i] || this.win) return;
+            this.board[i] = this.p;
+            $(`#ttt-${i}`).textContent = this.p;
+            if (this.check()) { this.win = this.p; $('#ttt-status').textContent = `Winner: ${this.p}`; }
+            else if (this.board.every(b => b)) { $('#ttt-status').textContent = `Draw!`; }
+            else { this.p = this.p === 'X' ? 'O' : 'X'; $('#ttt-status').textContent = `Turn: ${this.p}`; }
+        },
+        check() { const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return w.some(l => this.board[l[0]] && this.board[l[0]] === this.board[l[1]] && this.board[l[0]] === this.board[l[2]]); }
+    },
+    art: {
+        painting: false,
+        start() {
+            ui.showModal('art-run', `<h2 class="text-3xl font-black mb-10 text-center uppercase text-primary">Art</h2><canvas id="art-canvas" class="w-full aspect-square rounded-[2rem] border-4 border-custom bg-white mb-10"></canvas><button onclick="ui.closeModal('art-run')" class="w-full brand-bg py-5 rounded-3xl font-black uppercase text-xs tracking-widest">Done</button>`);
+            this.run();
+        },
+        run() {
+            const c = $('#art-canvas'); const ctx = c.getContext('2d');
+            const box = c.getBoundingClientRect();
+            c.width = 600; c.height = 600;
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+            const draw = (e) => {
+                if(!this.painting) return;
+                const rect = c.getBoundingClientRect();
+                const x = ((e.clientX || e.touches[0].clientX) - rect.left) * (c.width / rect.width);
+                const y = ((e.clientY || e.touches[0].clientY) - rect.top) * (c.height / rect.height);
+                ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+            };
+            c.onmousedown = c.ontouchstart = (e) => { this.painting = true; draw(e); e.preventDefault(); };
+            c.onmouseup = c.ontouchend = () => { this.painting = false; ctx.beginPath(); };
+            c.onmousemove = c.ontouchmove = draw;
+        }
+    },
+    reaction: {
+        timer: null, startTime: null,
+        start() {
+            ui.showModal('react-run', `<h2 class="text-3xl font-black mb-10 text-center uppercase text-primary">React</h2><div id="react-box" onclick="GAMES.reaction.hit()" class="w-full aspect-square bg-secondary rounded-[3rem] border border-custom flex items-center justify-center cursor-pointer transition-all"><p class="font-black text-xs uppercase tracking-widest text-secondary text-center">Wait for Green...</p></div><button onclick="ui.closeModal('react-run')" class="w-full mt-10 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Cancel</button>`);
+            this.begin();
+        },
+        begin() {
+            const box = $('#react-box'); 
+            box.classList.replace('brand-bg', 'bg-secondary');
+            box.innerHTML = `<p class="font-black text-xs text-secondary">WAIT...</p>`;
+            this.timer = setTimeout(() => {
+                box.classList.replace('bg-secondary', 'brand-bg');
+                box.innerHTML = `<p class="font-black text-4xl text-white">HIT!</p>`;
+                this.startTime = Date.now();
+            }, 1500 + Math.random() * 3000);
+        },
+        hit() {
+            if (!this.startTime) {
+                clearTimeout(this.timer); ui.showToast("Early!"); this.begin(); return;
+            }
+            const time = Date.now() - this.startTime;
+            $('#react-box').innerHTML = `<p class="font-black text-5xl text-white">${time}ms</p>`;
+            this.startTime = null;
         }
     }
 };
