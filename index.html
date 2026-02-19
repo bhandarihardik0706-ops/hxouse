@@ -70,7 +70,7 @@
         </div>
         <div class="mt-12 flex flex-col items-center text-center">
             <div class="w-10 h-10 border-4 border-t-brand border-secondary rounded-full animate-spin mb-6"></div>
-            <p class="text-secondary text-xs font-bold tracking-[0.4em] animate-pulse uppercase">Aniga Engine v3.5</p>
+            <p class="text-secondary text-xs font-bold tracking-[0.4em] animate-pulse uppercase">Aniga Engine v3.5 - Connected</p>
         </div>
     </div>
 
@@ -96,7 +96,7 @@
 <script>
 /**
  * HXOUSE COFFEE CO.
- * ANIGA AI ENGINE v3.5 (The Standard Combo Fix)
+ * ANIGA AI ENGINE v3.5 (Admin Connected)
  */
 
 const $ = (s) => document.querySelector(s);
@@ -135,9 +135,8 @@ MENU KNOWLEDGE:
 
 BEHAVIOR:
 - Guide users to 'Build Your Own Meal'.
-- Use coffee puns occasionally.
-- Suggest IG captions if asked.
-- Answer clearly about prices.`;
+- Answer clearly about prices.
+- Be encouraging and helpful.`;
 
 const app = {
     state: {
@@ -154,7 +153,7 @@ const app = {
         searchQuery: '',
         isListening: false,
         isThinking: false,
-        chatHistory: [{ role: 'aniga', text: "Hey! I'm Aniga. Our Momo Meals start at just ₹99. Want to see our standard combos?" }],
+        chatHistory: [{ role: 'aniga', text: "Hey! I'm Aniga. Our Momo Meals start at just ₹99. Ready to build your hustle meal?" }],
         countdownText: "00d 00h 00m 00s",
         builder: { snack: null, drink: null, fries: 'Peri Peri', price: 0 }
     },
@@ -163,9 +162,6 @@ const app = {
         this.setHeight();
         window.addEventListener('resize', () => this.setHeight());
         window.addEventListener('popstate', (e) => this.handleBack(e));
-        
-        // Ensure voices are loaded for Aniga
-        window.speechSynthesis.getVoices();
         
         const initialHash = location.hash.substring(1);
         this.state.currentPage = PAGES.includes(initialHash) ? initialHash : 'home';
@@ -205,10 +201,11 @@ const app = {
             $('#splash-screen').style.display = 'none';
             $('#app').classList.remove('hidden');
             $('#app').classList.add('flex');
+            
             if (!this.state.customerProfile?.name) this.onboard();
             else if (this.state.tableNumber) this.launch();
             else this.askTable();
-        } catch (e) { console.error("Aniga Critical Failure", e); }
+        } catch (e) { console.error("Aniga Error", e); }
     },
 
     async loadProfile() {
@@ -257,7 +254,7 @@ const app = {
                     <input type="tel" id="ob-phone" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="WhatsApp Number">
                     ${!this.state.tableNumber ? `<input type="number" id="ob-table" class="w-full p-5 bg-secondary border border-custom rounded-2xl font-bold text-center text-primary" placeholder="Table #">` : ''}
                 </div>
-                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-12 py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-tighter">Initialize ID</button>
+                <button onclick="app.submitOnboard()" class="w-full brand-bg mt-12 py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-tighter">Enter Hive</button>
             </div>
         `);
     },
@@ -266,7 +263,7 @@ const app = {
         const name = $('#ob-name').value.trim();
         const phone = $('#ob-phone').value.trim();
         const table = this.state.tableNumber || parseInt($('#ob-table')?.value);
-        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Incomplete Data");
+        if (!name || phone.length < 10 || isNaN(table)) return ui.showToast("Missing Info");
         try {
             const profile = { id: this.state.user.id, name, whatsapp_number: phone, loyalty_points: 0 };
             await sb.from('customers').upsert(profile);
@@ -279,7 +276,7 @@ const app = {
 
     askTable() {
         ui.showModal('table-ui', `
-            <h2 class="text-2xl font-black mb-8 text-center text-primary uppercase">Current Spot?</h2>
+            <h2 class="text-2xl font-black mb-8 text-center text-primary uppercase">Table Choice?</h2>
             <div class="grid grid-cols-5 gap-3 mb-10">
                 ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button onclick="$('#manual-table').value=${n}" class="p-5 bg-secondary rounded-2xl font-black border border-custom active:brand-bg text-primary">${n}</button>`).join('')}
             </div>
@@ -324,17 +321,17 @@ const app = {
 
     addCustomCombo() {
         const { snack, drink, fries, price } = this.state.builder;
-        if (!snack || !drink) return ui.showToast("Select snack & drink!");
+        if (!snack || !drink) return ui.showToast("Complete selection!");
         const comboItem = {
-            id: `combo_${Date.now()}`,
-            name: `Meal: ${snack} + ${drink}`,
+            id: `custom_combo_${Date.now()}`,
+            name: `Combo: ${snack} + ${drink}`,
             price: price,
             quantity: 1,
-            description: `Inc: ${fries} Fries.`
+            description: `Auto-included: ${fries} Fries.`
         };
         this.state.cart.push(comboItem);
         ui.closeModal('builder-ui');
-        ui.showToast("Meal added to bag!");
+        ui.showToast("Combo added to cart!");
         this.navigateTo('cart');
     },
 
@@ -361,8 +358,7 @@ const app = {
         ui.renderContent();
         
         try {
-            const apiKey = GEMINI_API_KEY || "";
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -379,7 +375,7 @@ const app = {
             this.speakAniga(text);
         } catch (e) {
             this.state.isThinking = false;
-            this.state.chatHistory.push({ role: 'aniga', text: "Gemini server timed out. I'm offline for a moment!" });
+            this.state.chatHistory.push({ role: 'aniga', text: "Gemini connection lost. I'm offline for a moment!" });
             ui.renderContent();
         }
     },
@@ -388,9 +384,8 @@ const app = {
         if (!window.speechSynthesis) return;
         const u = new SpeechSynthesisUtterance(text);
         const voices = window.speechSynthesis.getVoices();
-        // Force female tone
         u.voice = voices.find(v => (v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira'))) || voices[0];
-        u.pitch = 1.2; u.rate = 1.0;
+        u.pitch = 1.1; u.rate = 1.0;
         window.speechSynthesis.speak(u);
     },
 
@@ -404,24 +399,42 @@ const app = {
         rec.start();
     },
 
-    async placeOrder() {
+    async placeOrder(method, btn) {
+        btn.disabled = true;
+        btn.innerHTML = "Sending...";
+        
         const subtotal = this.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
         const total = subtotal * 1.05;
+
         try {
-            const { error } = await sb.rpc('create_order_with_items', {
+            // Using a default product ID (1) for custom combos if table doesn't support strings
+            const payload = {
                 table_number_input: this.state.tableNumber,
+                special_instructions_input: `Meal Selection: ${this.state.cart.map(i => i.name).join(', ')}`,
                 total_amount_input: total,
+                discount_percentage_input: 0,
                 source_input: 'Customer-Live',
                 order_items: this.state.cart.map(i => ({ 
                     product_id: isNaN(i.id) ? 1 : parseInt(i.id), 
                     quantity: i.quantity, 
                     price_at_time_of_order: i.price 
                 }))
-            });
+            };
+
+            const { data: orderId, error } = await sb.rpc('create_order_with_items', payload);
             if (error) throw error;
-            this.state.cart = []; ui.closeModal('pay-ui'); ui.showToast("Order Dispatched!");
-            await this.fetchActiveOrder(); this.navigateTo('cart');
-        } catch (e) { ui.showToast("Order Failed"); }
+
+            this.state.cart = [];
+            ui.closeModal('pay-ui');
+            ui.showToast("Order Dispatched!");
+            await this.fetchActiveOrder();
+            this.navigateTo('cart');
+        } catch (e) {
+            console.error(e);
+            ui.showToast("Connection Error");
+            btn.disabled = false;
+            btn.innerHTML = "Retry Order";
+        }
     }
 };
 
@@ -456,13 +469,13 @@ const ui = {
                     <video src="https://ttdnlatylcqrevzlyrru.supabase.co/storage/v1/object/public/assets/lv_0_20251012011509.mp4" autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover opacity-60"></video>
                     <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6">
                         <h1 class="text-4xl font-bold tracking-tighter uppercase leading-none text-center">Fuel the Hustle</h1>
-                        <p class="text-[9px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">COLLECTIVE ENGINE</p>
+                        <p class="text-[9px] font-bold tracking-[0.6em] mt-4 opacity-80 uppercase">CONNECTED ENGINE</p>
                     </div>
                 </div>
 
                 <div class="px-6">
                     <div class="bg-primary border-2 border-custom rounded-[2.5rem] p-7 text-center shadow-lg">
-                        <p class="text-[9px] font-black uppercase text-secondary tracking-[0.4em] mb-3">Combo Offers Ending:</p>
+                        <p class="text-[9px] font-black uppercase text-secondary tracking-[0.4em] mb-3">Live Offers Ending In:</p>
                         <div id="home-countdown" class="text-3xl font-black text-primary tracking-tighter countdown-timer">${app.state.countdownText}</div>
                     </div>
                 </div>
@@ -470,11 +483,11 @@ const ui = {
                 <div class="px-6">
                     <div onclick="ui.builderModal()" class="combo-card p-10 rounded-[3rem] text-center shadow-2xl cursor-pointer border-4 border-dashed transform active:scale-95 transition-all">
                         <div class="flex flex-col items-center">
-                            <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase mb-4">DYNAMIC COMBO</span>
+                            <span class="glow-tag text-[9px] px-3 py-1 rounded-full font-black uppercase mb-4">LIVE SPECIAL</span>
                             <h2 class="text-3xl font-black text-primary uppercase tracking-tighter leading-none mb-2">Build Your <br> Own Meal</h2>
-                            <p class="text-[10px] text-secondary font-bold uppercase mt-2 text-center">Snack + Drink + Fries</p>
-                            <h3 class="mt-4 font-black text-2xl text-primary tracking-tighter">From ₹99</h3>
-                            <button class="mt-8 brand-bg px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl">Start Build</button>
+                            <p class="text-[10px] text-secondary font-bold uppercase mt-2 text-center">Select Snack + Drink + Fries</p>
+                            <h3 class="mt-4 font-black text-2xl text-primary tracking-tighter">Starts ₹99</h3>
+                            <button class="mt-8 brand-bg px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl tracking-widest">Start Build</button>
                         </div>
                     </div>
                 </div>
@@ -486,7 +499,7 @@ const ui = {
         ui.showModal('builder-ui', `
             <div class="text-center">
                 <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter text-primary">HXOUSE MEAL</h2>
-                <p class="text-secondary text-[10px] font-black uppercase tracking-widest mb-10 text-primary">Custom Selection</p>
+                <p class="text-secondary text-[10px] font-black uppercase tracking-widest mb-10 text-primary">Live Admin Sync</p>
                 
                 <div class="space-y-10">
                     <div>
@@ -524,7 +537,7 @@ const ui = {
 
                 <div class="mt-12">
                     <div class="flex justify-between items-center mb-6 px-4">
-                        <span class="font-black uppercase text-secondary text-[10px] tracking-widest">Combo Price</span>
+                        <span class="font-black uppercase text-secondary text-[10px] tracking-widest">Total</span>
                         <span id="builder-total-price" class="font-black text-3xl text-primary tracking-tighter">₹--</span>
                     </div>
                     <button onclick="app.addCustomCombo()" class="w-full brand-bg py-6 rounded-[2rem] font-black text-xl shadow-2xl uppercase tracking-widest">Add to Bag</button>
@@ -565,9 +578,9 @@ const ui = {
             <div class="bg-secondary rounded-[2.5rem] border-2 border-brand-primary border-dashed overflow-hidden shadow-md mb-8 p-8 cursor-pointer transform active:scale-[0.98] transition" onclick="ui.builderModal()">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-[8px] font-black uppercase text-brand-primary tracking-[0.2em] mb-1">FEATURED COMBO</p>
+                        <p class="text-[8px] font-black uppercase text-brand-primary tracking-[0.2em] mb-1">LIVE COMBO</p>
                         <h4 class="font-black text-lg uppercase text-primary leading-none">BUILD YOUR MEAL</h4>
-                        <p class="text-xs text-secondary font-black uppercase mt-1">Select Snack + Drink + Fries</p>
+                        <p class="text-xs text-secondary font-black uppercase mt-1">Pick a Snack + Drink + Fries</p>
                     </div>
                     <div class="text-right">
                         <span class="font-black text-xl text-primary tracking-tighter">Starts ₹99</span>
@@ -607,7 +620,7 @@ const ui = {
         const subtotal = app.state.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
         c.innerHTML = `
             <div class="p-6 space-y-6 pb-32 fade-in">
-                <h2 class="text-4xl font-black tracking-tighter uppercase mb-10 text-primary">Selection Bag</h2>
+                <h2 class="text-4xl font-black tracking-tighter uppercase mb-10 text-primary">Your Selections</h2>
                 <div class="space-y-4">${app.state.cart.map(i => `
                     <div class="flex justify-between items-center p-6 bg-secondary rounded-[2rem] border border-custom shadow-sm">
                         <div class="flex-grow pr-4">
@@ -623,13 +636,13 @@ const ui = {
                 <div class="p-10 bg-secondary rounded-[3.5rem] border border-custom shadow-sm uppercase text-primary">
                     <div class="flex justify-between font-black text-3xl tracking-tighter uppercase"><span>Payable</span><span>₹${subtotal}</span></div>
                 </div>
-                <button onclick="ui.payModal()" class="w-full brand-bg py-8 rounded-[2.5rem] font-black text-2xl shadow-2xl uppercase tracking-tighter">Confirm Order</button>
+                <button onclick="ui.payModal()" class="w-full brand-bg py-8 rounded-[2.5rem] font-black text-2xl shadow-2xl uppercase tracking-tighter">Order Now</button>
             </div>`;
     },
 
     track(c) {
         const s = app.state.activeOrder?.status || 'received';
-        c.innerHTML = `<div class="p-10 text-center space-y-16 fade-in h-full flex flex-col justify-center"><h2 class="text-5xl font-black uppercase leading-none text-primary">Live <br> Order</h2><div class="relative h-6 w-full bg-secondary rounded-full border border-custom shadow-inner"><div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${s === 'preparing' ? '66%' : '33%'}"></div></div><p class="text-xs font-black uppercase text-secondary tracking-widest">Status: ${s.toUpperCase()}</p><button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest text-primary">Arcade</button></div>`;
+        c.innerHTML = `<div class="p-10 text-center space-y-16 fade-in h-full flex flex-col justify-center"><h2 class="text-5xl font-black uppercase leading-none text-primary">Live <br> Status</h2><div class="relative h-6 w-full bg-secondary rounded-full border border-custom shadow-inner"><div class="absolute h-full brand-bg transition-all duration-1000" style="width: ${s === 'preparing' ? '66%' : '33%'}"></div></div><p class="text-xs font-black uppercase text-secondary tracking-widest">Admin Desk Sync: ${s.toUpperCase()}</p><button onclick="ui.gameModal()" class="bg-secondary px-12 py-5 rounded-full font-black text-xs border border-custom shadow-xl uppercase tracking-widest text-primary">Arcade</button></div>`;
     },
 
     social(c) {
@@ -672,7 +685,7 @@ const ui = {
                 <h2 class="text-4xl font-black uppercase tracking-tighter mb-10 text-primary">Identity</h2>
                 <div class="bg-secondary p-12 rounded-[3rem] border border-custom shadow-xl mb-10">
                     <p class="font-black text-3xl tracking-tighter uppercase mb-2 text-primary">${app.state.customerProfile?.name || 'Collective Member'}</p>
-                    <p class="text-[9px] opacity-40 uppercase tracking-[0.5em] text-primary">HXOUSE Member ID: ${app.state.user.id.substring(0,8)}</p>
+                    <p class="text-[9px] opacity-40 uppercase tracking-[0.5em] text-primary">HXOUSE ID: ${app.state.user.id.substring(0,8)}</p>
                 </div>
                 <div class="space-y-4">
                     <button onclick="ui.gameModal()" class="w-full p-8 bg-secondary rounded-[2rem] text-left font-black border border-custom flex justify-between shadow-xl text-primary"><span>Arcade Center</span><span>🎮</span></button>
@@ -684,10 +697,10 @@ const ui = {
 
     payModal() {
         ui.showModal('pay-ui', `
-            <h2 class="text-3xl font-black mb-12 uppercase text-primary">Order Confirmation</h2>
+            <h2 class="text-3xl font-black mb-12 uppercase text-primary">Complete Order</h2>
             <div class="space-y-5">
-                <button onclick="app.placeOrder()" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Pay at Desk</span><span>💵</span></button>
-                <button onclick="app.placeOrder()" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Digital Wallet</span><span>📱</span></button>
+                <button onclick="app.placeOrder('Desk', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Pay at Desk</span><span>💵</span></button>
+                <button onclick="app.placeOrder('Digital', this)" class="w-full p-8 bg-secondary rounded-3xl text-left font-black border border-custom flex justify-between items-center shadow-xl uppercase text-[10px] tracking-widest text-primary active:brand-bg transition"><span>Digital Payment</span><span>📱</span></button>
             </div>
             <button onclick="ui.closeModal('pay-ui')" class="w-full mt-10 opacity-30 font-black uppercase text-[10px] tracking-widest text-primary">Return</button>
         `);
